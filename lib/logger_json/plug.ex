@@ -33,7 +33,6 @@ defmodule LoggerJSON.Plug do
     Conn.register_before_send(conn, fn conn ->
       diff = format_time(System.monotonic_time() - start)
       metadata = request_metadata(conn, diff)
-      Logger.log(level, "", metadata)
       conn
     end)
   end
