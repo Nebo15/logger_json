@@ -68,7 +68,7 @@ defmodule LoggerJSON.EctoTest do
         }
       },
       "labels" => %{
-        "application_name" => "logger_json",
+        "application_name" => "logger_json"
       }
     } = Jason.decode!(log)
   end
