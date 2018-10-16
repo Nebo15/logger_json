@@ -155,23 +155,15 @@ defmodule LoggerJSONTest do
   end
 
   test "logs crash reason when present" do
-    Process.flag :trap_exit, true
     Logger.configure_backend(LoggerJSON, metadata: [:crash_reason])
+    Logger.metadata(crash_reason: {%RuntimeError{message: "oops"}, []})
 
     log =
-      capture_log(fn ->
-        Task.async(fn ->
-          Task.async(fn -> throw {:error, :closed} end)
-          |> Task.yield()
-        end)
-        |> Task.yield()
-      end)
+      capture_log(fn -> Logger.debug("hello") end)
       |> Jason.decode!()
 
-    assert log["jsonPayload"]["metadata"]["crash_reason"] == "{:nocatch, {:error, :closed}}"
-    assert log["jsonPayload"]["metadata"]["crash_reason_stacktrace"] =~ "LoggerJSONTest"
-  after
-    Process.flag :trap_exit, false
+    assert log["jsonPayload"]["metadata"]["crash_reason"] == "%RuntimeError{message: \"oops\"}"
+    assert log["jsonPayload"]["metadata"]["crash_reason_stacktrace"] == "[]"
   end
 
   test "logs initial call when present" do
