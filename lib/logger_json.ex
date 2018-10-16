@@ -322,7 +322,7 @@ defmodule LoggerJSON do
 
   def take_metadata(metadata, :all) do
     metadata
-    |> Keyword.drop([:pid, :file, :line, :function, :module])
+    |> Keyword.drop([:pid, :file, :line, :function, :module, :crash_reason, :initial_call])
     |> Enum.into(%{})
   end
 

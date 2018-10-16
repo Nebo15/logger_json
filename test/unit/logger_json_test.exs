@@ -154,6 +154,37 @@ defmodule LoggerJSONTest do
            end) == ""
   end
 
+  test "logs crash reason when present" do
+    Process.flag :trap_exit, true
+    Logger.configure_backend(LoggerJSON, metadata: [:crash_reason])
+
+    log =
+      capture_log(fn ->
+        Task.async(fn ->
+          Task.async(fn -> throw {:error, :closed} end)
+          |> Task.yield()
+        end)
+        |> Task.yield()
+      end)
+      |> Jason.decode!()
+
+    assert log["jsonPayload"]["metadata"]["crash_reason"] == "{:nocatch, {:error, :closed}}"
+    assert log["jsonPayload"]["metadata"]["crash_reason_stacktrace"] =~ "LoggerJSONTest"
+  after
+    Process.flag :trap_exit, false
+  end
+
+  test "logs initial call when present" do
+    Logger.configure_backend(LoggerJSON, metadata: [:initial_call])
+    Logger.metadata(initial_call: {Foo, :bar, 3})
+
+    log =
+      capture_log(fn -> Logger.debug("hello") end)
+      |> Jason.decode!()
+
+    assert log["jsonPayload"]["metadata"]["initial_call"] == "Elixir.Foo.bar/3"
+  end
+
   # TODO: This flaky test should be rewritten for custom IO handler implementation that proxies events to test pid
   # test "buffers events" do
   #   Logger.configure_backend(LoggerJSON, max_buffer: 10)
