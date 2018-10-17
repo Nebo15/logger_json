@@ -33,7 +33,7 @@ defmodule LoggerJSON.Formatters.GoogleCloudLogger do
 
   defp format_metadata(md, md_keys) do
     md
-    |> Keyword.drop([:pid, :file, :line, :function, :module, :ansi_color, :application, :crash_reason])
+    |> Keyword.drop([:pid, :file, :line, :function, :module, :ansi_color, :application, :crash_reason, :initial_call])
     |> LoggerJSON.take_metadata(md_keys)
     |> maybe_put_initial_call(md[:initial_call])
     |> maybe_put_crash_reason(md[:crash_reason])
