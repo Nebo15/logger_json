@@ -108,14 +108,12 @@ defmodule LoggerJSON do
   Notice that settings this valie below `compile_time_purge_level` would not work,
   because Logger calls would be already stripped at compile-time.
   """
-  def configure_log_level!(nil),
-    do: :ok
+  def configure_log_level!(nil), do: :ok
 
   def configure_log_level!(level) when level in ["debug", "info", "warn", "error"],
     do: Logger.configure(level: String.to_atom(level))
 
-  def configure_log_level!(level) when is_atom(level),
-    do: Logger.configure(level: level)
+  def configure_log_level!(level) when is_atom(level), do: Logger.configure(level: level)
 
   def configure_log_level!(level) do
     raise ArgumentError,
