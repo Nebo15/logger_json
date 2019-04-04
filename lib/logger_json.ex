@@ -314,6 +314,16 @@ defmodule LoggerJSON do
     Enum.reduce(keys, %{}, &append_metadata_key_to_acc(metadata, &1, &2))
   end
 
+  defp append_metadata_key_to_acc(metadata, :pid, acc) do
+    case Keyword.fetch(metadata, :pid) do
+      {:ok, val} ->
+        Map.put(acc, :pid, inspect(val))
+
+      :error ->
+        acc
+    end
+  end
+
   defp append_metadata_key_to_acc(metadata, key, acc) do
     case Keyword.fetch(metadata, key) do
       {:ok, val} ->
