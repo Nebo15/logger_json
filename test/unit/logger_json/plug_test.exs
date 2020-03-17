@@ -17,7 +17,8 @@ defmodule LoggerJSON.PlugTest do
 
   setup do
     :ok =
-      Logger.configure_backend(LoggerJSON,
+      Logger.configure_backend(
+        LoggerJSON,
         device: :standard_error,
         level: nil,
         metadata: :all,

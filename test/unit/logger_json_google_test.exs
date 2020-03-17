@@ -6,7 +6,8 @@ defmodule LoggerJSONGoogleTest do
 
   setup do
     :ok =
-      Logger.configure_backend(LoggerJSON,
+      Logger.configure_backend(
+        LoggerJSON,
         device: :user,
         level: nil,
         metadata: [],
