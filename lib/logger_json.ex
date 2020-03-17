@@ -26,7 +26,8 @@ defmodule LoggerJSON do
     ```
 
   You can change this structure by implementing `LoggerJSON.Formatter` behaviour and passing module
-  name to `:formatter` config option. Example module can be found in `LoggerJSON.Formatters.GoogleCloudLogger`.
+  name to `:formatter` config option. Example implementations can be found in `LoggerJSON.Formatters.GoogleCloudLogger`
+  and `LoggerJSON.Formatters.BasicLogger`.
 
     ```elixir
     config :logger_json, :backend,
@@ -203,7 +204,7 @@ defmodule LoggerJSON do
       end
 
     json_encoder = Keyword.get(config, :json_encoder, Jason)
-    formatter = Keyword.get(config, :formatter, LoggerJSON.Formatters.GoogleCloudLogger)
+    formatter = Keyword.get(config, :formatter, LoggerJSON.Formatters.BasicLogger)
     level = Keyword.get(config, :level)
     device = Keyword.get(config, :device, :user)
     max_buffer = Keyword.get(config, :max_buffer, 32)
