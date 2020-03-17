@@ -17,7 +17,14 @@ defmodule LoggerJSON.PlugTest do
 
   setup do
     on_exit(fn ->
-      :ok = Logger.configure_backend(LoggerJSON, device: :user, level: nil, metadata: [], json_encoder: Jason)
+      :ok =
+        Logger.configure_backend(LoggerJSON,
+          device: :user,
+          level: nil,
+          metadata: [],
+          json_encoder: Jason,
+          formatter: LoggerJSON.Formatters.GoogleCloudLogger
+        )
     end)
 
     Logger.configure_backend(LoggerJSON, device: :standard_error, metadata: :all)
