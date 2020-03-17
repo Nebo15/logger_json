@@ -1,6 +1,5 @@
 defmodule LoggerJSONBasicTest do
   use Logger.Case, async: false
-  import ExUnit.CaptureIO
   require Logger
   alias LoggerJSON.Formatters.BasicLogger
 
