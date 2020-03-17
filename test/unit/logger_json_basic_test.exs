@@ -45,7 +45,7 @@ defmodule LoggerJSONBasicTest do
         |> capture_log()
         |> Jason.decode!()
 
-      assert %{"user_id" => 11, "dynamic_metadata" => 5} == log["metadata"]
+      assert %{"user_id" => 11, "dynamic_metadata" => 5} = log["metadata"]
     end
 
     test "can be empty" do

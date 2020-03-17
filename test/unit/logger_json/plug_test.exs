@@ -1,5 +1,5 @@
 defmodule LoggerJSON.PlugTest do
-  use Logger.Case
+  use Logger.Case, async: false
   use Plug.Test
   import ExUnit.CaptureIO
   require Logger

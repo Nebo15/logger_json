@@ -1,5 +1,5 @@
 defmodule LoggerJSON.EctoTest do
-  use Logger.Case
+  use Logger.Case, async: false
   import ExUnit.CaptureIO
   require Logger
 
