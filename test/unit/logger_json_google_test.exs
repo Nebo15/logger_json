@@ -1,15 +1,19 @@
-defmodule LoggerJSONTest do
-  use Logger.Case
+defmodule LoggerJSONGoogleTest do
+  use Logger.Case, async: false
   import ExUnit.CaptureIO
   require Logger
-  alias LoggerJSON.Formatters.{BasicLogger, GoogleCloudLogger}
+  alias LoggerJSON.Formatters.GoogleCloudLogger
 
   setup do
-    Logger.configure_backend(LoggerJSON, formatter: GoogleCloudLogger)
-
-    on_exit(fn ->
-      :ok = Logger.configure_backend(LoggerJSON, device: :user, level: nil, metadata: [], json_encoder: Jason)
-    end)
+    :ok =
+      Logger.configure_backend(LoggerJSON,
+        device: :user,
+        level: nil,
+        metadata: [],
+        json_encoder: Jason,
+        on_init: :disabled,
+        formatter: GoogleCloudLogger
+      )
   end
 
   describe "configure_log_level!/1" do
@@ -121,60 +125,7 @@ defmodule LoggerJSONTest do
            end) =~ "hello"
   end
 
-  describe "metadata for BasicLogger" do
-    setup do
-      Logger.configure_backend(LoggerJSON, formatter: BasicLogger)
-    end
-
-    test "can be configured" do
-      Logger.configure_backend(LoggerJSON, metadata: [:user_id])
-
-      assert capture_log(fn ->
-               Logger.debug("hello")
-             end) =~ "hello"
-
-      Logger.metadata(user_id: 11)
-      Logger.metadata(dynamic_metadata: 5)
-
-      log =
-        fn -> Logger.debug("hello") end
-        |> capture_log()
-        |> Jason.decode!()
-
-      assert %{"user_id" => 11} == log["metadata"]
-    end
-
-    test "can be configured to :all" do
-      Logger.configure_backend(LoggerJSON, metadata: :all)
-
-      Logger.metadata(user_id: 11)
-      Logger.metadata(dynamic_metadata: 5)
-
-      log =
-        fn -> Logger.debug("hello") end
-        |> capture_log()
-        |> Jason.decode!()
-
-      assert %{"user_id" => 11, "dynamic_metadata" => 5} == log["metadata"]
-    end
-
-    test "can be empty" do
-      Logger.configure_backend(LoggerJSON, metadata: [])
-
-      Logger.metadata(user_id: 11)
-      Logger.metadata(dynamic_metadata: 5)
-
-      log =
-        fn -> Logger.debug("hello") end
-        |> capture_log()
-        |> Jason.decode!()
-
-      assert %{"message" => "hello"} = log
-      assert %{} == log["metadata"]
-    end
-  end
-
-  describe "metadata for GoogleCloudLogger" do
+  describe "metadata" do
     test "can be configured" do
       Logger.configure_backend(LoggerJSON, metadata: [:user_id])
 
@@ -230,7 +181,7 @@ defmodule LoggerJSONTest do
     end
 
     test "is triggered" do
-      Logger.configure_backend(LoggerJSON, metadata: [], on_init: {LoggerJSONTest, :on_init_cb, []})
+      Logger.configure_backend(LoggerJSON, metadata: [], on_init: {LoggerJSONGoogleTest, :on_init_cb, []})
 
       Logger.metadata(user_id: 11)
 
