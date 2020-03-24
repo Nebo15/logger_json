@@ -24,66 +24,65 @@ After adding this back-end you may also be interested in [redirecting otp and sa
 By-default, generated JSON is compatible with
 [Google Cloud Logger LogEntry](https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry) format:
 
-  ```json
-  {
-    "log":"hello",
-    "logging.googleapis.com/sourceLocation":{
-      "file":"/os/logger_json/test/unit/logger_json_test.exs",
-      "function":"Elixir.LoggerJSONTest.test metadata can be configured/1",
-      "line":71
-    },
-    "severity":"DEBUG",
-    "time":"2018-10-19T01:10:49.582Z",
-    "user_id":13
-  }
-  ```
+```json
+{
+  "log": "hello",
+  "logging.googleapis.com/sourceLocation": {
+    "file": "/os/logger_json/test/unit/logger_json_test.exs",
+    "function": "Elixir.LoggerJSONTest.test metadata can be configured/1",
+    "line": 71
+  },
+  "severity": "DEBUG",
+  "time": "2018-10-19T01:10:49.582Z",
+  "user_id": 13
+}
+```
 
-  Log entry in Google Cloud Logger would looks something like this:
+Log entry in Google Cloud Logger would looks something like this:
 
-
-  ```json
-  {
-    "httpRequest":{
-      "latency":"0.350s",
-      "remoteIp":"::ffff:10.142.0.2",
-      "requestMethod":"GET",
-      "requestPath":"/",
-      "requestUrl":"http://10.16.0.70/",
-      "status":200,
-      "userAgent":"kube-probe/1.10+"
+```json
+{
+  "httpRequest": {
+    "latency": "0.350s",
+    "remoteIp": "::ffff:10.142.0.2",
+    "requestMethod": "GET",
+    "requestPath": "/",
+    "requestUrl": "http://10.16.0.70/",
+    "status": 200,
+    "userAgent": "kube-probe/1.10+"
+  },
+  "insertId": "1g64u74fgmqqft",
+  "jsonPayload": {
+    "log": "",
+    "phoenix": {
+      "action": "index",
+      "controller": "Elixir.MyApp.Web.PageController"
     },
-    "insertId":"1g64u74fgmqqft",
-    "jsonPayload":{
-      "log":"",
-      "phoenix":{
-        "action":"index",
-        "controller":"Elixir.MyApp.Web.PageController",
-      },
-      "request_id":"2lfbl1r3m81c40e5v40004c2",
-      "vm":{
-        "hostname":"myapp-web-66979fc-vbk4q",
-        "pid":1,
-      }
-    },
-    "logName":"projects/hammer-staging/logs/stdout",
-    "metadata":{
-      "systemLabels":{},
-      "userLabels":{}
-    },
-    "operation":{
-      "id":"2lfbl1r3m81c40e5v40004c2"
-    },
-    "receiveTimestamp":"2018-10-18T14:33:35.515253723Z",
-    "resource":{},
-    "severity":"INFO",
-    "sourceLocation":{
-      "file":"iex",
-      "function":"Elixir.LoggerJSON.Plug.call/2",
-      "line":"36"
-    },
-    "timestamp":"2018-10-18T14:33:33.263Z"
-  }
-  ```
+    "request_id": "2lfbl1r3m81c40e5v40004c2",
+    "vm": {
+      "hostname": "myapp-web-66979fc-vbk4q",
+      "pid": 1
+    }
+  },
+  "logName": "projects/hammer-staging/logs/stdout",
+  "metadata": {
+    "systemLabels": {},
+    "userLabels": {}
+  },
+  "operation": {
+    "id": "2lfbl1r3m81c40e5v40004c2"
+  },
+  "receiveTimestamp": "2018-10-18T14:33:35.515253723Z",
+  "resource": {},
+  "severity": "INFO",
+  "sourceLocation": {
+    "file": "iex",
+    "function": "Elixir.LoggerJSON.Plug.call/2",
+    "line": "36"
+  },
+  "timestamp": "2018-10-18T14:33:33.263Z"
+}
+```
 
 You can change this structure by implementing `LoggerJSON.Formatter` behaviour and passing module
 name to `:formatter` config option. Example module can be found in `LoggerJSON.Formatters.GoogleCloudLogger`.
@@ -97,54 +96,64 @@ config :logger_json, :backend,
 
 It's [available on Hex](https://hex.pm/packages/logger_json), the package can be installed as:
 
-  1. Add `:logger_json` and `:jason` to your list of dependencies in `mix.exs`:
+1. Add `:logger_json` and `:jason` to your list of dependencies in `mix.exs`:
 
-  ```ex
-  def deps do
-    [{:logger_json, "~> 3.0"}]
-  end
-  ```
+```ex
+def deps do
+  [{:logger_json, "~> 3.0"}]
+end
+```
 
-  2. Ensure `logger_json` and `:jason` is started before your application:
+2. Ensure `logger_json` and `:jason` is started before your application:
 
-  ```ex
-  def application do
-    [extra_applications: [:jason, :logger_json]]
-  end
-  ```
+```ex
+def application do
+  [extra_applications: [:jason, :logger_json]]
+end
+```
 
-  3. Set configuration in your `config/config.exs`:
+3. Set configuration in your `config/config.exs`:
 
-  ```ex
-  config :logger_json, :backend,
-    metadata: :all
-  ```
+```ex
+config :logger_json, :backend,
+  metadata: :all
+```
 
-  Some integrations (for eg. Plug) uses `metadata` to log request
-  and response parameters. You can reduce log size by replacing `:all`
-  (which means log all) with a list of the ones that you actually need.
+Some integrations (for eg. Plug) uses `metadata` to log request
+and response parameters. You can reduce log size by replacing `:all`
+(which means log all) with a list of the ones that you actually need.
 
-  4. Replace default Logger `:console` back-end with `LoggerJSON`:
+4. Replace default Logger `:console` back-end with `LoggerJSON`:
 
-  ```ex
-  config :logger,
-    backends: [LoggerJSON]
-  ```
+```ex
+config :logger,
+  backends: [LoggerJSON]
+```
 
-  5. Optionally. Log requests and responses by replacing a `Plug.Logger` in your endpoint with a:
+5. Optionally. Log requests and responses by replacing a `Plug.Logger` in your endpoint with a:
 
-  ```ex
-  plug LoggerJSON.Plug
-  ```
+```ex
+plug LoggerJSON.Plug
+```
 
-  6. Optionally. Log Ecto queries via Plug:
+It accepts some parameters:
 
-  ```ex
-  config :my_app, MyApp.Repo,
-    adapter: Ecto.Adapters.Postgres,
-    ...
-    loggers: [{LoggerJSON.Ecto, :log, [:info]}]
-  ```
+- :log - Specify the log level. Default: :info
+- :version_header - Specify the header name that identify the API version. Default: "x-api-version"
+- :metadata_formatter - Specify the module that will format the Plug metadata. Default: LoggerJSON.MetadataFormatters.GoogleCloudLogger. Available options:
+  - LoggerJSON.MetadataFormatters.GoogleCloudLogger
+  - LoggerJSON.MetadataFormatters.ELK
+  - Your own module
+- :filter_parameters - Specify the list of filtered parameters to be discarded before output log. Default: []
+
+6. Optionally. Log Ecto queries via Plug:
+
+```ex
+config :my_app, MyApp.Repo,
+  adapter: Ecto.Adapters.Postgres,
+  ...
+  loggers: [{LoggerJSON.Ecto, :log, [:info]}]
+```
 
 ## Dynamic configuration
 

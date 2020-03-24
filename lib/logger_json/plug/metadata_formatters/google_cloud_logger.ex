@@ -15,7 +15,7 @@ if Code.ensure_loaded?(Plug) do
     @nanoseconds_in_second System.convert_time_unit(1, :second, :nanosecond)
 
     @doc false
-    def build_metadata(conn, latency, client_version_header) do
+    def build_metadata(conn, latency, client_version_header, filter_parameters) do
       latency_seconds = native_to_seconds(latency)
       request_method = conn.method
       request_path = conn.request_path
@@ -34,6 +34,7 @@ if Code.ensure_loaded?(Plug) do
               requestMethod: request_method,
               requestPath: request_path,
               requestUrl: request_url,
+              params: fetch_params(conn.params, filter_parameters),
               status: status,
               userAgent: user_agent,
               remoteIp: remote_ip,
@@ -87,5 +88,9 @@ if Code.ensure_loaded?(Plug) do
 
       {hostname, vm_pid}
     end
+
+    defp fetch_params(%Plug.Conn.Unfetched{aspect: :params}, _filter_parameters), do: %{}
+
+    defp fetch_params(params, filter_parameters), do: LoggerJSON.ParamsFilter.discard_values(params, filter_parameters)
   end
 end

@@ -8,6 +8,7 @@ if Code.ensure_loaded?(Plug) do
       * `connection.request_path` - HTTP request path;
       * `connection.request_id` - value of `X-Request-ID` response header (see `Plug.RequestId`);
       * `connection.status` - HTTP status code sent to a client;
+      * `connection.params` - HTTP filtered params;
       * `client.user_agent` - value of `User-Agent` header;
       * `client.ip' - value of `X-Forwarded-For` header if present, otherwise - remote IP of a connected client;
       * `client.api_version' - version of API that was requested by a client;
@@ -20,7 +21,7 @@ if Code.ensure_loaded?(Plug) do
     import Jason.Helpers, only: [json_map: 1]
 
     @doc false
-    def build_metadata(conn, latency, client_version_header) do
+    def build_metadata(conn, latency, client_version_header, filter_parameters) do
       latency_μs = System.convert_time_unit(latency, :native, :microsecond)
       user_agent = LoggerJSON.Plug.get_header(conn, "user-agent")
       ip = remote_ip(conn)
@@ -34,7 +35,8 @@ if Code.ensure_loaded?(Plug) do
               type: connection_type(conn),
               method: conn.method,
               request_path: conn.request_path,
-              status: conn.status
+              status: conn.status,
+              params: fetch_params(conn.params, filter_parameters)
             ),
           client:
             json_map(
@@ -51,7 +53,8 @@ if Code.ensure_loaded?(Plug) do
     defp connection_type(_), do: "sent"
 
     defp remote_ip(conn) do
-      LoggerJSON.Plug.get_header(conn, "x-forwarded-for") || to_string(:inet_parse.ntoa(conn.remote_ip))
+      LoggerJSON.Plug.get_header(conn, "x-forwarded-for") ||
+        to_string(:inet_parse.ntoa(conn.remote_ip))
     end
 
     defp phoenix_metadata(%{private: %{phoenix_controller: controller, phoenix_action: action}}) do
@@ -73,5 +76,9 @@ if Code.ensure_loaded?(Plug) do
 
       {hostname, vm_pid}
     end
+
+    defp fetch_params(%Plug.Conn.Unfetched{aspect: :params}, _filter_parameters), do: %{}
+
+    defp fetch_params(params, filter_parameters), do: LoggerJSON.ParamsFilter.discard_values(params, filter_parameters)
   end
 end

@@ -7,7 +7,7 @@ defmodule LoggerJSON.PlugTest do
   defmodule MyPlug do
     use Plug.Builder
 
-    plug(LoggerJSON.Plug)
+    plug(LoggerJSON.Plug, filter_parameters: ["foo"])
     plug(:passthrough)
 
     defp passthrough(conn, _) do
@@ -28,7 +28,7 @@ defmodule LoggerJSON.PlugTest do
 
     log =
       capture_io(:standard_error, fn ->
-        call(conn(:get, "/"))
+        call(conn(:post, "/?a=b", %{"foo" => "bar"}))
         Logger.flush()
       end)
 
@@ -38,9 +38,10 @@ defmodule LoggerJSON.PlugTest do
                "latency" => latency,
                "referer" => nil,
                "remoteIp" => "127.0.0.1",
-               "requestMethod" => "GET",
+               "requestMethod" => "POST",
                "requestPath" => "/",
                "requestUrl" => "http://www.example.com/",
+               "params" => %{"a" => "b", "foo" => "[FILTERED]"},
                "status" => 200,
                "userAgent" => nil
              },
