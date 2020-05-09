@@ -263,6 +263,19 @@ defmodule LoggerJSONGoogleTest do
     assert log["error"]["reason"] == "{:socket_closed_unexpectedly, []}"
   end
 
+  test "logs metadata with crash containing PIDs" do
+    Logger.configure_backend(LoggerJSON, metadata: [:ancestors])
+    Logger.metadata(ancestors: [:process, self()])
+
+    log =
+      fn -> Logger.debug("hello") end
+      |> capture_log()
+      |> Jason.decode!()
+
+    assert log["ancestors"]
+    assert log["ancestors"] == ["process", "#{inspect(self())}"]
+  end
+
   test "logs initial call when present" do
     Logger.configure_backend(LoggerJSON, metadata: [:initial_call])
     Logger.metadata(crash_reason: {%RuntimeError{message: "oops"}, []}, initial_call: {Foo, :bar, 3})
