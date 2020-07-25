@@ -23,6 +23,7 @@ defmodule LoggerJSON.JasonSafeFormatter do
   def format(nil), do: nil
   def format(true), do: true
   def format(false), do: false
+  def format(data) when is_atom(data), do: data
 
   def format(%mod{} = data) do
     if jason_implemented?(mod) do

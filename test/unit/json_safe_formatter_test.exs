@@ -15,8 +15,16 @@ defmodule LoggerJSON.JasonSafeFormatterTest do
       assert false == Formatter.format(false)
     end
 
-    test "allows strings" do
+    test "allows printable strings" do
       assert "hello" == Formatter.format("hello")
+    end
+
+    test "inspects non-printable binaries" do
+      assert "<<104, 101, 108, 108, 111, 0>>" == Formatter.format("hello" <> <<0>>)
+    end
+
+    test "allows atoms" do
+      assert :hello == Formatter.format(:hello)
     end
 
     test "allows numbers" do
