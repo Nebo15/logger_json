@@ -6,6 +6,15 @@ defmodule LoggerJSON.JasonSafeFormatterTest do
   defmodule IDStruct, do: defstruct(id: nil)
 
   describe "format/1" do
+    test "allows nils" do
+      assert nil == Formatter.format(nil)
+    end
+
+    test "allows booleans" do
+      assert true == Formatter.format(true)
+      assert false == Formatter.format(false)
+    end
+
     test "allows strings" do
       assert "hello" == Formatter.format("hello")
     end

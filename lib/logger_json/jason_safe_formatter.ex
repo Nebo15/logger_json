@@ -20,6 +20,10 @@ defmodule LoggerJSON.JasonSafeFormatter do
     data
   end
 
+  def format(nil), do: nil
+  def format(true), do: true
+  def format(false), do: false
+
   def format(%mod{} = data) do
     if jason_implemented?(mod) do
       data
