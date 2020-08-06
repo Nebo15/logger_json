@@ -26,15 +26,15 @@ defmodule LoggerJSON.PlugTest do
     end
 
     import Plug.Conn
-  import Jason.Helpers, only: [json_map: 1]
+    import Jason.Helpers, only: [json_map: 1]
 
-  @spec add_meta(%Plug.Conn{}) :: Keyword.t()
-  def add_meta(conn) do
-    [
-      sample_key: "test-helper",
-      meta: json_map(x_request_id: get_req_header(conn, "x-request-id"))
-    ]
-  end
+    @spec add_meta(%Plug.Conn{}) :: Keyword.t()
+    def add_meta(conn) do
+      [
+        sample_key: "test-helper",
+        meta: json_map(x_request_id: get_req_header(conn, "x-request-id") |> List.last())
+      ]
+    end
   end
 
   setup do
@@ -131,6 +131,7 @@ defmodule LoggerJSON.PlugTest do
       :get
       |> conn("/")
       |> Plug.Conn.put_resp_header("x-request-id", request_id)
+      |> Plug.Conn.put_req_header("x-request-id", request_id)
       |> Plug.Conn.put_req_header("user-agent", "chrome")
       |> Plug.Conn.put_req_header("referer", "http://google.com")
       |> Plug.Conn.put_req_header("x-forwarded-for", "127.0.0.10")
@@ -142,14 +143,24 @@ defmodule LoggerJSON.PlugTest do
         Logger.flush()
       end)
 
+    log_map = Jason.decode!(log)
+
     assert %{
              "httpRequest" => %{
                "referer" => "http://google.com",
                "remoteIp" => "127.0.0.10",
                "userAgent" => "chrome"
              },
-             "sample_key" => "test-helper"
-           } = Jason.decode!(log)
+             "sample_key" => "test-helper",
+             "meta" => %{"x_request_id" => request_id}
+           } = log_map
+
+    assert Map.has_key?(log_map, "sample_key")
+    assert Map.has_key?(log_map, "meta")
+    assert Map.has_key?(log_map["meta"], "x_request_id")
+    assert %{
+      "x_request_id" => request_id
+    } == log_map["meta"]
   end
 
   defp call(conn) do
