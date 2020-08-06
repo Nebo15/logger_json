@@ -148,7 +148,7 @@ It's [available on Hex](https://hex.pm/packages/logger_json), the package can be
   5. Optionally. Log requests and responses by replacing a `Plug.Logger` in your endpoint with a:
 
   ```ex
-  plug LoggerJSON.Plug
+  plug LoggerJSON.Plug, extra_attributes_fn: &MyModule.put_meta/1
   ```
 
   6. Optionally. Log Ecto queries via Plug:
@@ -176,6 +176,26 @@ config :logger_json, :backend,
 
 You can replace default Jason encoder with other module that supports `encode_to_iodata!/1` function and
 enconding fragments.
+
+## Extra Attributes
+
+Additional data can be logged alongside the request by specifying a function to call which returns a %Jason.Fragment{}.
+
+<https://hexdocs.pm/jason/Jason.Helpers.html#json_map/1>
+
+```ex
+  defmodule MyModule do
+    import Jason.Helpers, only: [json_map: 1]
+
+    def put_meta(conn) do
+      [
+        metadata: json_map(
+          x-request-id: get_req_header(conn, "x-request-id")
+        )
+      ]
+    end
+  end
+  ```
 
 ## Documentation
 

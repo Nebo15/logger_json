@@ -15,6 +15,28 @@ defmodule LoggerJSON.PlugTest do
     end
   end
 
+  defmodule MyPlugWithExtraAttributes do
+    use Plug.Builder
+
+    plug(LoggerJSON.Plug, extra_attributes_fn: &__MODULE__.add_meta/1)
+    plug(:passthrough)
+
+    defp passthrough(conn, _) do
+      Plug.Conn.send_resp(conn, 200, "Passthrough")
+    end
+
+    import Plug.Conn
+  import Jason.Helpers, only: [json_map: 1]
+
+  @spec add_meta(%Plug.Conn{}) :: Keyword.t()
+  def add_meta(conn) do
+    [
+      sample_key: "test-helper",
+      meta: json_map(x_request_id: get_req_header(conn, "x-request-id"))
+    ]
+  end
+  end
+
   setup do
     :ok =
       Logger.configure_backend(
@@ -102,7 +124,39 @@ defmodule LoggerJSON.PlugTest do
            } = Jason.decode!(log)
   end
 
+  test "has extra attributes configured" do
+    request_id = Ecto.UUID.generate()
+
+    conn =
+      :get
+      |> conn("/")
+      |> Plug.Conn.put_resp_header("x-request-id", request_id)
+      |> Plug.Conn.put_req_header("user-agent", "chrome")
+      |> Plug.Conn.put_req_header("referer", "http://google.com")
+      |> Plug.Conn.put_req_header("x-forwarded-for", "127.0.0.10")
+      |> Plug.Conn.put_req_header("x-api-version", "2017-01-01")
+
+    log =
+      capture_io(:standard_error, fn ->
+        call_extra_attributes(conn)
+        Logger.flush()
+      end)
+
+    assert %{
+             "httpRequest" => %{
+               "referer" => "http://google.com",
+               "remoteIp" => "127.0.0.10",
+               "userAgent" => "chrome"
+             },
+             "sample_key" => "test-helper"
+           } = Jason.decode!(log)
+  end
+
   defp call(conn) do
     MyPlug.call(conn, [])
+  end
+
+  defp call_extra_attributes(conn) do
+    MyPlugWithExtraAttributes.call(conn, [])
   end
 end
