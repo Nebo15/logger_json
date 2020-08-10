@@ -124,7 +124,7 @@ defmodule LoggerJSON.PlugTest do
            } = Jason.decode!(log)
   end
 
-  test "has extra attributes configured" do
+  test "has extra_attributes_fn configured" do
     request_id = Ecto.UUID.generate()
 
     conn =
@@ -158,9 +158,20 @@ defmodule LoggerJSON.PlugTest do
     assert Map.has_key?(log_map, "sample_key")
     assert Map.has_key?(log_map, "meta")
     assert Map.has_key?(log_map["meta"], "x_request_id")
+
     assert %{
-      "x_request_id" => request_id
-    } == log_map["meta"]
+             "x_request_id" => request_id
+           } == log_map["meta"]
+  end
+
+  test "invalid extra_attributes_fn configuration" do
+    assert %ArgumentError{message: _, __exception__: true} =
+             catch_error(
+               defmodule MyPlugWithInvalidExtraAttributes do
+                 use Plug.Builder
+                 plug(LoggerJSON.Plug, extra_attributes_fn: "")
+               end
+             )
   end
 
   defp call(conn) do

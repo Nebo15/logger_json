@@ -41,7 +41,10 @@ if Code.ensure_loaded?(Plug) do
 
           nil ->
             nil
-            # Raise for anything else or set as nil?
+
+          anything_else ->
+            raise ArgumentError,
+          "Incorrect input for `extra_attributes_fn`, should be one of 'function', 'nil',  got: #{inspect(anything_else)}"
         end
 
       {level, metadata_formatter, client_version_header, extra_attributes_fn}
