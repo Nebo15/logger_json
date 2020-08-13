@@ -3,7 +3,7 @@ cache:
   directories:
   - deps
 elixir:
-  - 1.9.2
+  - 1.9.4
 otp_release:
   - 21.1
 matrix:
