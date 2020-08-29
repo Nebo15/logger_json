@@ -25,8 +25,8 @@ defmodule LoggerJSON.JasonSafeFormatter do
   def format(false), do: false
   def format(data) when is_atom(data), do: data
 
-  def format(%mod{} = data) do
-    if jason_implemented?(mod) do
+  def format(%_struct{} = data) do
+    if jason_implemented?(data) do
       data
     else
       data
@@ -67,13 +67,8 @@ defmodule LoggerJSON.JasonSafeFormatter do
     inspect(data, pretty: true, width: 80)
   end
 
-  def jason_implemented?(mod) do
-    try do
-      :ok = Protocol.assert_impl!(Jason.Encoder, mod)
-      true
-    rescue
-      ArgumentError ->
-        false
-    end
+  def jason_implemented?(data) do
+    impl = Jason.Encoder.impl_for(data)
+    impl && impl != Jason.Encoder.Any
   end
 end
