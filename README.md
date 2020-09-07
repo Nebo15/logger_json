@@ -5,7 +5,7 @@
 JSON console back-end for Elixir Logger.
 
 It can be used as drop-in replacement for default `:console` Logger back-end in cases where you use
-use Google Cloud Logger or other JSON-based log collectors.
+use Google Cloud Logger, DataDog Logger or other JSON-based log collectors.
 
 Minimum supported Erlang/OTP version is 20.
 
@@ -21,7 +21,7 @@ After adding this back-end you may also be interested in [redirecting otp and sa
 
 ## Log Format
 
-LoggerJSON provides two JSON formatters out of the box (see below for implementing your own custom formatter).
+LoggerJSON provides three JSON formatters out of the box (see below for implementing your own custom formatter).
 
 The `LoggerJSON.Formatters.BasicLogger` formatter provides a generic JSON formatted message with no vendor specific entries in the payload. A sample log entry from `LoggerJSON.Formatters.BasicLogger` looks like the following:
 
@@ -36,7 +36,7 @@ The `LoggerJSON.Formatters.BasicLogger` formatter provides a generic JSON format
 }
 ```
 
-The other formatter that comes with LoggerJSON is `LoggerJSON.Formatters.GoogleCloudLogger` and generates JSON that is compatible with the
+Another formatter that comes with LoggerJSON is `LoggerJSON.Formatters.GoogleCloudLogger` and generates JSON that is compatible with the
 [Google Cloud Logger LogEntry](https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry) format:
 
   ```json

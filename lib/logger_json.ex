@@ -3,15 +3,15 @@ defmodule LoggerJSON do
   JSON console back-end for Elixir Logger.
 
   It can be used as drop-in replacement for default `:console` Logger back-end in cases where you use
-  use Google Cloud Logger or other JSON-based log collectors.
+  use Google Cloud Logger, DataDog Logger or other JSON-based log collectors.
 
   ## Log Format
 
-  LoggerJSON provides two JSON formatters out of the box.
+  LoggerJSON provides three JSON formatters out of the box.
 
   You can change this structure by implementing `LoggerJSON.Formatter` behaviour and passing module
-  name to `:formatter` config option. Example implementations can be found in `LoggerJSON.Formatters.GoogleCloudLogger`
-  and `LoggerJSON.Formatters.BasicLogger`.
+  name to `:formatter` config option. Example implementations can be found in `LoggerJSON.Formatters.GoogleCloudLogger`,
+  `LoggerJSON.Formatters.DataDogLogger` and `LoggerJSON.Formatters.BasicLogger`.
 
     ```elixir
     config :logger_json, :backend,
