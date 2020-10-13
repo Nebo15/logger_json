@@ -31,19 +31,24 @@ if Code.ensure_loaded?(Plug) do
       level = Keyword.get(opts, :log, :info)
       client_version_header = Keyword.get(opts, :version_header, "x-api-version")
       metadata_formatter = Keyword.get(opts, :metadata_formatter, MetadataFormatters.GoogleCloudLogger)
-      {level, metadata_formatter, client_version_header}
+      ignore_paths = Keyword.get(opts, :ignore_paths, [])
+      {level, metadata_formatter, client_version_header, ignore_paths}
     end
 
     @impl true
-    def call(conn, {level, metadata_formatter, client_version_header}) do
-      start = System.monotonic_time()
+    def call(conn, {level, metadata_formatter, client_version_header, ignore_paths}) do
+      if not is_ignore_path(conn, ignore_paths) do
+        start = System.monotonic_time()
 
-      Conn.register_before_send(conn, fn conn ->
-        latency = System.monotonic_time() - start
-        metadata = metadata_formatter.build_metadata(conn, latency, client_version_header)
-        Logger.log(level, "", metadata)
+        Conn.register_before_send(conn, fn conn ->
+          latency = System.monotonic_time() - start
+          metadata = metadata_formatter.build_metadata(conn, latency, client_version_header)
+          Logger.log(level, "", metadata)
+          conn
+        end)
+      else
         conn
-      end)
+      end
     end
 
     @doc false
@@ -52,6 +57,11 @@ if Code.ensure_loaded?(Plug) do
         [] -> nil
         [val | _] -> val
       end
+    end
+
+    @doc false
+    defp is_ignore_path(conn, ignore_paths) do
+      Enum.member?(ignore_paths, conn.request_path)
     end
   end
 end
