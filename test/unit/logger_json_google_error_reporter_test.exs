@@ -27,6 +27,14 @@ defmodule LoggerJSONGoogleErrorReporterTest do
     assert log["@type"] == "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent"
   end
 
+  test "optional metadata" do
+    log =
+      capture_log(fn -> GoogleErrorReporter.report(%RuntimeError{message: "oops"}, [], foo: "bar") end)
+      |> Jason.decode!()
+
+    assert log["foo"] == "bar"
+  end
+
   test "logs elixir error" do
     error = %RuntimeError{message: "oops"}
 

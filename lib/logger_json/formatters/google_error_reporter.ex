@@ -2,11 +2,11 @@ defmodule LoggerJSON.Formatters.GoogleErrorReporter do
   require Logger
   @googleErrorType "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent"
 
-  def report(error, stacktrace) do
+  def report(error, stacktrace, metadata \\ []) do
     [format_error(error, stacktrace) | Enum.map(stacktrace, &format_line/1)]
     |> Enum.filter(& &1)
     |> Enum.join("\n")
-    |> Logger.error("@type": @googleErrorType)
+    |> Logger.error(Keyword.merge(["@type": @googleErrorType], metadata))
   end
 
   defp format_error(error, stacktrace) do
