@@ -29,38 +29,44 @@ defmodule LoggerJSONGoogleErrorReporterTest do
 
   test "logs elixir error" do
     error = %RuntimeError{message: "oops"}
+
     stacktrace = [
       {Foo, :bar, 0, [file: 'foo/bar.ex', line: 123]},
       {Foo.Bar, :baz, 1, [file: 'foo/bar/baz.ex', line: 456]}
     ]
+
     log =
       capture_log(fn -> GoogleErrorReporter.report(error, stacktrace) end)
       |> Jason.decode!()
 
     assert log["message"] ==
-      """
-      Elixir.RuntimeError: oops
-      \tfoo/bar.ex:123:in `Elixir.Foo.bar/0'
-      \tfoo/bar/baz.ex:456:in `Elixir.Foo.Bar.baz/1'
-      """ |> String.trim_trailing()
+             """
+             Elixir.RuntimeError: oops
+             \tfoo/bar.ex:123:in `Elixir.Foo.bar/0'
+             \tfoo/bar/baz.ex:456:in `Elixir.Foo.Bar.baz/1'
+             """
+             |> String.trim_trailing()
   end
 
   test "logs erlang error" do
     error = :undef
+
     stacktrace = [
       {Foo, :bar, [], []},
       {Foo, :bar, 0, [file: 'foo/bar.ex', line: 123]},
       {Foo.Bar, :baz, 1, [file: 'foo/bar/baz.ex', line: 456]}
     ]
+
     log =
       capture_log(fn -> GoogleErrorReporter.report(error, stacktrace) end)
       |> Jason.decode!()
 
     assert log["message"] ==
-      """
-      Elixir.UndefinedFunctionError: function Foo.bar/0 is undefined (module Foo is not available)
-      \tfoo/bar.ex:123:in `Elixir.Foo.bar/0'
-      \tfoo/bar/baz.ex:456:in `Elixir.Foo.Bar.baz/1'
-      """ |> String.trim_trailing()
+             """
+             Elixir.UndefinedFunctionError: function Foo.bar/0 is undefined (module Foo is not available)
+             \tfoo/bar.ex:123:in `Elixir.Foo.bar/0'
+             \tfoo/bar/baz.ex:456:in `Elixir.Foo.Bar.baz/1'
+             """
+             |> String.trim_trailing()
   end
 end

@@ -6,7 +6,7 @@ defmodule LoggerJSON.Formatters.GoogleErrorReporter do
     [format_error(error, stacktrace) | Enum.map(stacktrace, &format_line/1)]
     |> Enum.filter(& &1)
     |> Enum.join("\n")
-    |> Logger.error(["@type": @googleErrorType])
+    |> Logger.error("@type": @googleErrorType)
   end
 
   defp format_error(error, stacktrace) do
