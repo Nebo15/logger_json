@@ -4,6 +4,7 @@ defmodule LoggerJSON.Formatters.GoogleErrorReporter do
 
   def report(error, stacktrace) do
     [format_error(error, stacktrace) | Enum.map(stacktrace, &format_line/1)]
+    |> Enum.filter(& &1)
     |> Enum.join("\n")
     |> Logger.error(["@type": @googleErrorType])
   end
@@ -17,4 +18,6 @@ defmodule LoggerJSON.Formatters.GoogleErrorReporter do
   defp format_line({module, function, arity, [file: file, line: line]}) do
     "\t#{file}:#{line}:in `#{module}.#{function}/#{arity}'"
   end
+
+  defp format_line({_, _, [], []}), do: nil
 end

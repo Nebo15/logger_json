@@ -48,6 +48,7 @@ defmodule LoggerJSONGoogleErrorReporterTest do
   test "logs erlang error" do
     error = :undef
     stacktrace = [
+      {Foo, :bar, [], []},
       {Foo, :bar, 0, [file: 'foo/bar.ex', line: 123]},
       {Foo.Bar, :baz, 1, [file: 'foo/bar/baz.ex', line: 456]}
     ]
