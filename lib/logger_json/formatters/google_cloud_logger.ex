@@ -5,7 +5,6 @@ defmodule LoggerJSON.Formatters.GoogleCloudLogger do
   import Jason.Helpers, only: [json_map: 1]
 
   alias LoggerJSON.{FormatterUtils, JasonSafeFormatter}
-  alias LoggerJSON.Formatters.GoogleErrorReporter
 
   @behaviour LoggerJSON.Formatter
 
@@ -26,30 +25,6 @@ defmodule LoggerJSON.Formatters.GoogleCloudLogger do
 
   See: https://cloud.google.com/logging/docs/agent/configuration#special_fields_in_structured_payloads
   """
-  def format_event(:error, msg, ts, md, md_keys) do
-    {error_reporter_set, google_error_reporter} = Application.fetch_env(:logger_json, :google_error_reporter)
-
-    {message, google_error_reporter} = if md[:crash_reason] && error_reporter_set == :ok do
-      {error, stacktrace} = md[:crash_reason]
-      {
-        GoogleErrorReporter.format(error, stacktrace),
-        Map.merge(%{"@type": "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent"}, google_error_reporter)
-      }
-    else
-      { IO.chardata_to_string(msg), %{} }
-    end
-
-    Map.merge(
-      %{
-        time: FormatterUtils.format_timestamp(ts),
-        severity: "ERROR",
-        message: message
-      },
-      format_metadata(md, md_keys)
-    )
-    |> Map.merge(google_error_reporter)
-  end
-
   for {level, gcp_level} <- @severity_levels do
     def format_event(unquote(level), msg, ts, md, md_keys) do
       Map.merge(
