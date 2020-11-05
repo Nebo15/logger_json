@@ -6,7 +6,7 @@ defmodule LoggerJSON.Formatters.GoogleErrorReporter do
     [format_error(error, stacktrace) | Enum.map(stacktrace, &format_line/1)]
     |> Enum.filter(& &1)
     |> Enum.join("\n")
-    |> Logger.error(Keyword.merge(["@type": @googleErrorType], metadata))
+    |> Logger.error(Keyword.merge(build_metadata(), metadata))
   end
 
   defp format_error(error, stacktrace) do
@@ -20,4 +20,21 @@ defmodule LoggerJSON.Formatters.GoogleErrorReporter do
   end
 
   defp format_line({_, _, [], []}), do: nil
+
+  defp build_metadata() do
+    ["@type": @googleErrorType]
+    |> with_service_context()
+  end
+
+  defp with_service_context(metadata) do
+    if service_context = config()[:service_context] do
+      Keyword.merge(metadata, serviceContext: service_context)
+    else
+      metadata
+    end
+  end
+
+  defp config do
+    Application.get_env(:logger_json, :google_error_reporter, [])
+  end
 end
