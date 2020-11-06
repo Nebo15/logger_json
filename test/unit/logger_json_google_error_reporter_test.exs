@@ -61,20 +61,18 @@ defmodule LoggerJSONGoogleErrorReporterTest do
 
     assert log["message"] ==
              """
-             Elixir.RuntimeError: oops
-             \tfoo/bar.ex:123:in `Elixir.Foo.bar/0'
-             \tfoo/bar/baz.ex:456:in `Elixir.Foo.Bar.baz/1'
+             ** (RuntimeError) oops
+                 foo/bar.ex:123:in `Foo.bar/0'
+                 foo/bar/baz.ex:456:in `Foo.Bar.baz/1'
              """
-             |> String.trim_trailing()
   end
 
   test "logs erlang error" do
     error = :undef
 
     stacktrace = [
-      {Foo, :bar, [], []},
       {Foo, :bar, [123, 456], []},
-      {Foo, :bar, 0, [file: 'foo/bar.ex', line: 123]},
+      {Foo, :bar, 2, [file: 'foo/bar.ex', line: 123]},
       {Foo.Bar, :baz, 1, [file: 'foo/bar/baz.ex', line: 456]}
     ]
 
@@ -84,10 +82,10 @@ defmodule LoggerJSONGoogleErrorReporterTest do
 
     assert log["message"] ==
              """
-             Elixir.UndefinedFunctionError: function Foo.bar/0 is undefined (module Foo is not available)
-             \tfoo/bar.ex:123:in `Elixir.Foo.bar/0'
-             \tfoo/bar/baz.ex:456:in `Elixir.Foo.Bar.baz/1'
+             ** (UndefinedFunctionError) function Foo.bar/2 is undefined (module Foo is not available)
+                 Foo.bar(123, 456)
+                 foo/bar.ex:123:in `Foo.bar/2'
+                 foo/bar/baz.ex:456:in `Foo.Bar.baz/1'
              """
-             |> String.trim_trailing()
   end
 end

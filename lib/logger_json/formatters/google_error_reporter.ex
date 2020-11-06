@@ -3,23 +3,27 @@ defmodule LoggerJSON.Formatters.GoogleErrorReporter do
   @googleErrorType "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent"
 
   def report(error, stacktrace, metadata \\ []) do
-    [format_error(error, stacktrace) | Enum.map(stacktrace, &format_line/1)]
-    |> Enum.filter(& &1)
+    [format_banner(error, stacktrace) | format_stacktrace(stacktrace)]
     |> Enum.join("\n")
     |> Logger.error(Keyword.merge(build_metadata(), metadata))
   end
 
-  defp format_error(error, stacktrace) do
-    normalized = Exception.normalize(:error, error, stacktrace)
-    error_name = to_string(normalized.__struct__)
-    "#{error_name}: #{Exception.message(normalized)}"
+  defp format_banner(error, stacktrace) do
+    Exception.format_banner(:error, error, stacktrace)
   end
 
-  defp format_line({module, function, arity, [file: file, line: line]}) do
-    "\t#{file}:#{line}:in `#{module}.#{function}/#{arity}'"
+  defp format_stacktrace(stacktrace) do
+    Exception.format_stacktrace(stacktrace)
+    |> String.split("\n")
+    |> Enum.map(&format_line/1)
   end
 
-  defp format_line({_, _, _, []}), do: nil
+  defp format_line(line) do
+    case Regex.run(~r/(.+)\:(\d+)\: (.*)/, line) do
+      [_, file, line, function] -> "#{file}:#{line}:in `#{function}'"
+      nil -> line
+    end
+  end
 
   defp build_metadata() do
     ["@type": @googleErrorType]
