@@ -2,17 +2,17 @@ defmodule LoggerJSON.Formatters.GoogleErrorReporter do
   require Logger
   @googleErrorType "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent"
 
-  def report(error, stacktrace, metadata \\ []) do
-    [format_banner(error, stacktrace) | format_stacktrace(stacktrace)]
+  def report(kind, reason, stacktrace, metadata \\ []) do
+    [format_banner(kind, reason, stacktrace) | format_stacktrace(stacktrace)]
     |> Enum.join("\n")
     |> Logger.error(Keyword.merge(build_metadata(), metadata))
   end
 
-  defp format_banner(error, stacktrace) do
-    formatted = Exception.format_banner(:error, error, stacktrace)
+  defp format_banner(kind, reason, stacktrace) do
+    formatted = Exception.format_banner(kind, reason, stacktrace)
     case Regex.run(~r/\*\* \((\S+)\)(.*)/, formatted) do
       [_, type, message] -> "#{type}:#{message}"
-      _ -> error
+      _ -> reason
     end
   end
 
