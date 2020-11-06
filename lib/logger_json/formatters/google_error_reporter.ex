@@ -9,11 +9,7 @@ defmodule LoggerJSON.Formatters.GoogleErrorReporter do
   end
 
   defp format_banner(kind, reason, stacktrace) do
-    formatted = Exception.format_banner(kind, reason, stacktrace)
-    case Regex.run(~r/\*\* \((\S+)\)(.*)/, formatted) do
-      [_, type, message] -> "#{type}:#{message}"
-      _ -> reason
-    end
+    Exception.format_banner(kind, reason, stacktrace)
   end
 
   defp format_stacktrace(stacktrace) do
