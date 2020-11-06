@@ -9,7 +9,11 @@ defmodule LoggerJSON.Formatters.GoogleErrorReporter do
   end
 
   defp format_banner(error, stacktrace) do
-    Exception.format_banner(:error, error, stacktrace)
+    formatted = Exception.format_banner(:error, error, stacktrace)
+    case Regex.run(~r/\*\* \((\S+)\)(.*)/, formatted) do
+      [_, type, message] -> "#{type}:#{message}"
+      _ -> error
+    end
   end
 
   defp format_stacktrace(stacktrace) do
@@ -21,7 +25,7 @@ defmodule LoggerJSON.Formatters.GoogleErrorReporter do
   defp format_line(line) do
     case Regex.run(~r/(.+)\:(\d+)\: (.*)/, line) do
       [_, file, line, function] -> "#{file}:#{line}:in `#{function}'"
-      nil -> line
+      _ -> line
     end
   end
 
