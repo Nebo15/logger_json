@@ -19,7 +19,7 @@ defmodule LoggerJSON.Formatters.GoogleErrorReporter do
     "\t#{file}:#{line}:in `#{module}.#{function}/#{arity}'"
   end
 
-  defp format_line({_, _, [], []}), do: nil
+  defp format_line({_, _, _, []}), do: nil
 
   defp build_metadata() do
     ["@type": @googleErrorType]
