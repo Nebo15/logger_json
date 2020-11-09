@@ -83,9 +83,10 @@ defmodule LoggerJSONGoogleErrorReporterTest do
     assert log["message"] ==
              """
              ** (UndefinedFunctionError) function Foo.bar/2 is undefined (module Foo is not available)
-                 Foo.bar(123, 456)
                  foo/bar.ex:123:in `Foo.bar/2'
                  foo/bar/baz.ex:456:in `Foo.Bar.baz/1'
+             Context:
+                 Foo.bar(123, 456)
              """
   end
 end

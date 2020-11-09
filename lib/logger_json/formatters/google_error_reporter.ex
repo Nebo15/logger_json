@@ -13,16 +13,33 @@ defmodule LoggerJSON.Formatters.GoogleErrorReporter do
   end
 
   defp format_stacktrace(stacktrace) do
-    Exception.format_stacktrace(stacktrace)
-    |> String.split("\n")
-    |> Enum.map(&format_line/1)
+    lines =
+      Exception.format_stacktrace(stacktrace)
+      |> String.trim_trailing()
+      |> String.split("\n")
+      |> Enum.map(&format_line/1)
+      |> Enum.group_by(fn {kind, _line} -> kind end)
+
+    format_lines(:trace, lines[:trace]) ++ format_lines(:context, lines[:context]) ++ [""]
   end
 
   defp format_line(line) do
     case Regex.run(~r/(.+)\:(\d+)\: (.*)/, line) do
-      [_, file, line, function] -> "#{file}:#{line}:in `#{function}'"
-      _ -> line
+      [_, file, line, function] -> {:trace, "#{file}:#{line}:in `#{function}'"}
+      _ -> {:context, line}
     end
+  end
+
+  defp format_lines(_kind, nil) do
+    []
+  end
+
+  defp format_lines(:trace, lines) do
+    Enum.map(lines, fn {:trace, line} -> line end)
+  end
+
+  defp format_lines(:context, lines) do
+    ["Context:" | Enum.map(lines, fn {:context, line} -> line end)]
   end
 
   defp build_metadata() do
