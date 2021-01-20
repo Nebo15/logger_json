@@ -1,6 +1,7 @@
 defmodule LoggerJSON.Formatters.DatadogLogger do
   @moduledoc """
-  DataDog formatter.
+  DataDog formatter. Adhears to the DataDog
+  [default standard attribute list](https://docs.datadoghq.com/logs/processing/attributes_naming_convention/#default-standard-attribute-list).
   """
   import Jason.Helpers, only: [json_map: 1]
 
@@ -51,6 +52,6 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
 
   defp node_hostname do
     {:ok, hostname} = :inet.gethostname()
-    hostname
+    to_string(hostname)
   end
 end

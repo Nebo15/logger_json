@@ -3,7 +3,7 @@ if Code.ensure_loaded?(Plug) do
     @moduledoc """
     This formatter builds a metadata which is natively supported by Datadog:
 
-      * `http` - see [LogEntry#HttpRequest](https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#HttpRequest);
+      * `http` - see [DataDog](https://docs.datadoghq.com/logs/processing/attributes_naming_convention/#http-requests);
       * `phoenix.controller` - Phoenix controller that processed the request;
       * `phoenix.action` - Phoenix action that processed the request;
     """
