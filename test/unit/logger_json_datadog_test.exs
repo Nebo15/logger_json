@@ -53,7 +53,7 @@ defmodule LoggerJSONDatadogTest do
       |> capture_log()
       |> Jason.decode!()
 
-    assert %{"message" => ""} = log
+    assert %{"msg" => ""} = log
   end
 
   test "logs binary messages" do
@@ -64,7 +64,7 @@ defmodule LoggerJSONDatadogTest do
       |> capture_log()
       |> Jason.decode!()
 
-    assert %{"message" => "hello"} = log
+    assert %{"msg" => "hello"} = log
   end
 
   test "logs empty iodata messages" do
@@ -75,7 +75,7 @@ defmodule LoggerJSONDatadogTest do
       |> capture_log()
       |> Jason.decode!()
 
-    assert %{"message" => ""} = log
+    assert %{"msg" => ""} = log
   end
 
   test "logs iodata messages" do
@@ -86,7 +86,7 @@ defmodule LoggerJSONDatadogTest do
       |> capture_log()
       |> Jason.decode!()
 
-    assert %{"message" => "hello"} = log
+    assert %{"msg" => "hello"} = log
   end
 
   test "logs chardata messages" do
@@ -97,7 +97,7 @@ defmodule LoggerJSONDatadogTest do
       |> capture_log()
       |> Jason.decode!()
 
-    assert %{"message" => "παβ"} = log
+    assert %{"msg" => "παβ"} = log
   end
 
   test "log message does not break escaping" do
@@ -108,14 +108,14 @@ defmodule LoggerJSONDatadogTest do
       |> capture_log()
       |> Jason.decode!()
 
-    assert %{"message" => "\"h"} = log
+    assert %{"msg" => "\"h"} = log
 
     log =
       fn -> Logger.debug("\"h") end
       |> capture_log()
       |> Jason.decode!()
 
-    assert %{"message" => "\"h"} = log
+    assert %{"msg" => "\"h"} = log
   end
 
   test "does not start when there is no user" do
@@ -182,7 +182,7 @@ defmodule LoggerJSONDatadogTest do
         |> capture_log()
         |> Jason.decode!()
 
-      assert %{"message" => "hello"} = log
+      assert %{"msg" => "hello"} = log
     end
 
     test "ignore otp's metadata unixtime" do
@@ -247,7 +247,7 @@ defmodule LoggerJSONDatadogTest do
 
     assert %{
              "logger" => %{
-               "method_name" => ^function
+               "method_name" => "LoggerJSONDatadogTest.test contains source location/1::241"
              }
            } = log
   end
