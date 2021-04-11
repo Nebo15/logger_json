@@ -3,6 +3,7 @@ if Code.ensure_loaded?(Plug) do
     @moduledoc """
     A Plug to log request information in JSON format.
     """
+
     alias Plug.Conn
     alias LoggerJSON.Plug.MetadataFormatters
     require Logger

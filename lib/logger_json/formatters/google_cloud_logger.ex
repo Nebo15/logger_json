@@ -2,6 +2,7 @@ defmodule LoggerJSON.Formatters.GoogleCloudLogger do
   @moduledoc """
   Google Cloud Logger formatter.
   """
+
   import Jason.Helpers, only: [json_map: 1]
 
   alias LoggerJSON.{FormatterUtils, JasonSafeFormatter}

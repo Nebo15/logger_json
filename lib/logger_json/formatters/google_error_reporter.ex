@@ -1,4 +1,8 @@
 defmodule LoggerJSON.Formatters.GoogleErrorReporter do
+  @moduledoc """
+  Google Error Reporter formatter.
+  """
+
   require Logger
   @googleErrorType "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent"
 
