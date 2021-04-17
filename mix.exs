@@ -36,7 +36,7 @@ defmodule LoggerJSON.Mixfile do
       {:ecto, "~> 2.1 or ~> 3.0", optional: true},
       {:plug, "~> 1.0", optional: true},
       {:telemetry, "~> 0.4.0", optional: true},
-      {:ex_doc, ">= 0.0.0", only: [:dev, :test], runtime: false},
+      {:ex_doc, ">= 0.15.0", only: [:dev, :test], runtime: false},
       {:excoveralls, ">= 0.5.0", only: [:dev, :test]},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false}
     ]
