@@ -47,6 +47,10 @@ defmodule LoggerJSON.JasonSafeFormatterTest do
       assert %{a: 1, b: 2} == Formatter.format(a: 1, b: 2)
     end
 
+    test "converts irregular map keys" do
+      assert %{{"a", "b"} => 1} |> Formatter.format() |> Jason.encode!()
+    end
+
     test "inspects functions" do
       assert "&LoggerJSON.JasonSafeFormatter.format/1" == Formatter.format(&Formatter.format/1)
     end
