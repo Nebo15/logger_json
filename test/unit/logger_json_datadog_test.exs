@@ -242,7 +242,6 @@ defmodule LoggerJSONDatadogTest do
       |> capture_log()
       |> Jason.decode!()
 
-    # line = line + 3
     function = "Elixir.#{inspect(mod)}.#{name}/#{arity}"
 
     assert %{
