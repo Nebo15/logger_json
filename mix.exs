@@ -39,7 +39,7 @@ defmodule LoggerJSON.Mixfile do
       {:ex_doc, ">= 0.15.0", only: [:dev, :test], runtime: false},
       {:excoveralls, ">= 0.5.0", only: [:dev, :test]},
       {:dialyxir, "~> 1.1.0", only: [:dev], runtime: false},
-      {:stream_data, "~> 0.5", only: :test}
+      {:stream_data, "~> 0.5", only: [:dev, :test]}
     ]
   end
 
