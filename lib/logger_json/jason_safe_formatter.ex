@@ -54,31 +54,23 @@ defmodule LoggerJSON.JasonSafeFormatter do
 
   def format(data) when is_number(data), do: data
 
-  def format(data) when is_binary(data) do
+  def format(data) when is_binary(data), do: format_binary(data)
+
+  def format(data) when is_list(data), do: for(d <- data, do: format(d))
+
+  def format(data), do: inspect(data, pretty: true, width: 80)
+
+  defp format_map_key(key) when is_binary(key), do: format_binary(key)
+  defp format_map_key(key) when is_atom(key) or is_number(key), do: key
+  defp format_map_key(key), do: inspect(key)
+
+  defp format_binary(data) when is_binary(data) do
     if String.valid?(data) && String.printable?(data) do
       data
     else
       inspect(data)
     end
   end
-
-  def format(data) when is_list(data), do: for(d <- data, do: format(d))
-
-  def format(data) do
-    inspect(data, pretty: true, width: 80)
-  end
-
-  defp format_map_key(key) when is_binary(key) do
-    if String.valid?(key) && String.printable?(key) do
-      key
-    else
-      inspect(key)
-    end
-  end
-
-  defp format_map_key(key) when is_atom(key) or is_number(key), do: key
-
-  defp format_map_key(key), do: inspect(key)
 
   def jason_implemented?(data) do
     impl = Jason.Encoder.impl_for(data)
