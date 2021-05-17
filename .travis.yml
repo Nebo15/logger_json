@@ -1,7 +1,7 @@
 language: elixir
 cache:
   directories:
-  - deps
+    - deps
 elixir:
   - 1.9.4
 otp_release:
@@ -27,4 +27,7 @@ script:
   # Submit code coverage report to Coveralls
   - "mix coveralls.travis"
   # Ensure code is formatter
-  - "mix format --check-formatted --dry-run"
+  - >
+    if [[ $(elixir -v) == *"Elixir 1.10.4"* ]]; then
+      mix format --check-formatted
+    fi
