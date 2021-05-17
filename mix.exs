@@ -17,7 +17,7 @@ defmodule LoggerJSON.Mixfile do
       deps: deps(),
       docs: docs(),
       test_coverage: [tool: ExCoveralls],
-      preferred_cli_env: [coveralls: :test],
+      preferred_cli_env: [coveralls: :test, "coveralls.travis": :test, "coveralls.html": :test],
       dialyzer: [
         plt_add_apps: [:plug]
       ]
