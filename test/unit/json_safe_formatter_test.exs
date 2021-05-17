@@ -36,6 +36,10 @@ defmodule LoggerJSON.JasonSafeFormatterTest do
       assert %{id: "hello"} == Formatter.format(%IDStruct{id: "hello"})
     end
 
+    test "does not strip structs for which Jason.Encoder is derived" do
+      assert %NameStruct{name: "B"} == Formatter.format(%NameStruct{name: "B"})
+    end
+
     test "converts tuples to lists" do
       assert [1, 2, 3] == Formatter.format({1, 2, 3})
     end
