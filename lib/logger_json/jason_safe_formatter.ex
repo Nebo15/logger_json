@@ -42,7 +42,7 @@ defmodule LoggerJSON.JasonSafeFormatter do
 
   def format([{key, _} | _] = data) when is_atom(key) do
     Enum.into(data, %{}, fn
-      {key, value} -> {key, format(value)}
+      {key, value} -> {format_map_key(key), format(value)}
     end)
   rescue
     _ -> for(d <- data, do: format(d))
