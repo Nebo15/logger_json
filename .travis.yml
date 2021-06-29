@@ -20,6 +20,8 @@ matrix:
       elixir: 1.11.4
     - otp_release: 24.0
       elixir: 1.11.4
+    - otp_release: 24.0
+      elixir: 1.12.1
 env:
   global:
     - MIX_ENV=test
