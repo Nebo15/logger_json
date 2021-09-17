@@ -14,7 +14,7 @@ if Code.ensure_loaded?(Plug) do
 
     ### Available options
 
-      * `:level` - log level which is used to log requests;
+      * `:log` - log level which is used to log requests;
       * `:version_header` - request header which is used to determine API version requested by
       client, default: `x-api-version`;
       * `:metadata_formatter` - module with `build_metadata/3` function that formats the metadata
