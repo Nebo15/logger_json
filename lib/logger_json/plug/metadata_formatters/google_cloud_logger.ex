@@ -74,7 +74,7 @@ if Code.ensure_loaded?(Plug) do
       {:ok, hostname} = :inet.gethostname()
 
       vm_pid =
-        case Integer.parse(System.get_pid()) do
+        case Integer.parse(System.pid()) do
           {pid, _units} -> pid
           _ -> nil
         end
