@@ -187,7 +187,7 @@ config :logger_json, :backend,
 ## Encoders support
 
 You can replace default Jason encoder with other module that supports `encode_to_iodata!/1` function and
-enconding fragments.
+encoding fragments.
 
 ## Documentation
 
