@@ -11,7 +11,7 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
 
   @behaviour LoggerJSON.Formatter
 
-  @processed_metadata_keys ~w[pid file line function module application]a
+  @processed_metadata_keys ~w[pid file line function module application span_id trace_id]a
 
   def format_event(level, msg, ts, md, md_keys) do
     Map.merge(
@@ -35,8 +35,22 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
 
   defp format_metadata(md, md_keys) do
     LoggerJSON.take_metadata(md, md_keys, @processed_metadata_keys)
+    |> convert_tracing_keys(md)
     |> JasonSafeFormatter.format()
     |> FormatterUtils.maybe_put(:error, FormatterUtils.format_process_crash(md))
+  end
+
+  # To connect logs and traces, span_id and trace_id keys are respectively dd.span_id and dd.trace_id
+  # https://docs.datadoghq.com/tracing/faq/why-cant-i-see-my-correlated-logs-in-the-trace-id-panel/?tab=jsonlogs
+  defp convert_tracing_keys(output, md) do
+    Enum.reduce([:trace_id, :span_id], output, fn key, acc ->
+      if Keyword.has_key?(md, key) do
+        dd_key = "dd." <> Atom.to_string(key)
+        Map.merge(acc, %{dd_key => Keyword.get(md, key)})
+      else
+        acc
+      end
+    end)
   end
 
   defp method_name(metadata) do

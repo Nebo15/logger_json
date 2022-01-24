@@ -208,6 +208,20 @@ defmodule LoggerJSONDatadogTest do
 
       assert %{"id_struct" => %{"id" => "test"}} = log
     end
+
+    test "convert trace_id/span_id to expected datadog keys" do
+      Logger.configure_backend(LoggerJSON, metadata: :all)
+      Logger.metadata(trace_id: "1", span_id: "2")
+
+      log =
+        fn -> Logger.debug("hello") end
+        |> capture_log()
+        |> Jason.decode!()
+
+      assert %{"dd.trace_id" => "1", "dd.span_id" => "2"} = log
+      assert Map.has_key?(log, "trace_id") == false
+      assert Map.has_key?(log, "span_id") == false
+    end
   end
 
   describe "on_init/1 callback" do
