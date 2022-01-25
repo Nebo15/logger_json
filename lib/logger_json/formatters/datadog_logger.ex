@@ -19,7 +19,9 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
         logger:
           json_map(
             thread_name: inspect(Keyword.get(md, :pid)),
-            method_name: method_name(md)
+            method_name: method_name(md),
+            file_name: Keyword.get(md, :file),
+            line: Keyword.get(md, :line)
           ),
         message: IO.chardata_to_string(msg),
         syslog:

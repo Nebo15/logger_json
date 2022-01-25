@@ -249,20 +249,27 @@ defmodule LoggerJSONDatadogTest do
   end
 
   test "contains source location" do
-    %{module: mod, function: {name, arity}, file: _file, line: _line} = __ENV__
+    %{module: mod, function: {name, arity}, file: file, line: before_log_line_num} = __ENV__
 
     log =
       fn -> Logger.debug("hello") end
       |> capture_log()
       |> Jason.decode!()
 
+    %{line: after_log_line_num} = __ENV__
+
     function = "Elixir.#{inspect(mod)}.#{name}/#{arity}"
 
     assert %{
              "logger" => %{
-               "method_name" => ^function
+               "method_name" => ^function,
+               "line" => log_line_num,
+               "file_name" => ^file,
+               "thread_name" => _
              }
            } = log
+
+    assert log_line_num > before_log_line_num and log_line_num < after_log_line_num
   end
 
   test "may configure level" do
