@@ -9,8 +9,6 @@ otp_release:
 matrix:
   include:
     - otp_release: 21.1
-      elixir: 1.8.0
-    - otp_release: 21.1
       elixir: 1.9.4
     - otp_release: 22.1
       elixir: 1.9.4
