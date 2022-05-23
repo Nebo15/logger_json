@@ -26,7 +26,6 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
         message: IO.chardata_to_string(msg),
         syslog:
           json_map(
-            hostname: node_hostname(),
             severity: Atom.to_string(level),
             timestamp: FormatterUtils.format_timestamp(ts)
           )
@@ -60,10 +59,5 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
     module = Keyword.get(metadata, :module)
 
     FormatterUtils.format_function(module, function)
-  end
-
-  defp node_hostname do
-    {:ok, hostname} = :inet.gethostname()
-    to_string(hostname)
   end
 end
