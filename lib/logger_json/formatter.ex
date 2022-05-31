@@ -7,6 +7,13 @@ defmodule LoggerJSON.Formatter do
   """
 
   @doc """
+  Initialization callback. Ran on startup with the given `formatter_opts` list.
+
+  Returned list will be used as formatter_state in `format_event/6`.
+  """
+  @callback init(Keyword.t()) :: Keyword.t()
+
+  @doc """
   Format event callback.
 
   Returned map will be encoded to JSON.
@@ -16,6 +23,7 @@ defmodule LoggerJSON.Formatter do
               msg :: Logger.message(),
               ts :: Logger.Formatter.time(),
               md :: [atom] | :all,
-              state :: map
+              state :: map,
+              formatter_state :: Keyword.t()
             ) :: map | iodata() | %Jason.Fragment{}
 end

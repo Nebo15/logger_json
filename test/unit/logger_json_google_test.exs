@@ -15,7 +15,8 @@ defmodule LoggerJSONGoogleTest do
         metadata: [],
         json_encoder: Jason,
         on_init: :disabled,
-        formatter: GoogleCloudLogger
+        formatter: GoogleCloudLogger,
+        formatter_state: []
       )
 
     :ok = Logger.reset_metadata([])

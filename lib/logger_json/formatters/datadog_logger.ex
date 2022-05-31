@@ -13,7 +13,11 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
 
   @processed_metadata_keys ~w[pid file line function module application span_id trace_id]a
 
-  def format_event(level, msg, ts, md, md_keys) do
+  @impl true
+  def init(_formatter_opts), do: []
+
+  @impl true
+  def format_event(level, msg, ts, md, md_keys, _formatter_state) do
     Map.merge(
       %{
         logger:

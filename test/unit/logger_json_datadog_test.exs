@@ -15,7 +15,8 @@ defmodule LoggerJSONDatadogTest do
         metadata: [],
         json_encoder: Jason,
         on_init: :disabled,
-        formatter: DatadogLogger
+        formatter: DatadogLogger,
+        formatter_state: []
       )
 
     :ok = Logger.reset_metadata([])
