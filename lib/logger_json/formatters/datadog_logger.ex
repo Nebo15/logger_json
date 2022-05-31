@@ -1,9 +1,26 @@
 defmodule LoggerJSON.Formatters.DatadogLogger do
   @moduledoc """
-  DataDog formatter.
+  [DataDog](https://www.datadoghq.com) formatter. This will adhere to the
+  [default standard attribute list](https://docs.datadoghq.com/logs/processing/attributes_naming_convention/#default-standard-attribute-list)
+  as much as possible.
 
-  Adhere to the
-  [default standard attribute list](https://docs.datadoghq.com/logs/processing/attributes_naming_convention/#default-standard-attribute-list).
+  ## Options
+
+  This formatter has a couple of options to fine tune the logging output for
+  your deployed environment.
+
+  ### `hostname`
+
+  By setting the `hostname` value, you can change how the `syslog.hostname` is
+  set in logs. In most cases, you can leave this unset and it will use default
+  to `:system`, which uses `:inet.gethostname/0` to resolve the value.
+
+  If you are running in an environment where the hostname is not correct, you
+  can hard code it by setting `hostname` to a string. In places where the
+  hostname is inaccurate but also dynamic (like Kubernetes), you can set
+  `hostname` to `:unset` to exclude it entirely. You'll then be relying on
+  [`dd-agent`](https://docs.datadoghq.com/agent/) to determine the hostname.
+
   """
   import Jason.Helpers, only: [json_map: 1]
 
@@ -11,13 +28,24 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
 
   @behaviour LoggerJSON.Formatter
 
+  @default_opts [hostname: :system]
   @processed_metadata_keys ~w[pid file line function module application span_id trace_id]a
 
   @impl true
-  def init(_formatter_opts), do: []
+  def init(formatter_opts \\ []) do
+    opts = Keyword.merge(@default_opts, formatter_opts)
+
+    unless is_binary(opts[:hostname]) or opts[:hostname] in [:system, :unset] do
+      raise ArgumentError,
+            "invalid :hostname option for :formatter_opts logger_json backend. " <>
+              "Expected :system, :unset, or string, " <> "got: #{inspect(opts[:hostname])}"
+    end
+
+    opts
+  end
 
   @impl true
-  def format_event(level, msg, ts, md, md_keys, _formatter_state) do
+  def format_event(level, msg, ts, md, md_keys, formatter_state) do
     Map.merge(
       %{
         logger:
@@ -28,11 +56,7 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
             line: Keyword.get(md, :line)
           ),
         message: IO.chardata_to_string(msg),
-        syslog:
-          json_map(
-            severity: Atom.to_string(level),
-            timestamp: FormatterUtils.format_timestamp(ts)
-          )
+        syslog: syslog(level, ts, formatter_state[:hostname])
       },
       format_metadata(md, md_keys)
     )
@@ -63,5 +87,30 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
     module = Keyword.get(metadata, :module)
 
     FormatterUtils.format_function(module, function)
+  end
+
+  defp syslog(level, ts, :system) do
+    {:ok, hostname} = :inet.gethostname()
+
+    json_map(
+      hostname: to_string(hostname),
+      severity: Atom.to_string(level),
+      timestamp: FormatterUtils.format_timestamp(ts)
+    )
+  end
+
+  defp syslog(level, ts, :unset) do
+    json_map(
+      severity: Atom.to_string(level),
+      timestamp: FormatterUtils.format_timestamp(ts)
+    )
+  end
+
+  defp syslog(level, ts, hostname) do
+    json_map(
+      hostname: hostname,
+      severity: Atom.to_string(level),
+      timestamp: FormatterUtils.format_timestamp(ts)
+    )
   end
 end

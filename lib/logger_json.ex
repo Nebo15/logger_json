@@ -7,14 +7,20 @@ defmodule LoggerJSON do
 
   ## Log Format
 
-  LoggerJSON provides two JSON formatters out of the box.
+  LoggerJSON provides three JSON formatters out of the box.
 
   You can change this structure by implementing `LoggerJSON.Formatter` behaviour and passing module
-  name to `:formatter` config option. Example implementations can be found in `LoggerJSON.Formatters.GoogleCloudLogger`
-  and `LoggerJSON.Formatters.BasicLogger`.
+  name to `:formatter` config option. Example implementations can be found in `LoggerJSON.Formatters.GoogleCloudLogger`,
+  `LoggerJSON.Formatters.DatadogLogger`, and `LoggerJSON.Formatters.BasicLogger`.
 
       config :logger_json, :backend,
         formatter: MyFormatterImplementation
+
+  If your formatter supports different options, you can specify them with `:formatter_opts`.
+
+      config :logger_json, :backend,
+        formatter: LoggerJSON.Formatters.DatadogLogger,
+        formatter_opts: [hostname: "example.com"]
 
   ## Encoders support
 
