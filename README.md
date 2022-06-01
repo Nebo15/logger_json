@@ -178,7 +178,7 @@ It's [available on Hex](https://hex.pm/packages/logger_json), the package can be
 
   Some integrations (for eg. Plug) use `metadata` to log request and response parameters. You can reduce log size by replacing `:all` (which means log all metadata) with a list of the ones that you actually need. 
 
-  By default, [some metadata keys](https://github.com/Nebo15/logger_json/blob/349c8174886135a02bb16317f76beac89d1aa20d/lib/logger_json.ex#L46) would be ignored by default, unless `:all` option is given, but formatters like `GoogleCloudLogger` and `DatadogLogger` still persist those metadata values into a structured output. This behavior is similar to the default Elixir logger backend.
+  Beware that LoggerJSON always ignores [some metadata keys](https://github.com/Nebo15/logger_json/blob/349c8174886135a02bb16317f76beac89d1aa20d/lib/logger_json.ex#L46), but formatters like `GoogleCloudLogger` and `DatadogLogger` still persist those metadata values into a structured output. This behavior is similar to the default Elixir logger backend.
 
   3. Replace default Logger `:console` back-end with `LoggerJSON`:
 
