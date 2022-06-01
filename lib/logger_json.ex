@@ -7,7 +7,7 @@ defmodule LoggerJSON do
 
   ## Log Format
 
-  LoggerJSON provides two JSON formatters out of the box.
+  LoggerJSON provides three JSON formatters out of the box.
 
   You can change this structure by implementing `LoggerJSON.Formatter` behaviour and passing module
   name to `:formatter` config option. Example implementations can be found in `LoggerJSON.Formatters.GoogleCloudLogger`
