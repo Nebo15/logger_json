@@ -11,24 +11,15 @@
 
 JSON console back-end for Elixir Logger.
 
-It can be used as drop-in replacement for default `:console` Logger back-end in cases where you use
-use Google Cloud Logger or other JSON-based log collectors.
+It can be used as drop-in replacement for default `:console` Logger back-end in cases where you use use Google Cloud Logger, DataDog or other JSON-based log collectors. After adding this back-end you may also be interested in [redirecting otp and sasl reports to Logger](https://hexdocs.pm/logger/Logger.html#error-logger-configuration) (see "Error Logger configuration" section).
 
 Minimum supported Erlang/OTP version is 20.
 
-## Motivation
-
-[We](https://github.com/Nebo15) deploy our applications as dockerized containers in Google Container Engine (Kubernetes cluster), in this case all your logs will go to `stdout` and log solution on top of Kubernetes should collect and persist it elsewhere.
-
-In GKE it is persisted in Google Cloud Logger, but traditional single Logger output may contain newlines for a single log line, and GCL counts each new line as separate log entry, this making it hard to search over it.
-
-This backend makes sure that there is only one line per log record and adds additional integration niceness, like [LogEntry](https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry) format support.
-
-After adding this back-end you may also be interested in [redirecting otp and sasl reports to Logger](https://hexdocs.pm/logger/Logger.html#error-logger-configuration) (see "Error Logger configuration" section).
-
 ## Log Format
 
-LoggerJSON provides two JSON formatters out of the box (see below for implementing your own custom formatter).
+LoggerJSON provides three JSON formatters out of the box and allows developers to implement a custom one.
+
+### BasicLogger
 
 The `LoggerJSON.Formatters.BasicLogger` formatter provides a generic JSON formatted message with no vendor specific entries in the payload. A sample log entry from `LoggerJSON.Formatters.BasicLogger` looks like the following:
 
@@ -43,8 +34,9 @@ The `LoggerJSON.Formatters.BasicLogger` formatter provides a generic JSON format
 }
 ```
 
-The other formatter that comes with LoggerJSON is `LoggerJSON.Formatters.GoogleCloudLogger` and generates JSON that is compatible with the
-[Google Cloud Logger LogEntry](https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry) format:
+### GoogleCloudLogger
+
+Generates JSON that is compatible with the [Google Cloud Logger LogEntry](https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry) format:
 
   ```json
   {
@@ -60,7 +52,7 @@ The other formatter that comes with LoggerJSON is `LoggerJSON.Formatters.GoogleC
   }
   ```
 
-  Log entry in Google Cloud Logger would looks something like this:
+  Notice that GKE doesn't allow to set certain fields of the LogEntry, so support is limited. The results in Google Cloud Logger would looks something like this:
 
   ```json
   {
@@ -106,13 +98,61 @@ The other formatter that comes with LoggerJSON is `LoggerJSON.Formatters.GoogleC
   }
   ```
 
+### DatadogLogger
+
+Adheres to the [default standard attribute list](https://docs.datadoghq.com/logs/processing/attributes_naming_convention/#default-standard-attribute-list).
+
+  ```json
+  {
+    "domain": ["elixir"],
+    "duration": 3863403,
+    "http": {
+      "url": "http://localhost/create-account",
+      "status_code": 200,
+      "method": "GET",
+      "referer": "http://localhost:4000/login",
+      "request_id": "http_FlDCOItxeudZJ20AAADD",
+      "useragent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36",
+      "url_details": {
+        "host": "localhost",
+        "port": 4000,
+        "path": "/create-account",
+        "queryString": "",
+        "scheme": "http"
+      }
+    },
+    "logger": {
+      "thread_name": "#PID<0.1042.0>",
+      "method_name": "Elixir.LoggerJSON.Plug.call/2"
+    },
+    "message": "",
+    "network": {
+      "client": {
+        "ip": "127.0.0.1"
+      }
+    },
+    "phoenix": {
+      "controller": "Elixir.RecognizerWeb.Accounts.UserRegistrationController",
+      "action": "new"
+    },
+    "request_id": "http_FlDCOItxeudZJ20AAADD",
+    "syslog": {
+      "hostname": [10, 10, 100, 100, 100, 100, 100],
+      "severity": "info",
+      "timestamp": "2020-12-14T19:16:55.088Z"
+    }
+  }
+  ```
+
+### Custom formatters
+
 You can change this structure by implementing `LoggerJSON.Formatter` behaviour and passing module
 name to `:formatter` config option. Example module can be found in `LoggerJSON.Formatters.GoogleCloudLogger`.
 
-```ex
-config :logger_json, :backend,
-  formatter: MyFormatterImplementation
-```
+  ```ex
+  config :logger_json, :backend,
+    formatter: MyFormatterImplementation
+  ```
 
 ## Installation
 
@@ -130,12 +170,15 @@ It's [available on Hex](https://hex.pm/packages/logger_json), the package can be
 
   ```ex
   config :logger_json, :backend,
-    metadata: :all
+    metadata: :all,
+    json_encoder: Jason,
+    formatter: LoggerJSON.Formatters.GoogleCloudLogger
+
   ```
 
-  Some integrations (for eg. Plug) uses `metadata` to log request
-  and response parameters. You can reduce log size by replacing `:all`
-  (which means log all) with a list of the ones that you actually need.
+  Some integrations (for eg. Plug) use `metadata` to log request and response parameters. You can reduce log size by replacing `:all` (which means log all metadata) with a list of the ones that you actually need. 
+
+  By default, [some metadata keys](https://github.com/Nebo15/logger_json/blob/349c8174886135a02bb16317f76beac89d1aa20d/lib/logger_json.ex#L46) would be ignored by default, unless `:all` option is given, but formatters like `GoogleCloudLogger` and `DatadogLogger` still persist those metadata values into a structured output. This behavior is similar to the default Elixir logger backend.
 
   3. Replace default Logger `:console` back-end with `LoggerJSON`:
 
