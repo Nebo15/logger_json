@@ -19,6 +19,9 @@ defmodule LoggerJSON.Formatters.GoogleCloudLogger do
     {:error, "ERROR"}
   ]
 
+  @impl true
+  def init(_formatter_opts), do: []
+
   @doc """
   Builds structured payload which is mapped to Google Cloud Logger
   [`LogEntry`](https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry) format.
@@ -26,7 +29,8 @@ defmodule LoggerJSON.Formatters.GoogleCloudLogger do
   See: https://cloud.google.com/logging/docs/agent/configuration#special_fields_in_structured_payloads
   """
   for {level, gcp_level} <- @severity_levels do
-    def format_event(unquote(level), msg, ts, md, md_keys) do
+    @impl true
+    def format_event(unquote(level), msg, ts, md, md_keys, _formatter_state) do
       Map.merge(
         %{
           time: FormatterUtils.format_timestamp(ts),
@@ -38,7 +42,8 @@ defmodule LoggerJSON.Formatters.GoogleCloudLogger do
     end
   end
 
-  def format_event(_level, msg, ts, md, md_keys) do
+  @impl true
+  def format_event(_level, msg, ts, md, md_keys, _formatter_state) do
     Map.merge(
       %{
         time: FormatterUtils.format_timestamp(ts),

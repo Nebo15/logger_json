@@ -12,7 +12,10 @@ defmodule LoggerJSON.Formatters.BasicLogger do
   @processed_metadata_keys ~w[pid file line function module application]a
 
   @impl true
-  def format_event(level, msg, ts, md, md_keys) do
+  def init(_formatter_opts), do: []
+
+  @impl true
+  def format_event(level, msg, ts, md, md_keys, _formatter_state) do
     json_map(
       time: FormatterUtils.format_timestamp(ts),
       severity: Atom.to_string(level),

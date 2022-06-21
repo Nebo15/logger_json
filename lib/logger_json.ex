@@ -10,11 +10,17 @@ defmodule LoggerJSON do
   LoggerJSON provides three JSON formatters out of the box.
 
   You can change this structure by implementing `LoggerJSON.Formatter` behaviour and passing module
-  name to `:formatter` config option. Example implementations can be found in `LoggerJSON.Formatters.GoogleCloudLogger`
-  and `LoggerJSON.Formatters.BasicLogger`.
+  name to `:formatter` config option. Example implementations can be found in `LoggerJSON.Formatters.GoogleCloudLogger`,
+  `LoggerJSON.Formatters.DatadogLogger`, and `LoggerJSON.Formatters.BasicLogger`.
 
       config :logger_json, :backend,
         formatter: MyFormatterImplementation
+
+  If your formatter supports different options, you can specify them with `:formatter_opts`.
+
+      config :logger_json, :backend,
+        formatter: LoggerJSON.Formatters.DatadogLogger,
+        formatter_opts: [hostname: "example.com"]
 
   ## Encoders support
 
@@ -55,7 +61,8 @@ defmodule LoggerJSON do
             output: nil,
             json_encoder: nil,
             on_init: nil,
-            formatter: nil
+            formatter: nil,
+            formatter_state: %{}
 
   @doc """
   Configures Logger log level at runtime by using value from environment variable.
@@ -197,6 +204,9 @@ defmodule LoggerJSON do
       |> Keyword.get(:metadata, [])
       |> configure_metadata()
 
+    formatter_opts = Keyword.get(config, :formatter_opts, %{})
+    formatter_state = apply(formatter, :init, [formatter_opts])
+
     %{
       state
       | metadata: metadata,
@@ -204,7 +214,8 @@ defmodule LoggerJSON do
         device: device,
         max_buffer: max_buffer,
         json_encoder: json_encoder,
-        formatter: formatter
+        formatter: formatter,
+        formatter_state: formatter_state
     }
   end
 
@@ -259,7 +270,7 @@ defmodule LoggerJSON do
   end
 
   defp format_event(level, msg, ts, md, state) do
-    %{json_encoder: json_encoder, formatter: formatter, metadata: md_keys} = state
+    %{json_encoder: json_encoder, formatter: formatter, formatter_state: formatter_state, metadata: md_keys} = state
 
     unless formatter do
       raise ArgumentError,
@@ -267,7 +278,7 @@ defmodule LoggerJSON do
               "Expected module name that implements LoggerJSON.Formatter behaviour, " <> "got: #{inspect(json_encoder)}"
     end
 
-    event = formatter.format_event(level, msg, ts, md, md_keys)
+    event = formatter.format_event(level, msg, ts, md, md_keys, formatter_state)
 
     case json_encoder do
       nil ->

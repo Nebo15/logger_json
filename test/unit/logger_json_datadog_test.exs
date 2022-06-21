@@ -15,7 +15,8 @@ defmodule LoggerJSONDatadogTest do
         metadata: [],
         json_encoder: Jason,
         on_init: :disabled,
-        formatter: DatadogLogger
+        formatter: DatadogLogger,
+        formatter_state: %{}
       )
 
     :ok = Logger.reset_metadata([])
@@ -278,6 +279,40 @@ defmodule LoggerJSONDatadogTest do
     assert capture_log(fn ->
              Logger.debug("hello")
            end) == ""
+  end
+
+  test "logs hostname when set to :system" do
+    Logger.configure_backend(LoggerJSON, formatter_opts: %{hostname: :system})
+    {:ok, hostname} = :inet.gethostname()
+
+    log =
+      fn -> Logger.debug("hello") end
+      |> capture_log()
+      |> Jason.decode!()
+
+    assert log["syslog"]["hostname"] == to_string(hostname)
+  end
+
+  test "does not log hostname when set to :unset" do
+    Logger.configure_backend(LoggerJSON, formatter_opts: %{hostname: :unset})
+
+    log =
+      fn -> Logger.debug("hello") end
+      |> capture_log()
+      |> Jason.decode!()
+
+    assert log["syslog"]["hostname"] == nil
+  end
+
+  test "logs hostname when set to string" do
+    Logger.configure_backend(LoggerJSON, formatter_opts: %{hostname: "testing"})
+
+    log =
+      fn -> Logger.debug("hello") end
+      |> capture_log()
+      |> Jason.decode!()
+
+    assert log["syslog"]["hostname"] == "testing"
   end
 
   test "logs severity" do

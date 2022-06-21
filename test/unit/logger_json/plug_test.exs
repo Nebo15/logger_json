@@ -24,7 +24,8 @@ defmodule LoggerJSON.PlugTest do
         metadata: :all,
         json_encoder: Jason,
         on_init: :disabled,
-        formatter: LoggerJSON.Formatters.GoogleCloudLogger
+        formatter: LoggerJSON.Formatters.GoogleCloudLogger,
+        formatter_state: %{}
       )
   end
 
