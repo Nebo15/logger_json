@@ -15,7 +15,7 @@ defmodule LoggerJSONBasicTest do
         json_encoder: Jason,
         on_init: :disabled,
         formatter: BasicLogger,
-        formatter_state: []
+        formatter_state: %{}
       )
   end
 

@@ -28,17 +28,17 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
 
   @behaviour LoggerJSON.Formatter
 
-  @default_opts [hostname: :system]
+  @default_opts %{hostname: :system}
   @processed_metadata_keys ~w[pid file line function module application span_id trace_id]a
 
   @impl true
-  def init(formatter_opts \\ []) do
-    opts = Keyword.merge(@default_opts, formatter_opts)
+  def init(formatter_opts \\ %{}) do
+    opts = Map.merge(@default_opts, formatter_opts)
 
-    unless is_binary(opts[:hostname]) or opts[:hostname] in [:system, :unset] do
+    unless is_binary(opts.hostname) or opts.hostname in [:system, :unset] do
       raise ArgumentError,
             "invalid :hostname option for :formatter_opts logger_json backend. " <>
-              "Expected :system, :unset, or string, " <> "got: #{inspect(opts[:hostname])}"
+              "Expected :system, :unset, or string, " <> "got: #{inspect(opts.hostname)}"
     end
 
     opts
@@ -56,7 +56,7 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
             line: Keyword.get(md, :line)
           ),
         message: IO.chardata_to_string(msg),
-        syslog: syslog(level, ts, formatter_state[:hostname])
+        syslog: syslog(level, ts, formatter_state.hostname)
       },
       format_metadata(md, md_keys)
     )

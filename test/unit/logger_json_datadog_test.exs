@@ -16,7 +16,7 @@ defmodule LoggerJSONDatadogTest do
         json_encoder: Jason,
         on_init: :disabled,
         formatter: DatadogLogger,
-        formatter_state: []
+        formatter_state: %{}
       )
 
     :ok = Logger.reset_metadata([])
@@ -282,7 +282,7 @@ defmodule LoggerJSONDatadogTest do
   end
 
   test "logs hostname when set to :system" do
-    Logger.configure_backend(LoggerJSON, formatter_opts: [hostname: :system])
+    Logger.configure_backend(LoggerJSON, formatter_opts: %{hostname: :system})
     {:ok, hostname} = :inet.gethostname()
 
     log =
@@ -294,7 +294,7 @@ defmodule LoggerJSONDatadogTest do
   end
 
   test "does not log hostname when set to :unset" do
-    Logger.configure_backend(LoggerJSON, formatter_opts: [hostname: :unset])
+    Logger.configure_backend(LoggerJSON, formatter_opts: %{hostname: :unset})
 
     log =
       fn -> Logger.debug("hello") end
@@ -305,7 +305,7 @@ defmodule LoggerJSONDatadogTest do
   end
 
   test "logs hostname when set to string" do
-    Logger.configure_backend(LoggerJSON, formatter_opts: [hostname: "testing"])
+    Logger.configure_backend(LoggerJSON, formatter_opts: %{hostname: "testing"})
 
     log =
       fn -> Logger.debug("hello") end

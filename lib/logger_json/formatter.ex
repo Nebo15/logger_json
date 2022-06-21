@@ -24,6 +24,6 @@ defmodule LoggerJSON.Formatter do
               ts :: Logger.Formatter.time(),
               md :: [atom] | :all,
               state :: map,
-              formatter_state :: Keyword.t()
+              formatter_state :: map
             ) :: map | iodata() | %Jason.Fragment{}
 end

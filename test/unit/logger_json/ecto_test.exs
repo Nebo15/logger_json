@@ -13,7 +13,7 @@ defmodule LoggerJSON.EctoTest do
         json_encoder: Jason,
         on_init: :disabled,
         formatter: LoggerJSON.Formatters.GoogleCloudLogger,
-        formatter_state: []
+        formatter_state: %{}
       )
 
     diff = :erlang.convert_time_unit(1, :microsecond, :native)

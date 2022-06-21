@@ -62,7 +62,7 @@ defmodule LoggerJSON do
             json_encoder: nil,
             on_init: nil,
             formatter: nil,
-            formatter_state: []
+            formatter_state: %{}
 
   @doc """
   Configures Logger log level at runtime by using value from environment variable.
@@ -204,7 +204,7 @@ defmodule LoggerJSON do
       |> Keyword.get(:metadata, [])
       |> configure_metadata()
 
-    formatter_opts = Keyword.get(config, :formatter_opts, [])
+    formatter_opts = Keyword.get(config, :formatter_opts, %{})
     formatter_state = apply(formatter, :init, [formatter_opts])
 
     %{

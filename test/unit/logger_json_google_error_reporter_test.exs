@@ -13,7 +13,7 @@ defmodule LoggerJSONGoogleErrorReporterTest do
         json_encoder: Jason,
         on_init: :disabled,
         formatter: GoogleCloudLogger,
-        formatter_state: []
+        formatter_state: %{}
       )
 
     :ok = Logger.reset_metadata([])
