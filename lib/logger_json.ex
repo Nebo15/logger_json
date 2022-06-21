@@ -20,7 +20,7 @@ defmodule LoggerJSON do
 
       config :logger_json, :backend,
         formatter: LoggerJSON.Formatters.DatadogLogger,
-        formatter_opts: [hostname: "example.com"]
+        formatter_opts: %{hostname: "example.com"}
 
   ## Encoders support
 
