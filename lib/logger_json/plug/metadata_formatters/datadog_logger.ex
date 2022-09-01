@@ -55,12 +55,23 @@ if Code.ensure_loaded?(Plug) do
       end
     end
 
-    defp phoenix_metadata(%{private: %{phoenix_controller: controller, phoenix_action: action}}) do
-      [phoenix: json_map(controller: controller, action: action)]
+    defp phoenix_metadata(%{private: %{phoenix_controller: controller, phoenix_action: action}} = conn) do
+      [phoenix: json_map(controller: controller, action: action, route: phoenix_route(conn))]
     end
 
     defp phoenix_metadata(_conn) do
       []
     end
+
+    if Code.ensure_loaded?(Phoenix.Router) do
+      defp phoenix_route(%{private: %{phoenix_router: router}, method: method, request_path: path, host: host} = conn) do
+        case Phoenix.Router.route_info(router, method, path, host) do
+          %{route: route} -> route
+          _ -> nil
+        end
+      end
+    end
+
+    defp phoenix_route(_conn), do: nil
   end
 end
