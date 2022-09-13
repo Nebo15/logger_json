@@ -64,7 +64,7 @@ if Code.ensure_loaded?(Plug) do
     end
 
     if Code.ensure_loaded?(Phoenix.Router) do
-      defp phoenix_route(%{private: %{phoenix_router: router}, method: method, request_path: path, host: host} = conn) do
+      defp phoenix_route(%{private: %{phoenix_router: router}, method: method, request_path: path, host: host}) do
         case Phoenix.Router.route_info(router, method, path, host) do
           %{route: route} -> route
           _ -> nil
