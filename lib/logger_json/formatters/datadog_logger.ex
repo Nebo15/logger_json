@@ -101,7 +101,10 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
     _ -> ""
   end
 
+  defp convert_otel_field(value) when byte_size(value) < 16, do: ""
+
   defp convert_otel_field(value) do
+    value = to_string(value)
     len = byte_size(value) - 16
     <<_front::binary-size(len), value::binary>> = value
     convert_otel_field(value)
