@@ -29,7 +29,7 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
   @behaviour LoggerJSON.Formatter
 
   @default_opts %{hostname: :system}
-  @processed_metadata_keys ~w[pid file line function module application span_id trace_id]a
+  @processed_metadata_keys ~w[pid file line function module application span_id trace_id otel_span_id otel_trace_id]a
 
   @impl true
   def init(formatter_opts \\ %{}) do
@@ -72,14 +72,41 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
   # To connect logs and traces, span_id and trace_id keys are respectively dd.span_id and dd.trace_id
   # https://docs.datadoghq.com/tracing/faq/why-cant-i-see-my-correlated-logs-in-the-trace-id-panel/?tab=jsonlogs
   defp convert_tracing_keys(output, md) do
-    Enum.reduce([:trace_id, :span_id], output, fn key, acc ->
+    fields = %{
+      span_id: ["dd.span_id", &(&1)],
+      trace_id: ["dd.trace_id", &(&1)],
+      otel_span_id: ["dd.span_id", &convert_otel_field/1],
+      otel_trace_id: ["dd.trace_id", &convert_otel_field/1]
+    }
+
+    Enum.reduce(fields, output, fn {key, [new_key, transformer]}, acc ->
       if Keyword.has_key?(md, key) do
-        dd_key = "dd." <> Atom.to_string(key)
-        Map.merge(acc, %{dd_key => Keyword.get(md, key)})
+        new_value = apply(transformer, [Keyword.get(md, key)])
+        Map.merge(acc, %{new_key => new_value})
       else
         acc
       end
     end)
+  end
+
+  # This converts native OpenTelemetry fields to the native Datadog format.
+  # This function is taken from the Datadog examples for converting. Mostly the Golang version
+  # https://docs.datadoghq.com/tracing/other_telemetry/connect_logs_and_traces/opentelemetry/?tab=go
+  # Tests were stolen from https://github.com/open-telemetry/opentelemetry-specification/issues/525
+  # and https://go.dev/play/p/pUBHcLdXJNy
+  defp convert_otel_field(value) do
+    value = to_string(value)
+    value_len = String.length(value)
+
+    if value_len >= 16 do
+      value = String.slice(value, value_len - 16, 16)
+      {value, _} = Integer.parse(value, 16)
+      Integer.to_string(value, 10)
+    else
+      ""
+    end
+  rescue
+    _ -> ""
   end
 
   defp method_name(metadata) do
