@@ -193,6 +193,9 @@ It's [available on Hex](https://hex.pm/packages/logger_json), the package can be
   plug LoggerJSON.Plug
   ```
 
+  `LoggerJSON.Plug` is configured by default to use `LoggerJSON.Plug.MetadataFormatters.GoogleCloudLogger`.
+  You can replace it with the `:metadata_formatter` config option.
+
   5. Optionally. Use Ecto telemetry for additional metadata:
 
   Attach telemetry handler for Ecto events in `start/2` function in `application.ex`

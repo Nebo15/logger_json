@@ -22,6 +22,7 @@ if Code.ensure_loaded?(Plug) do
 
     ### Available metadata formatters
 
+      * `LoggerJSON.Plug.MetadataFormatters.DatadogLogger` see module for logged structure;
       * `LoggerJSON.Plug.MetadataFormatters.GoogleCloudLogger` leverages GCP LogEntry format;
       * `LoggerJSON.Plug.MetadataFormatters.ELK` see module for logged structure.
 
