@@ -41,7 +41,7 @@ defmodule LoggerJSON.Mixfile do
       {:phoenix, ">= 1.5.0", optional: true},
       {:telemetry, "~> 0.4.0 or ~> 1.0", optional: true},
       {:ex_doc, ">= 0.15.0", only: [:dev, :test], runtime: false},
-      {:excoveralls, ">= 0.5.0", only: [:dev, :test]},
+      {:excoveralls, ">= 0.15.0", only: [:dev, :test]},
       {:dialyxir, "~> 1.1.0", only: [:dev], runtime: false},
       {:stream_data, "~> 0.5", only: [:dev, :test]}
     ]
