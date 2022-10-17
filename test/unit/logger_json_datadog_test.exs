@@ -223,6 +223,67 @@ defmodule LoggerJSONDatadogTest do
       assert Map.has_key?(log, "trace_id") == false
       assert Map.has_key?(log, "span_id") == false
     end
+
+    test "convert otel_trace_id/otel_span_id binary to expected datadog keys" do
+      Logger.configure_backend(LoggerJSON, metadata: :all)
+
+      Logger.metadata(
+        otel_trace_id:
+          <<98, 56, 49, 48, 100, 98, 97, 50, 57, 56, 48, 51, 101, 101, 54, 49, 101, 55, 99, 55, 49, 102, 102, 48, 99,
+            50, 99, 57, 53, 97, 57, 100>>
+      )
+
+      log =
+        fn -> Logger.debug("hello") end
+        |> capture_log()
+        |> Jason.decode!()
+
+      assert %{"dd.trace_id" => "16701352862047361693"} = log
+      assert Map.has_key?(log, "trace_id") == false
+      assert Map.has_key?(log, "span_id") == false
+    end
+
+    test "convert otel_trace_id/otel_span_id charlist to expected datadog keys" do
+      Logger.configure_backend(LoggerJSON, metadata: :all)
+      Logger.metadata(otel_trace_id: 'b810dba29803ee61e7c71ff0c2c95a9d')
+
+      log =
+        fn -> Logger.debug("hello") end
+        |> capture_log()
+        |> Jason.decode!()
+
+      assert %{"dd.trace_id" => "16701352862047361693"} = log
+      assert Map.has_key?(log, "trace_id") == false
+      assert Map.has_key?(log, "span_id") == false
+    end
+
+    test "convert otel_trace_id/otel_span_id string to expected datadog keys" do
+      Logger.configure_backend(LoggerJSON, metadata: :all)
+      Logger.metadata(otel_trace_id: "e7c71ff0c2c95a9d")
+
+      log =
+        fn -> Logger.debug("hello") end
+        |> capture_log()
+        |> Jason.decode!()
+
+      assert %{"dd.trace_id" => "16701352862047361693"} = log
+      assert Map.has_key?(log, "trace_id") == false
+      assert Map.has_key?(log, "span_id") == false
+    end
+
+    test "does not error on incorrect otel_trace_id/otel_span_id metadata" do
+      Logger.configure_backend(LoggerJSON, metadata: :all)
+      Logger.metadata(otel_trace_id: {:noop})
+
+      log =
+        fn -> Logger.debug("hello") end
+        |> capture_log()
+        |> Jason.decode!()
+
+      assert %{"dd.trace_id" => ""} = log
+      assert Map.has_key?(log, "trace_id") == false
+      assert Map.has_key?(log, "span_id") == false
+    end
   end
 
   describe "on_init/1 callback" do
