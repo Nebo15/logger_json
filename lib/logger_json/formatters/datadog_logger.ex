@@ -72,14 +72,14 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
   # To connect logs and traces, span_id and trace_id keys are respectively dd.span_id and dd.trace_id
   # https://docs.datadoghq.com/tracing/faq/why-cant-i-see-my-correlated-logs-in-the-trace-id-panel/?tab=jsonlogs
   defp convert_tracing_keys(output, md) do
-    fields = %{
-      span_id: ["dd.span_id", & &1],
-      trace_id: ["dd.trace_id", & &1],
-      otel_span_id: ["dd.span_id", &convert_otel_field/1],
-      otel_trace_id: ["dd.trace_id", &convert_otel_field/1]
-    }
-
-    Enum.reduce(fields, output, fn {key, [new_key, transformer]}, acc ->
+    # Notice: transformers can override each others but the last one in this list wins
+    [
+      otel_span_id: {"dd.span_id", &convert_otel_field/1},
+      otel_trace_id: {"dd.trace_id", &convert_otel_field/1},
+      span_id: {"dd.span_id", & &1},
+      trace_id: {"dd.trace_id", & &1}
+    ]
+    |> Enum.reduce(output, fn {key, {new_key, transformer}}, acc ->
       if Keyword.has_key?(md, key) do
         new_value = transformer.(Keyword.get(md, key))
         Map.put(acc, new_key, new_value)

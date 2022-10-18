@@ -224,6 +224,25 @@ defmodule LoggerJSONDatadogTest do
       assert Map.has_key?(log, "span_id") == false
     end
 
+    test "trace_id/span_id has greater priority than otel_trace_id/otel_span_id" do
+      Logger.configure_backend(LoggerJSON, metadata: :all)
+
+      otel_id =
+        <<98, 56, 49, 48, 100, 98, 97, 50, 57, 56, 48, 51, 101, 101, 54, 49, 101, 55, 99, 55, 49, 102, 102, 48, 99, 50,
+          99, 57, 53, 97, 57, 100>>
+
+      Logger.metadata(otel_trace_id: otel_id, trace_id: "1", span_id: "2", otel_span_id: otel_id)
+
+      log =
+        fn -> Logger.debug("hello") end
+        |> capture_log()
+        |> Jason.decode!()
+
+      assert %{"dd.trace_id" => "1", "dd.span_id" => "2"} = log
+      assert Map.has_key?(log, "trace_id") == false
+      assert Map.has_key?(log, "span_id") == false
+    end
+
     test "convert otel_trace_id/otel_span_id binary to expected datadog keys" do
       Logger.configure_backend(LoggerJSON, metadata: :all)
 
