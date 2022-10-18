@@ -1,4 +1,4 @@
-defmodule LoggerJSONGoogleErrorReporterTest do
+defmodule LoggerJSON.Formatters.GoogleErrorReporterTest do
   use Logger.Case, async: false
   alias LoggerJSON.Formatters.GoogleCloudLogger
   alias LoggerJSON.Formatters.GoogleErrorReporter

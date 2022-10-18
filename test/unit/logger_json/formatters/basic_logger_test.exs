@@ -1,4 +1,4 @@
-defmodule LoggerJSONBasicTest do
+defmodule LoggerJSON.Formatters.BasicLoggerTest do
   use Logger.Case, async: false
   require Logger
   alias LoggerJSON.Formatters.BasicLogger

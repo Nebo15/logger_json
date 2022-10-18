@@ -81,8 +81,8 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
 
     Enum.reduce(fields, output, fn {key, [new_key, transformer]}, acc ->
       if Keyword.has_key?(md, key) do
-        new_value = apply(transformer, [Keyword.get(md, key)])
-        Map.merge(acc, %{new_key => new_value})
+        new_value = transformer.(Keyword.get(md, key))
+        Map.put(acc, new_key, new_value)
       else
         acc
       end

@@ -1,4 +1,4 @@
-defmodule LoggerJSONGoogleTest do
+defmodule LoggerJSON.GoogleCloudLoggerTest do
   use Logger.Case, async: false
   import ExUnit.CaptureIO
   require Logger
@@ -222,7 +222,7 @@ defmodule LoggerJSONGoogleTest do
     end
 
     test "is triggered" do
-      Logger.configure_backend(LoggerJSON, metadata: [], on_init: {LoggerJSONGoogleTest, :on_init_cb, []})
+      Logger.configure_backend(LoggerJSON, metadata: [], on_init: {LoggerJSON.GoogleCloudLoggerTest, :on_init_cb, []})
 
       Logger.metadata(user_id: 11)
 
