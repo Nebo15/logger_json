@@ -20,7 +20,7 @@ defmodule LoggerJSON.Formatters.GoogleCloudLogger do
   ]
 
   @impl true
-  def init(_formatter_opts), do: []
+  def init(_formatter_opts), do: %{}
 
   @doc """
   Builds structured payload which is mapped to Google Cloud Logger
