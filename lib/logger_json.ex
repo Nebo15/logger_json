@@ -204,8 +204,8 @@ defmodule LoggerJSON do
       |> Keyword.get(:metadata, [])
       |> configure_metadata()
 
-    formatter_opts = Keyword.get(config, :formatter_opts, %{})
-    formatter_state = apply(formatter, :init, [formatter_opts])
+    formatter_opts = Keyword.get(config, :formatter_opts, [])
+    formatter_state = formatter.init(formatter_opts)
 
     %{
       state

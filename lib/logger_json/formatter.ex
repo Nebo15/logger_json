@@ -11,7 +11,7 @@ defmodule LoggerJSON.Formatter do
 
   Returned list will be used as formatter_state in `format_event/6`.
   """
-  @callback init(Keyword.t()) :: Keyword.t()
+  @callback init(Keyword.t()) :: term()
 
   @doc """
   Format event callback.

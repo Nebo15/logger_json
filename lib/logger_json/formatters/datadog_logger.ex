@@ -32,8 +32,9 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
   @processed_metadata_keys ~w[pid file line function module application span_id trace_id otel_span_id otel_trace_id]a
 
   @impl true
-  def init(formatter_opts \\ %{}) do
-    opts = Map.merge(@default_opts, formatter_opts)
+  def init(formatter_opts) do
+    # Notice: we also accept formatter_opts for DataDog logger as a map for backwards compatibility
+    opts = Map.merge(@default_opts, Map.new(formatter_opts))
 
     unless is_binary(opts.hostname) or opts.hostname in [:system, :unset] do
       raise ArgumentError,
