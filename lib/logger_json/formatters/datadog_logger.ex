@@ -77,6 +77,8 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
     [
       otel_span_id: {"dd.span_id", &convert_otel_field/1},
       otel_trace_id: {"dd.trace_id", &convert_otel_field/1},
+      otel_span_id: {"otel_span_id", &otel_to_string/1},
+      otel_trace_id: {"otel_trace_id", &otel_to_string/1},
       span_id: {"dd.span_id", & &1},
       trace_id: {"dd.trace_id", & &1}
     ]
@@ -109,6 +111,13 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
     len = byte_size(value) - 16
     <<_front::binary-size(len), value::binary>> = value
     convert_otel_field(value)
+  rescue
+    _ -> ""
+  end
+
+  # convert to a binary if it's a charlist
+  defp otel_to_string(id) do
+    to_string(id)
   rescue
     _ -> ""
   end
