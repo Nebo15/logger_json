@@ -11,7 +11,7 @@
 
 JSON console back-end for Elixir Logger.
 
-It can be used as drop-in replacement for default `:console` Logger back-end in cases where you use use Google Cloud Logger, DataDog or other JSON-based log collectors. After adding this back-end you may also be interested in [redirecting otp and sasl reports to Logger](https://hexdocs.pm/logger/Logger.html#error-logger-configuration) (see "Error Logger configuration" section).
+It can be used as drop-in replacement for default `:console` Logger back-end in cases where you use Google Cloud Logger, DataDog or other JSON-based log collectors. After adding this back-end you may also be interested in [redirecting otp and sasl reports to Logger](https://hexdocs.pm/logger/Logger.html#error-logger-configuration) (see "Error Logger configuration" section).
 
 Minimum supported Erlang/OTP version is 20.
 
