@@ -19,7 +19,7 @@ if Code.ensure_loaded?(Plug) do
     import Jason.Helpers, only: [json_map: 1]
 
     @doc false
-    def build_metadata(conn, latency, client_version_header) do
+    def build_metadata(conn, latency, client_version_header, _) do
       latency_μs = System.convert_time_unit(latency, :native, :microsecond)
       user_agent = LoggerJSON.PlugUtils.get_header(conn, "user-agent")
       ip = LoggerJSON.PlugUtils.remote_ip(conn)

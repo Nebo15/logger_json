@@ -196,6 +196,31 @@ It's [available on Hex](https://hex.pm/packages/logger_json), the package can be
   `LoggerJSON.Plug` is configured by default to use `LoggerJSON.Plug.MetadataFormatters.GoogleCloudLogger`.
   You can replace it with the `:metadata_formatter` config option.
 
+  Or for a Phoenix application
+
+  ```ex
+  config :phoenix, :logger, false
+  ```
+
+  ```ex
+  # application.ex
+  def start(_type, _args) do
+    LoggerJSON.Phoenix.Logger.install()
+    ...
+  end
+  ```
+
+  `LoggerJSON.Phoenix.Logger` is configured by default to use `LoggerJSON.Plug.MetadataFormatters.GoogleCloudLogger`.
+  You can replace it with the `:metadata_formatter` config option.
+
+  ```ex
+  # application.ex
+  def start(_type, _args) do
+    LoggerJSON.Phoenix.Logger.install(metadata_formatter: LoggerJSON.Plug.MetadataFormatters.DatadogFormatter)
+    ...
+  end
+  ```
+
   5. Optionally. Use Ecto telemetry for additional metadata:
 
   Attach telemetry handler for Ecto events in `start/2` function in `application.ex`

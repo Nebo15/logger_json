@@ -30,18 +30,20 @@ if Code.ensure_loaded?(Plug) do
     @impl true
     def init(opts) do
       level = Keyword.get(opts, :log, :info)
+      unit = Keyword.get(opts, :unit, :nanosecond)
+      metadata_opts = [unit: unit]
       client_version_header = Keyword.get(opts, :version_header, "x-api-version")
       metadata_formatter = Keyword.get(opts, :metadata_formatter, MetadataFormatters.GoogleCloudLogger)
-      {level, metadata_formatter, client_version_header}
+      {level, metadata_formatter, client_version_header, metadata_opts}
     end
 
     @impl true
-    def call(conn, {level, metadata_formatter, client_version_header}) do
+    def call(conn, {level, metadata_formatter, client_version_header, metadata_opts}) do
       start = System.monotonic_time()
 
       Conn.register_before_send(conn, fn conn ->
         latency = System.monotonic_time() - start
-        metadata = metadata_formatter.build_metadata(conn, latency, client_version_header)
+        metadata = metadata_formatter.build_metadata(conn, latency, client_version_header, metadata_opts)
         Logger.log(level, "", metadata)
         conn
       end)

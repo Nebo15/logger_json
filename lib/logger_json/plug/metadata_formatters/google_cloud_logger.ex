@@ -15,7 +15,7 @@ if Code.ensure_loaded?(Plug) do
     @nanoseconds_in_second System.convert_time_unit(1, :second, :nanosecond)
 
     @doc false
-    def build_metadata(conn, latency, client_version_header) do
+    def build_metadata(conn, latency, client_version_header, _) do
       latency_seconds = native_to_seconds(latency)
       request_method = conn.method
       request_url = request_url(conn)
