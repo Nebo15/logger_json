@@ -10,11 +10,13 @@ if Code.ensure_loaded?(Plug) do
     import Jason.Helpers, only: [json_map: 1]
 
     @doc false
-    def build_metadata(conn, latency, client_version_header) do
+    def build_metadata(conn, latency, client_version_header, opts \\ []) do
+      unit = Keyword.get(opts, :unit, :nanosecond)
+
       client_metadata(conn, client_version_header) ++
         phoenix_metadata(conn) ++
         [
-          duration: native_to_nanoseconds(latency),
+          duration: native_to_unit(latency, unit),
           http:
             json_map(
               url: request_url(conn),
@@ -36,12 +38,12 @@ if Code.ensure_loaded?(Plug) do
         ]
     end
 
-    defp native_to_nanoseconds(nil) do
+    defp native_to_unit(nil, _) do
       nil
     end
 
-    defp native_to_nanoseconds(native) do
-      System.convert_time_unit(native, :native, :nanosecond)
+    defp native_to_unit(native, unit) do
+      System.convert_time_unit(native, :native, unit)
     end
 
     defp request_url(%{request_path: "/"} = conn), do: "#{conn.scheme}://#{conn.host}/"
