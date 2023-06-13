@@ -46,7 +46,7 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
   end
 
   @impl true
-  def format_event(level, msg, ts, md, md_keys, formatter_state) do
+  def format_event(level, msg, ts, md, md_keys, imd_keys, formatter_state) do
     Map.merge(
       %{
         logger:
@@ -59,12 +59,12 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
         message: IO.chardata_to_string(msg),
         syslog: syslog(level, ts, formatter_state.hostname)
       },
-      format_metadata(md, md_keys)
+      format_metadata(md, md_keys, imd_keys)
     )
   end
 
-  defp format_metadata(md, md_keys) do
-    LoggerJSON.take_metadata(md, md_keys, @processed_metadata_keys)
+  defp format_metadata(md, md_keys, imd_keys) do
+    LoggerJSON.take_metadata(md, md_keys, @processed_metadata_keys ++ imd_keys)
     |> convert_tracing_keys(md)
     |> JasonSafeFormatter.format()
     |> FormatterUtils.maybe_put(:error, FormatterUtils.format_process_crash(md))

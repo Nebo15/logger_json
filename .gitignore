@@ -49,3 +49,4 @@ rel/*/
 # Don't commit file uploads
 uploads/
 !uploads/.gitkeep
+/logger_json.iml

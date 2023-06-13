@@ -52,6 +52,7 @@ defmodule LoggerJSON do
   @ignored_metadata_keys ~w[ansi_color initial_call crash_reason pid gl mfa report_cb time]a
 
   defstruct metadata: nil,
+            ignored_metadata: nil,
             level: nil,
             device: nil,
             max_buffer: nil,
@@ -204,12 +205,17 @@ defmodule LoggerJSON do
       |> Keyword.get(:metadata, [])
       |> configure_metadata()
 
+    ignored_metadata =
+      config
+      |> Keyword.get(:ignored_metadata, [])
+
     formatter_opts = Keyword.get(config, :formatter_opts, [])
     formatter_state = formatter.init(formatter_opts)
 
     %{
       state
       | metadata: metadata,
+        ignored_metadata: ignored_metadata,
         level: level,
         device: device,
         max_buffer: max_buffer,
@@ -270,7 +276,7 @@ defmodule LoggerJSON do
   end
 
   defp format_event(level, msg, ts, md, state) do
-    %{json_encoder: json_encoder, formatter: formatter, formatter_state: formatter_state, metadata: md_keys} = state
+    %{json_encoder: json_encoder, formatter: formatter, formatter_state: formatter_state, metadata: md_keys, ignored_metadata: imd_keys} = state
 
     unless formatter do
       raise ArgumentError,
@@ -278,7 +284,7 @@ defmodule LoggerJSON do
               "Expected module name that implements LoggerJSON.Formatter behaviour, " <> "got: #{inspect(json_encoder)}"
     end
 
-    event = formatter.format_event(level, msg, ts, md, md_keys, formatter_state)
+    event = formatter.format_event(level, msg, ts, md, md_keys, imd_keys, formatter_state)
 
     case json_encoder do
       nil ->
