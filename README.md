@@ -162,7 +162,7 @@ It's [available on Hex](https://hex.pm/packages/logger_json), the package can be
 
   ```ex
   def deps do
-    [{:logger_json, "~> 5.1"}]
+    [{:logger_json, "~> 5.2"}]
   end
   ```
 
@@ -176,7 +176,10 @@ It's [available on Hex](https://hex.pm/packages/logger_json), the package can be
 
   ```
 
-  Some integrations (for eg. Plug) use `metadata` to log request and response parameters. You can reduce log size by replacing `:all` (which means log all metadata) with a list of the ones that you actually need. 
+  Some integrations (for eg. Plug) use `metadata` to log request and response parameters.
+
+  You can reduce log size by replacing `:all` (which means log all metadata) with a list of the ones that you actually need, OR
+  you can combine `:all` with `ignored_metadata: [:atom1, ...]` to exclude specific items instead. 
 
   Beware that LoggerJSON always ignores [some metadata keys](https://github.com/Nebo15/logger_json/blob/349c8174886135a02bb16317f76beac89d1aa20d/lib/logger_json.ex#L46), but formatters like `GoogleCloudLogger` and `DatadogLogger` still persist those metadata values into a structured output. This behavior is similar to the default Elixir logger backend.
 
