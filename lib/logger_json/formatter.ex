@@ -23,6 +23,7 @@ defmodule LoggerJSON.Formatter do
               msg :: Logger.message(),
               ts :: Logger.Formatter.time(),
               md :: [atom] | :all,
+              imd :: [atom],
               state :: map,
               formatter_state :: map
             ) :: map | iodata() | %Jason.Fragment{}

@@ -30,32 +30,32 @@ defmodule LoggerJSON.Formatters.GoogleCloudLogger do
   """
   for {level, gcp_level} <- @severity_levels do
     @impl true
-    def format_event(unquote(level), msg, ts, md, md_keys, _formatter_state) do
+    def format_event(unquote(level), msg, ts, md, md_keys, imd_keys, _formatter_state) do
       Map.merge(
         %{
           time: FormatterUtils.format_timestamp(ts),
           severity: unquote(gcp_level),
           message: IO.chardata_to_string(msg)
         },
-        format_metadata(md, md_keys)
+        format_metadata(md, md_keys, imd_keys)
       )
     end
   end
 
   @impl true
-  def format_event(_level, msg, ts, md, md_keys, _formatter_state) do
+  def format_event(_level, msg, ts, md, md_keys, imd_keys, _formatter_state) do
     Map.merge(
       %{
         time: FormatterUtils.format_timestamp(ts),
         severity: "DEFAULT",
         message: IO.chardata_to_string(msg)
       },
-      format_metadata(md, md_keys)
+      format_metadata(md, md_keys, imd_keys)
     )
   end
 
-  defp format_metadata(md, md_keys) do
-    LoggerJSON.take_metadata(md, md_keys, @processed_metadata_keys)
+  defp format_metadata(md, md_keys, imd_keys) do
+    LoggerJSON.take_metadata(md, md_keys, @processed_metadata_keys ++ imd_keys)
     |> JasonSafeFormatter.format()
     |> FormatterUtils.maybe_put(:error, FormatterUtils.format_process_crash(md))
     |> FormatterUtils.maybe_put(:"logging.googleapis.com/sourceLocation", format_source_location(md))

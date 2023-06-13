@@ -67,6 +67,23 @@ defmodule LoggerJSON.Formatters.BasicLoggerTest do
       assert %{} == log["metadata"]
     end
 
+    test "can have ignored_metadata" do
+      Logger.configure_backend(LoggerJSON, metadata: :all, ignored_metadata: [:pii])
+
+      Logger.metadata(user_id: 11)
+      Logger.metadata(dynamic_metadata: 5)
+      Logger.metadata(pii: "secret")
+
+      log =
+        fn -> Logger.debug("hello") end
+        |> capture_log()
+        |> Jason.decode!()
+
+      assert %{"message" => "hello"} = log
+      assert %{"user_id" => 11, "dynamic_metadata" => 5} = log["metadata"]
+      assert is_nil(log["metadata"]["pii"])
+    end
+
     test "converts Struct metadata to maps" do
       Logger.configure_backend(LoggerJSON, metadata: :all)
 

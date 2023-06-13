@@ -15,18 +15,18 @@ defmodule LoggerJSON.Formatters.BasicLogger do
   def init(_formatter_opts), do: []
 
   @impl true
-  def format_event(level, msg, ts, md, md_keys, _formatter_state) do
+  def format_event(level, msg, ts, md, md_keys, imd_keys, _formatter_state) do
     json_map(
       time: FormatterUtils.format_timestamp(ts),
       severity: Atom.to_string(level),
       message: IO.chardata_to_string(msg),
-      metadata: format_metadata(md, md_keys)
+      metadata: format_metadata(md, md_keys, imd_keys)
     )
   end
 
-  defp format_metadata(md, md_keys) do
+  defp format_metadata(md, md_keys, imd_keys) do
     md
-    |> LoggerJSON.take_metadata(md_keys, @processed_metadata_keys)
+    |> LoggerJSON.take_metadata(md_keys, @processed_metadata_keys ++ imd_keys)
     |> FormatterUtils.maybe_put(:error, FormatterUtils.format_process_crash(md))
     |> JasonSafeFormatter.format()
   end
