@@ -67,7 +67,7 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
     LoggerJSON.take_metadata(md, md_keys, @processed_metadata_keys)
     |> convert_tracing_keys(md)
     |> JasonSafeFormatter.format()
-    |> FormatterUtils.maybe_put(:error, FormatterUtils.format_process_crash(md))
+    |> FormatterUtils.maybe_put(:error, format_process_crash(md))
   end
 
   # To connect logs and traces, span_id and trace_id keys are respectively dd.span_id and dd.trace_id
@@ -112,6 +112,38 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
   rescue
     _ -> ""
   end
+
+  # This follows the DataDog standard attributes for error tracking, allowing
+  # errors to automatically be aggregated by error tracking.
+  defp format_process_crash(metadata) do
+    case Keyword.get(metadata, :crash_reason) do
+      {reason, stacktrace} ->
+        initial_call = Keyword.get(metadata, :initial_call)
+
+        json_map(
+          initial_call: format_initial_call(initial_call),
+          stack: Exception.format_stacktrace(stacktrace),
+          message: format_exception_message(reason),
+          kind: format_exception_kind(reason)
+        )
+
+      nil ->
+        nil
+    end
+  end
+
+  defp format_initial_call(nil), do: nil
+
+  defp format_initial_call({module, function, arity}),
+    do: FormatterUtils.format_function(module, function, arity)
+
+  defp format_exception_message(%{message: message}), do: message
+  defp format_exception_message(other), do: JasonSafeFormatter.format(other)
+
+  defp format_exception_kind(:throw), do: "throw"
+  defp format_exception_kind(:exit), do: "exit"
+  defp format_exception_kind(%exception{}), do: inspect(exception)
+  defp format_exception_kind(other), do: inspect(other)
 
   defp method_name(metadata) do
     function = Keyword.get(metadata, :function)
