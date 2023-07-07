@@ -50,6 +50,7 @@ defmodule LoggerJSON do
   @behaviour :gen_event
 
   @ignored_metadata_keys ~w[ansi_color initial_call crash_reason pid gl mfa report_cb time]a
+  @log_levels ~w[debug info notice warning error critical alert emergency]
 
   defstruct metadata: nil,
             level: nil,
@@ -83,14 +84,16 @@ defmodule LoggerJSON do
   """
   def configure_log_level!(nil), do: :ok
 
-  def configure_log_level!(level) when level in ["debug", "info", "warn", "error"],
+  def configure_log_level!("warn"), do: Logger.configure(level: :warning)
+
+  def configure_log_level!(level) when level in @log_levels,
     do: Logger.configure(level: String.to_atom(level))
 
   def configure_log_level!(level) when is_atom(level), do: Logger.configure(level: level)
 
   def configure_log_level!(level) do
     raise ArgumentError,
-          "LOG_LEVEL environment should have one of 'debug', 'info', 'warn', 'error' values, got: #{inspect(level)}"
+          "LOG_LEVEL environment should have one of #{Enum.join(@log_levels, ", ")} values, got: #{inspect(level)}"
   end
 
   def init(__MODULE__) do
@@ -118,6 +121,7 @@ defmodule LoggerJSON do
 
   def handle_event({level, _gl, {Logger, msg, ts, md}}, state) do
     %{level: log_level, ref: ref, buffer_size: buffer_size, max_buffer: max_buffer} = state
+    level = md[:erl_level] || level
 
     cond do
       not meet_level?(level, log_level) ->

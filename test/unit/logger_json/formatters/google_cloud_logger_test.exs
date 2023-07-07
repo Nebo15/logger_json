@@ -279,6 +279,17 @@ defmodule LoggerJSON.GoogleCloudLoggerTest do
     assert %{"severity" => "WARNING"} = log
   end
 
+  if Version.compare(System.version(), "1.11.0") != :lt do
+    test "logs severity with erl_level" do
+      log =
+        fn -> Logger.notice("hello") end
+        |> capture_log()
+        |> Jason.decode!()
+
+      assert %{"severity" => "NOTICE"} = log
+    end
+  end
+
   test "logs crash reason for exceptions when present" do
     Logger.configure_backend(LoggerJSON, metadata: [:crash_reason])
     Logger.metadata(crash_reason: {%RuntimeError{message: "oops"}, []})
