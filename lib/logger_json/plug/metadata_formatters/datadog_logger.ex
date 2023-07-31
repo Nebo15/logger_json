@@ -91,6 +91,9 @@ if Code.ensure_loaded?(Plug) do
     defp recursive_scrub(%{__struct__: Plug.Conn.Unfetched}),
       do: "%Plug.Conn.Unfetched{}"
 
+    defp recursive_scrub([head | _tail] = data) when is_tuple(head),
+      do: data |> Enum.map(&recursive_scrub/1) |> Map.new()
+
     defp recursive_scrub(data) when is_list(data) and length(data) > 100,
       do: "List of #{length(data)} items"
 
@@ -101,7 +104,7 @@ if Code.ensure_loaded?(Plug) do
       do: data |> Map.from_struct() |> recursive_scrub()
 
     defp recursive_scrub(data) when is_map(data) do
-      Enum.map(data, fn
+      Map.new(data, fn
         {k, v} when v in @scrubbed_keys -> {k, @scrubbed_value}
         {k, v} -> {k, recursive_scrub(v)}
       end)
