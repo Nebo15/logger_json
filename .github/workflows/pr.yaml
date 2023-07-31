@@ -1,0 +1,35 @@
+# This file is synced with stordco/common-config-elixir. Any changes will be overwritten.
+
+name: PR
+
+on:
+  merge_group:
+  pull_request:
+    types:
+      - edited
+      - opened
+      - reopened
+      - synchronize
+
+jobs:
+  title:
+    if: github.event_name == 'pull_request'
+    name: Check Title
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Check
+        uses: stordco/actions-pr-title@v1.0.0
+        with:
+          regex: '^(feat!|fix!|fix|feat|chore|(fix|feat|chore)\(\w.*\)):\s(\[\w{1,8}-\d{1,8}\]|.*).*'
+          hint: |
+            You can pass the following formats:
+
+            fix: [OR-123] some title of the PR
+            feat: [OR-1234] some title of the PR
+            chore: update some action
+
+            Note: Adding ! (i.e. `feat!:`) represents a breaking change and will result in a SemVer major.

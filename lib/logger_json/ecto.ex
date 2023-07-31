@@ -80,10 +80,10 @@ if Code.ensure_loaded?(Ecto) do
             level :: Logger.level()
           ) :: :ok
     def telemetry_logging_handler(_event_name, time, %{query: query, repo: repo}, level) do
-      query_time = Map.get(time, :query_time) |> format_time(:nanosecond)
-      queue_time = Map.get(time, :queue_time) |> format_time(:nanosecond)
-      decode_time = Map.get(time, :decode_time) |> format_time(:nanosecond)
-      latency = Map.get(time, :total_time) |> format_time(:nanosecond)
+      query_time = time |> Map.get(:query_time) |> format_time(:nanosecond)
+      queue_time = time |> Map.get(:queue_time) |> format_time(:nanosecond)
+      decode_time = time |> Map.get(:decode_time) |> format_time(:nanosecond)
+      latency = time |> Map.get(:total_time) |> format_time(:nanosecond)
 
       metadata = [
         query: %{

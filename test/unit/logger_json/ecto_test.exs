@@ -88,7 +88,7 @@ defmodule LoggerJSON.EctoTest do
                %{
                  columns: nil,
                  command: :savepoint,
-                 connection_id: 26925,
+                 connection_id: 26_925,
                  messages: [],
                  num_rows: nil,
                  rows: nil

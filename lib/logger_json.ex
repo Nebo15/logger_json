@@ -51,6 +51,8 @@ defmodule LoggerJSON do
 
   @ignored_metadata_keys ~w[ansi_color initial_call crash_reason pid gl mfa report_cb time]a
 
+  @dialyzer :no_improper_lists
+
   defstruct metadata: nil,
             level: nil,
             device: nil,
@@ -84,7 +86,7 @@ defmodule LoggerJSON do
   def configure_log_level!(nil), do: :ok
 
   def configure_log_level!(level) when level in ["debug", "info", "warn", "error"],
-    do: Logger.configure(level: String.to_atom(level))
+    do: Logger.configure(level: String.to_existing_atom(level))
 
   def configure_log_level!(level) when is_atom(level), do: Logger.configure(level: level)
 

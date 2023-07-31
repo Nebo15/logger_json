@@ -22,16 +22,17 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
   [`dd-agent`](https://docs.datadoghq.com/agent/) to determine the hostname.
 
   """
+
+  @behaviour LoggerJSON.Formatter
+
   import Jason.Helpers, only: [json_map: 1]
 
   alias LoggerJSON.{FormatterUtils, JasonSafeFormatter}
 
-  @behaviour LoggerJSON.Formatter
-
   @default_opts %{hostname: :system}
   @processed_metadata_keys ~w[pid file line function module application span_id trace_id otel_span_id otel_trace_id]a
 
-  @impl true
+  @impl LoggerJSON.Formatter
   def init(formatter_opts) do
     # Notice: we also accept formatter_opts for DataDog logger as a map for backwards compatibility
     opts = Map.merge(@default_opts, Map.new(formatter_opts))
@@ -45,7 +46,7 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
     opts
   end
 
-  @impl true
+  @impl LoggerJSON.Formatter
   def format_event(level, msg, ts, md, md_keys, formatter_state) do
     Map.merge(
       %{
@@ -64,7 +65,8 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
   end
 
   defp format_metadata(md, md_keys) do
-    LoggerJSON.take_metadata(md, md_keys, @processed_metadata_keys)
+    md
+    |> LoggerJSON.take_metadata(md_keys, @processed_metadata_keys)
     |> convert_tracing_keys(md)
     |> JasonSafeFormatter.format()
     |> FormatterUtils.maybe_put(:error, format_process_crash(md))
@@ -74,15 +76,16 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
   # https://docs.datadoghq.com/tracing/faq/why-cant-i-see-my-correlated-logs-in-the-trace-id-panel/?tab=jsonlogs
   defp convert_tracing_keys(output, md) do
     # Notice: transformers can override each others but the last one in this list wins
-    [
+    data = [
       otel_span_id: {"dd.span_id", &convert_otel_field/1},
       otel_trace_id: {"dd.trace_id", &convert_otel_field/1},
       span_id: {"dd.span_id", & &1},
       trace_id: {"dd.trace_id", & &1}
     ]
-    |> Enum.reduce(output, fn {key, {new_key, transformer}}, acc ->
+
+    Enum.reduce(data, output, fn {key, {new_key, transformer}}, acc ->
       if Keyword.has_key?(md, key) do
-        new_value = transformer.(Keyword.get(md, key))
+        new_value = md |> Keyword.get(key) |> transformer.()
         Map.put(acc, new_key, new_value)
       else
         acc

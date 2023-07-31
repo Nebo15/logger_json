@@ -1,12 +1,14 @@
+# The dynamic @impl loop is causing the check to fail.
+# credo:disable-for-this-file Credo.Check.Readability.StrictModuleLayout
 defmodule LoggerJSON.Formatters.GoogleCloudLogger do
   @moduledoc """
   Google Cloud Logger formatter.
   """
+  @behaviour LoggerJSON.Formatter
+
   import Jason.Helpers, only: [json_map: 1]
 
   alias LoggerJSON.{FormatterUtils, JasonSafeFormatter}
-
-  @behaviour LoggerJSON.Formatter
 
   @processed_metadata_keys ~w[pid file line function module application]a
 
@@ -19,7 +21,7 @@ defmodule LoggerJSON.Formatters.GoogleCloudLogger do
     {:error, "ERROR"}
   ]
 
-  @impl true
+  @impl LoggerJSON.Formatter
   def init(_formatter_opts), do: []
 
   @doc """
@@ -29,7 +31,7 @@ defmodule LoggerJSON.Formatters.GoogleCloudLogger do
   See: https://cloud.google.com/logging/docs/agent/configuration#special_fields_in_structured_payloads
   """
   for {level, gcp_level} <- @severity_levels do
-    @impl true
+    @impl LoggerJSON.Formatter
     def format_event(unquote(level), msg, ts, md, md_keys, _formatter_state) do
       Map.merge(
         %{
@@ -42,7 +44,7 @@ defmodule LoggerJSON.Formatters.GoogleCloudLogger do
     end
   end
 
-  @impl true
+  @impl LoggerJSON.Formatter
   def format_event(_level, msg, ts, md, md_keys, _formatter_state) do
     Map.merge(
       %{
@@ -55,7 +57,8 @@ defmodule LoggerJSON.Formatters.GoogleCloudLogger do
   end
 
   defp format_metadata(md, md_keys) do
-    LoggerJSON.take_metadata(md, md_keys, @processed_metadata_keys)
+    md
+    |> LoggerJSON.take_metadata(md_keys, @processed_metadata_keys)
     |> JasonSafeFormatter.format()
     |> FormatterUtils.maybe_put(:error, FormatterUtils.format_process_crash(md))
     |> FormatterUtils.maybe_put(:"logging.googleapis.com/sourceLocation", format_source_location(md))

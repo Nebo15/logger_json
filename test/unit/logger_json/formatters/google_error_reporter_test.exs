@@ -1,7 +1,7 @@
 defmodule LoggerJSON.Formatters.GoogleErrorReporterTest do
   use Logger.Case, async: false
-  alias LoggerJSON.Formatters.GoogleCloudLogger
-  alias LoggerJSON.Formatters.GoogleErrorReporter
+
+  alias LoggerJSON.Formatters.{GoogleCloudLogger, GoogleErrorReporter}
 
   setup do
     :ok =
@@ -21,7 +21,8 @@ defmodule LoggerJSON.Formatters.GoogleErrorReporterTest do
 
   test "metadata" do
     log =
-      capture_log(fn -> GoogleErrorReporter.report(:error, %RuntimeError{message: "oops"}, []) end)
+      fn -> GoogleErrorReporter.report(:error, %RuntimeError{message: "oops"}, []) end
+      |> capture_log()
       |> Jason.decode!()
 
     assert log["severity"] == "ERROR"
@@ -33,7 +34,8 @@ defmodule LoggerJSON.Formatters.GoogleErrorReporterTest do
       Application.put_env(:logger_json, :google_error_reporter, service_context: [service: "myapp", version: "abc123"])
 
     log =
-      capture_log(fn -> GoogleErrorReporter.report(:error, %RuntimeError{message: "oops"}, []) end)
+      fn -> GoogleErrorReporter.report(:error, %RuntimeError{message: "oops"}, []) end
+      |> capture_log()
       |> Jason.decode!()
 
     assert log["serviceContext"]["service"] == "myapp"
@@ -44,7 +46,8 @@ defmodule LoggerJSON.Formatters.GoogleErrorReporterTest do
 
   test "optional metadata" do
     log =
-      capture_log(fn -> GoogleErrorReporter.report(:error, %RuntimeError{message: "oops"}, [], foo: "bar") end)
+      fn -> GoogleErrorReporter.report(:error, %RuntimeError{message: "oops"}, [], foo: "bar") end
+      |> capture_log()
       |> Jason.decode!()
 
     assert log["foo"] == "bar"
@@ -59,7 +62,8 @@ defmodule LoggerJSON.Formatters.GoogleErrorReporterTest do
     ]
 
     log =
-      capture_log(fn -> GoogleErrorReporter.report(:error, error, stacktrace) end)
+      fn -> GoogleErrorReporter.report(:error, error, stacktrace) end
+      |> capture_log()
       |> Jason.decode!()
 
     assert log["message"] ==
@@ -80,7 +84,8 @@ defmodule LoggerJSON.Formatters.GoogleErrorReporterTest do
     ]
 
     log =
-      capture_log(fn -> GoogleErrorReporter.report(:error, error, stacktrace) end)
+      fn -> GoogleErrorReporter.report(:error, error, stacktrace) end
+      |> capture_log()
       |> Jason.decode!()
 
     assert log["message"] ==

@@ -3,11 +3,13 @@ if Code.ensure_loaded?(Plug) do
     @moduledoc """
     A Plug to log request information in JSON format.
     """
-    alias Plug.Conn
-    alias LoggerJSON.Plug.MetadataFormatters
-    require Logger
 
     @behaviour Plug
+
+    require Logger
+
+    alias LoggerJSON.Plug.MetadataFormatters
+    alias Plug.Conn
 
     @doc """
     Initializes the Plug.
@@ -27,7 +29,7 @@ if Code.ensure_loaded?(Plug) do
       * `LoggerJSON.Plug.MetadataFormatters.ELK` see module for logged structure.
 
     """
-    @impl true
+    @impl Plug
     def init(opts) do
       level = Keyword.get(opts, :log, :info)
       client_version_header = Keyword.get(opts, :version_header, "x-api-version")
@@ -35,7 +37,7 @@ if Code.ensure_loaded?(Plug) do
       {level, metadata_formatter, client_version_header}
     end
 
-    @impl true
+    @impl Plug
     def call(conn, {level, metadata_formatter, client_version_header}) do
       start = System.monotonic_time()
 

@@ -3,18 +3,18 @@ defmodule LoggerJSON.Formatters.BasicLogger do
   Basic JSON log formatter with no vendor specific formatting.
   """
 
+  @behaviour LoggerJSON.Formatter
+
   import Jason.Helpers, only: [json_map: 1]
 
   alias LoggerJSON.{FormatterUtils, JasonSafeFormatter}
 
-  @behaviour LoggerJSON.Formatter
-
   @processed_metadata_keys ~w[pid file line function module application]a
 
-  @impl true
+  @impl LoggerJSON.Formatter
   def init(_formatter_opts), do: []
 
-  @impl true
+  @impl LoggerJSON.Formatter
   def format_event(level, msg, ts, md, md_keys, _formatter_state) do
     json_map(
       time: FormatterUtils.format_timestamp(ts),

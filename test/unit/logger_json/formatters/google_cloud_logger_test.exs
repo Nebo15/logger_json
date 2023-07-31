@@ -284,7 +284,8 @@ defmodule LoggerJSON.GoogleCloudLoggerTest do
     Logger.metadata(crash_reason: {%RuntimeError{message: "oops"}, []})
 
     log =
-      capture_log(fn -> Logger.debug("hello") end)
+      fn -> Logger.debug("hello") end
+      |> capture_log()
       |> Jason.decode!()
 
     assert is_nil(log["error"]["initial_call"])
@@ -296,7 +297,8 @@ defmodule LoggerJSON.GoogleCloudLoggerTest do
     Logger.metadata(crash_reason: {:throw, {:error, :whatever}})
 
     log =
-      capture_log(fn -> Logger.debug("hello") end)
+      fn -> Logger.debug("hello") end
+      |> capture_log()
       |> Jason.decode!()
 
     assert is_nil(log["error"]["initial_call"])
@@ -308,7 +310,8 @@ defmodule LoggerJSON.GoogleCloudLoggerTest do
     Logger.metadata(crash_reason: {:exit, :abnormal})
 
     log =
-      capture_log(fn -> Logger.debug("hello") end)
+      fn -> Logger.debug("hello") end
+      |> capture_log()
       |> Jason.decode!()
 
     assert is_nil(log["error"]["initial_call"])
@@ -320,7 +323,8 @@ defmodule LoggerJSON.GoogleCloudLoggerTest do
     Logger.metadata(crash_reason: {:socket_closed_unexpectedly, []})
 
     log =
-      capture_log(fn -> Logger.debug("hello") end)
+      fn -> Logger.debug("hello") end
+      |> capture_log()
       |> Jason.decode!()
 
     assert is_nil(log["error"]["initial_call"])
@@ -332,7 +336,8 @@ defmodule LoggerJSON.GoogleCloudLoggerTest do
     Logger.metadata(crash_reason: {%RuntimeError{message: "oops"}, []}, initial_call: {Foo, :bar, 3})
 
     log =
-      capture_log(fn -> Logger.debug("hello") end)
+      fn -> Logger.debug("hello") end
+      |> capture_log()
       |> Jason.decode!()
 
     assert log["error"]["initial_call"] == "Elixir.Foo.bar/3"

@@ -2,13 +2,17 @@ defmodule LoggerJSON.Formatters.GoogleErrorReporter do
   @moduledoc """
   Google Error Reporter formatter.
   """
+
   require Logger
-  @googleErrorType "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent"
+
+  @google_error_type "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent"
 
   def report(kind, reason, stacktrace, metadata \\ []) do
+    full_metadata = Keyword.merge(build_metadata(), metadata)
+
     [format_banner(kind, reason, stacktrace) | format_stacktrace(stacktrace)]
     |> Enum.join("\n")
-    |> Logger.error(Keyword.merge(build_metadata(), metadata))
+    |> Logger.error(full_metadata)
   end
 
   defp format_banner(kind, reason, stacktrace) do
@@ -17,12 +21,15 @@ defmodule LoggerJSON.Formatters.GoogleErrorReporter do
 
   defp format_stacktrace(stacktrace) do
     lines =
-      Exception.format_stacktrace(stacktrace)
+      stacktrace
+      |> Exception.format_stacktrace()
       |> String.trim_trailing()
       |> String.split("\n")
       |> Enum.map(&format_line/1)
       |> Enum.group_by(fn {kind, _line} -> kind end)
 
+    # Stord doesn't use this and I don't want to refactor.
+    # credo:disable-for-next-line Credo.Check.Refactor.AppendSingleItem
     format_lines(:trace, lines[:trace]) ++ format_lines(:context, lines[:context]) ++ [""]
   end
 
@@ -45,9 +52,8 @@ defmodule LoggerJSON.Formatters.GoogleErrorReporter do
     ["Context:" | Enum.map(lines, fn {:context, line} -> line end)]
   end
 
-  defp build_metadata() do
-    ["@type": @googleErrorType]
-    |> with_service_context()
+  defp build_metadata do
+    with_service_context("@type": @google_error_type)
   end
 
   defp with_service_context(metadata) do

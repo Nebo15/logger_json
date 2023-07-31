@@ -24,8 +24,7 @@ defmodule LoggerJSON.FormatterUtils do
   RFC3339 UTC "Zulu" format.
   """
   def format_timestamp({date, time}) do
-    [format_date(date), ?T, format_time(time), ?Z]
-    |> IO.iodata_to_binary()
+    IO.iodata_to_binary([format_date(date), ?T, format_time(time), ?Z])
   end
 
   @doc """

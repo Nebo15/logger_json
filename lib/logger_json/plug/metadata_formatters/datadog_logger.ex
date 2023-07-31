@@ -7,6 +7,7 @@ if Code.ensure_loaded?(Plug) do
       * `phoenix.controller` - Phoenix controller that processed the request;
       * `phoenix.action` - Phoenix action that processed the request;
     """
+
     import Jason.Helpers, only: [json_map: 1]
 
     @scrubbed_keys [

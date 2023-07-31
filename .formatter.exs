@@ -1,5 +1,8 @@
+# This file is synced with stordco/common-config-elixir. Any changes will be overwritten.
+
 [
   import_deps: [:stream_data],
-  inputs: ["mix.exs", "{config,lib,test}/**/*.{ex,exs}"],
-  line_length: 120
+  inputs: ["*.{ex,exs}", "{config,lib,priv,test}/**/*.{ex,exs}"],
+  line_length: 120,
+  plugins: []
 ]
