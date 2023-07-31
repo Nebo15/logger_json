@@ -2,7 +2,7 @@ defmodule LoggerJSON.Mixfile do
   use Mix.Project
 
   @source_url "https://github.com/stordco/logger_json"
-  @version "5.1.2"
+  @version "1.0.0"
 
   def project do
     [
