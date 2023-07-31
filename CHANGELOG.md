@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/stordco/logger_json/compare/v1.0.0...v1.0.1) (2023-07-31)
+
+
+### Bug Fixes
+
+* Update datadog plug formatter for tuples and maps ([0b238d4](https://github.com/stordco/logger_json/commit/0b238d4ea850cf6d9e22158451182df42bc54e79))
+
 ## 1.0.0 (2023-07-31)
 
 
