@@ -108,4 +108,30 @@ defmodule LoggerJSON.Plug.MetadataFormatters.DatadogLoggerTest do
              }
            } = Jason.decode!(log)
   end
+
+  test "scrubs nested request body keys" do
+    conn =
+      :post
+      |> conn("/hello/world", Jason.encode!(%{test: %{key: %{password: "sensitive"}}}))
+      |> put_req_header("content-type", "application/json")
+
+    log =
+      capture_io(:standard_error, fn ->
+        MyPlug.call(conn, [])
+        Logger.flush()
+        Process.sleep(10)
+      end)
+
+    assert %{
+             "http" => %{
+               "request_params" => %{
+                 "test" => %{
+                   "key" => %{
+                     "password" => "*********"
+                   }
+                 }
+               }
+             }
+           } = Jason.decode!(log)
+  end
 end

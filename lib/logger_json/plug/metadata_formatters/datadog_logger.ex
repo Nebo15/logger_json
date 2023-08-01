@@ -108,7 +108,7 @@ if Code.ensure_loaded?(Plug) do
 
     defp recursive_scrub(data) when is_map(data) do
       Map.new(data, fn
-        {k, v} when v in @scrubbed_keys -> {k, @scrubbed_value}
+        {k, v} when k in @scrubbed_keys -> {k, @scrubbed_value}
         {k, v} -> {k, recursive_scrub(v)}
       end)
     end
