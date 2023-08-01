@@ -103,6 +103,9 @@ if Code.ensure_loaded?(Plug) do
     defp recursive_scrub(data) when is_struct(data),
       do: data |> Map.from_struct() |> recursive_scrub()
 
+    defp recursive_scrub({k, _v}) when k in @scrubbed_keys,
+      do: {k, @scrubbed_value}
+
     defp recursive_scrub(data) when is_map(data) do
       Map.new(data, fn
         {k, v} when v in @scrubbed_keys -> {k, @scrubbed_value}

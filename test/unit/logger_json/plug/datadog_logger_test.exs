@@ -63,6 +63,30 @@ defmodule LoggerJSON.Plug.MetadataFormatters.DatadogLoggerTest do
            } = Jason.decode!(log)
   end
 
+  test "scrubs sensitive request headers" do
+    conn =
+      :post
+      |> conn("/hello/world", [])
+      |> put_req_header("authorization", "Bearer TESTING")
+      |> put_req_header("cookie", "iwannacookie")
+
+    log =
+      capture_io(:standard_error, fn ->
+        MyPlug.call(conn, [])
+        Logger.flush()
+        Process.sleep(10)
+      end)
+
+    assert %{
+             "http" => %{
+               "request_headers" => %{
+                 "authorization" => "*********",
+                 "cookie" => "*********"
+               }
+             }
+           } = Jason.decode!(log)
+  end
+
   test "logs request body" do
     conn =
       :post
