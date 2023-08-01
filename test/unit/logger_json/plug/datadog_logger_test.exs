@@ -1,5 +1,5 @@
 # The use Plug.Builder in another nested module is causing this check to fail.
-# credo:disable-for-this-file Credo.Check.Consistency.MultiAliasImportRequireUseg
+# credo:disable-for-this-file Credo.Check.Consistency.MultiAliasImportRequireUse
 defmodule LoggerJSON.Plug.MetadataFormatters.DatadogLoggerTest do
   use Logger.Case, async: false
   use Plug.Test
