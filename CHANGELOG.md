@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.0.2](https://github.com/stordco/logger_json/compare/v1.0.1...v1.0.2) (2023-08-01)
+
+
+### Bug Fixes
+
+* Scrub nested body key values ([83d2855](https://github.com/stordco/logger_json/commit/83d2855c5663363d3eff5f85d94ef130d2d56fcc))
+* Scrub tuple values ([e680ed7](https://github.com/stordco/logger_json/commit/e680ed7c389f547bb904e5419c64cbe9fe31c84e))
+
+
+### Miscellaneous
+
+* Fix warning during compile ([0a90846](https://github.com/stordco/logger_json/commit/0a908465a2d151de39389995888d5dd38a894846))
+* Update credo ignore rule ([8893e30](https://github.com/stordco/logger_json/commit/8893e30a215067b5ddfe79490ba60cfd4a94c8bc))
+
 ## [1.0.1](https://github.com/stordco/logger_json/compare/v1.0.0...v1.0.1) (2023-07-31)
 
 
