@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/stordco/logger_json/compare/v1.0.2...v1.0.3) (2023-08-08)
+
+
+### Bug Fixes
+
+* Add additional protective wrapping to crash log handling ([#5](https://github.com/stordco/logger_json/issues/5)) ([f7aba76](https://github.com/stordco/logger_json/commit/f7aba76f638a00b1a7c86448bf3f90b69b6eb56d))
+
 ## [1.0.2](https://github.com/stordco/logger_json/compare/v1.0.1...v1.0.2) (2023-08-01)
 
 
