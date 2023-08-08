@@ -120,12 +120,26 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
   # errors to automatically be aggregated by error tracking.
   defp format_process_crash(metadata) do
     case Keyword.get(metadata, :crash_reason) do
-      {reason, stacktrace} ->
+      {reason, stacktrace} when is_list(stacktrace) ->
         initial_call = Keyword.get(metadata, :initial_call)
 
         json_map(
           initial_call: format_initial_call(initial_call),
           stack: Exception.format_stacktrace(stacktrace),
+          message: format_exception_message(reason),
+          kind: format_exception_kind(reason)
+        )
+
+      # This should never happen unless you are manually faking
+      # a crash reason. Non the less, we've had errors appear
+      # in the past where `Exception.format_stacktrace/1` has
+      # not received a list of stacktrace entries.
+      {reason, not_a_stacktrace} ->
+        initial_call = Keyword.get(metadata, :initial_call)
+
+        json_map(
+          initial_call: format_initial_call(initial_call),
+          stack: inspect(not_a_stacktrace),
           message: format_exception_message(reason),
           kind: format_exception_kind(reason)
         )

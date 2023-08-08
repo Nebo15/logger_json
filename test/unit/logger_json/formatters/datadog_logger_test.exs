@@ -435,6 +435,27 @@ defmodule LoggerJSONDatadogTest do
     assert log["error"]["stack"] =~ "stacktrace test"
   end
 
+  test "inspects any non stacktrace crash reason data" do
+    Logger.configure_backend(LoggerJSON, metadata: [:crash_reason])
+
+    Logger.metadata(
+      crash_reason: {
+        :exit,
+        {Task.Supervised, :stream, [5000]}
+      }
+    )
+
+    log =
+      fn -> Logger.debug("hello") end
+      |> capture_log()
+      |> Jason.decode!()
+
+    assert is_nil(log["error"]["initial_call"])
+    assert log["error"]["kind"] == "exit"
+    assert log["error"]["message"] == "exit"
+    assert log["error"]["stack"] =~ "{Task.Supervised, :stream, [5000]}"
+  end
+
   test "logs erlang style crash reasons" do
     Logger.configure_backend(LoggerJSON, metadata: [:crash_reason])
     Logger.metadata(crash_reason: {:socket_closed_unexpectedly, []})
