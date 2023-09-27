@@ -15,6 +15,19 @@ defmodule LoggerJSON.PlugTest do
     end
   end
 
+  defmodule MyDyanmicLevelPlug do
+    use Plug.Builder
+
+    plug(LoggerJSON.Plug, log: {MyDyanmicLevelPlug, :log_level, []})
+    plug(:passthrough)
+
+    defp passthrough(conn, _) do
+      Plug.Conn.send_resp(conn, 200, "Passthrough")
+    end
+
+    def log_level(conn), do: false
+  end
+
   setup do
     :ok =
       Logger.configure_backend(
@@ -100,6 +113,18 @@ defmodule LoggerJSON.PlugTest do
                "userAgent" => "chrome"
              }
            } = Jason.decode!(log)
+  end
+
+  test "can compute dynamic log levels and not log on false" do
+    conn = conn(:get, "/")
+
+    log =
+      capture_io(:standard_error, fn ->
+        MyDyanmicLevelPlug.call(conn, [])
+        Logger.flush()
+      end)
+
+    assert log == ""
   end
 
   defp call(conn) do
