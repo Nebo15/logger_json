@@ -69,6 +69,7 @@ defmodule LoggerJSON.Plug.MetadataFormatters.DatadogLoggerTest do
       |> conn("/hello/world", [])
       |> put_req_header("authorization", "Bearer TESTING")
       |> put_req_header("cookie", "iwannacookie")
+      |> put_req_header("x-cloud-signature", "pleasedontleakmebro")
 
     log =
       capture_io(:standard_error, fn ->
@@ -81,7 +82,8 @@ defmodule LoggerJSON.Plug.MetadataFormatters.DatadogLoggerTest do
              "http" => %{
                "request_headers" => %{
                  "authorization" => "*********",
-                 "cookie" => "*********"
+                 "cookie" => "*********",
+                 "x-cloud-signature" => "*********"
                }
              }
            } = Jason.decode!(log)
