@@ -175,6 +175,21 @@ defmodule LoggerJSON.GoogleCloudLoggerTest do
       assert %{"dynamic_metadata" => 5} = log
     end
 
+    test "can be configured to :all_except" do
+      Logger.configure_backend(LoggerJSON, metadata: {:all_except, [:user_id]})
+
+      Logger.metadata(user_id: 11)
+      Logger.metadata(dynamic_metadata: 5)
+
+      log =
+        fn -> Logger.debug("hello") end
+        |> capture_log()
+        |> Jason.decode!()
+
+      refute Map.has_key?(log, "user_id")
+      assert Map.has_key?(log, "dynamic_metadata")
+    end
+
     test "can be empty" do
       Logger.configure_backend(LoggerJSON, metadata: [])
 

@@ -221,7 +221,8 @@ defmodule LoggerJSON do
 
   defp configure_metadata([]), do: []
   defp configure_metadata(:all), do: :all
-  defp configure_metadata(metadata) when is_list(metadata), do: Enum.reverse(metadata)
+  defp configure_metadata({:all_except, keys}), do: {:all_except, Enum.reverse(keys)}
+  defp configure_metadata(keys) when is_list(keys), do: Enum.reverse(keys)
 
   defp configure_merge(env, options), do: Keyword.merge(env, options, fn _key, _v1, v2 -> v2 end)
 
@@ -297,6 +298,12 @@ defmodule LoggerJSON do
 
   # Drops keys that can not or should not be encoded to JSON
   def take_metadata(metadata, keys_or_all, ignored_keys \\ [])
+
+  def take_metadata(metadata, {:all_except, keys}, ignored_keys) do
+    metadata
+    |> Keyword.drop(ignored_keys ++ keys ++ @ignored_metadata_keys)
+    |> Enum.into(%{})
+  end
 
   def take_metadata(metadata, :all, ignored_keys) do
     metadata
