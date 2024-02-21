@@ -172,6 +172,14 @@ defmodule LoggerJSON do
   defp put_env(env), do: Application.put_env(:logger_json, :backend, env)
 
   defp meet_level?(_lvl, nil), do: true
+  defp meet_level?(lvl, lvl), do: true
+
+  if Version.match?(System.version(), ">= 1.11.0") do
+    # This clause avoids `IO.warn/1` being triggered by Logger when using `:warn`.
+    defp meet_level?(:warn, min), do: Logger.compare_levels(:warning, min) != :lt
+    defp meet_level?(lvl, :warn), do: Logger.compare_levels(lvl, :warning) != :lt
+  end
+
   defp meet_level?(lvl, min), do: Logger.compare_levels(lvl, min) != :lt
 
   defp init(config, state) do
