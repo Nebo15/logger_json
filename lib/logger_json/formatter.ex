@@ -22,8 +22,8 @@ defmodule LoggerJSON.Formatter do
               level :: Logger.level(),
               msg :: Logger.message(),
               ts :: Logger.Formatter.time(),
-              md :: [atom] | :all,
-              state :: map,
-              formatter_state :: map
-            ) :: map | iodata() | %Jason.Fragment{}
+              md :: Keyword.t(),
+              md_keys :: [atom()] | :all,
+              formatter_state :: Map.t()
+            ) :: Map.t() | iodata() | %Jason.Fragment{}
 end
