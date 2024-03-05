@@ -413,14 +413,25 @@ defmodule LoggerJSONDatadogTest do
 
   test "logs crash reason when present" do
     Logger.configure_backend(LoggerJSON, metadata: [:crash_reason])
-    Logger.metadata(crash_reason: {%RuntimeError{message: "oops"}, []})
+
+    Logger.metadata(
+      crash_reason:
+        {%RuntimeError{message: "oops"},
+         [
+           {Exception, :exception, [[message: "stacktrace test"]], []},
+           {LoggerJSONDatadogTest, :"test logs crash reason when present", 1,
+            [file: 'test/unit/logger_json/formatters/datadog_logger_test.exs', line: 414]}
+         ]}
+    )
 
     log =
       capture_log(fn -> Logger.debug("hello") end)
       |> Jason.decode!()
 
     assert is_nil(log["error"]["initial_call"])
-    assert log["error"]["reason"] == "** (RuntimeError) oops"
+    assert log["error"]["kind"] == "RuntimeError"
+    assert log["error"]["message"] == "oops"
+    assert log["error"]["stack"] =~ "stacktrace test"
   end
 
   test "logs erlang style crash reasons" do
@@ -432,7 +443,7 @@ defmodule LoggerJSONDatadogTest do
       |> Jason.decode!()
 
     assert is_nil(log["error"]["initial_call"])
-    assert log["error"]["reason"] == "{:socket_closed_unexpectedly, []}"
+    assert log["error"]["message"] == "socket_closed_unexpectedly"
   end
 
   test "logs initial call when present" do
