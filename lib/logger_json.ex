@@ -1,51 +1,68 @@
 defmodule LoggerJSON do
   @moduledoc """
-  JSON console back-end for Elixir Logger.
+  A collection of formatters and utilities for JSON-based logging for various cloud tools and platforms.
 
-  It can be used as drop-in replacement for default `:console` Logger back-end in cases where you use
-  use Google Cloud Logger or other JSON-based log collectors.
+  ## Supported formatters
 
-  ## Log Format
+  * `LoggerJSON.Formatters.Basic` - a basic JSON formatter that logs messages in a structured format,
+  can be used with any JSON-based logging system, like ElasticSearch, Logstash, etc.
 
-  LoggerJSON provides three JSON formatters out of the box.
+  * `LoggerJSON.Formatters.GoogleCloud` - a formatter that logs messages in a structured format that can be
+  consumed by Google Cloud Logger and Google Cloud Error Reporter.
 
-  You can change this structure by implementing `LoggerJSON.Formatter` behaviour and passing module
-  name to `:formatter` config option. Example implementations can be found in `LoggerJSON.Formatters.GoogleCloudLogger`,
-  `LoggerJSON.Formatters.DatadogLogger`, and `LoggerJSON.Formatters.BasicLogger`.
+  * `LoggerJSON.Formatters.Datadog` - a formatter that logs messages in a structured format that can be consumed
+  by Datadog.
 
-      config :logger_json, :backend,
-        formatter: MyFormatterImplementation
+  ## Installation
 
-  If your formatter supports different options, you can specify them with `:formatter_opts`.
+  Add `logger_json` to your list of dependencies in `mix.exs`:
 
-      config :logger_json, :backend,
-        formatter: LoggerJSON.Formatters.DatadogLogger,
-        formatter_opts: %{hostname: "example.com"}
+      def deps do
+        [
+          # ...
+          {:logger_json, "~> 6.0"}
+          # ...
+        ]
+      end
 
-  ## Encoders support
+  and install it running `mix deps.get`.
 
-  You can replace default Jason encoder with other module that supports `encode!/1` function. This can be even used
-  as custom formatter callback.
+  Then, enable the formatter in your `config.exs`:
 
-  Popular Jason alternatives:
+      config :logger, :default_handler,
+        formatter: {LoggerJSON.Formatters.Basic, []}
 
-   * [poison](https://hex.pm/packages/poison).
-   * [exjsx](https://github.com/talentdeficit/exjsx).
-   * [elixir-json](https://github.com/cblage/elixir-json) - native Elixir encoder implementation.
-   * [jiffy](https://github.com/davisp/jiffy).
+  or during runtime (eg. in your `application.ex`):
 
-  ## Dynamic configuration
+      :logger.update_handler_config(:default, :formatter, {Basic, []})
 
-  For dynamically configuring the endpoint, such as loading data
-  from environment variables or configuration files, LoggerJSON provides
-  an `:on_init` option that allows developers to set a module, function
-  and list of arguments that is invoked when the endpoint starts. If you
-  would like to disable the `:on_init` callback function dynamically, you
-  can pass in `:disabled` and no callback function will be called.
+  ## Configuration
 
-      config :logger_json, :backend,
-        on_init: {YourApp.Logger, :load_from_system_env, []}
+  Configuration can be set using 2nd element of the tuple of the `:formatter` option in `Logger` configuration.
+  For example in `config.exs`:
 
+      config :logger, :default_handler,
+        formatter: {LoggerJSON.Formatters.GoogleCloud, metadata: :all, project_id: "logger-101"}
+
+  or during runtime:
+
+      :logger.update_handler_config(:default, :formatter, {Basic, metadata: {:all_except, [:conn]}})
+
+  ### Shared Options
+
+  Some formatters require additional configuration options. Here are the options that are common for each formatter:
+
+    * `:metadata` - a list of metadata keys to include in the log entry. By default, no metadata is included.
+    If `:all`is given, all metadata is included. If `{:all_except, keys}` is given, all metadata except
+    the specified keys is included.
+
+  ## Metadata
+
+  You can set some well-known metadata keys to be included in the log entry. The following keys are supported
+  for all formatters:
+
+    * `:conn` - the `Plug.Conn` struct. This is useful when logging HTTP requests and responses,
+    each formatter may use it differently.
   """
   @behaviour :gen_event
 

@@ -9,30 +9,6 @@ defmodule Logger.Case do
     end
   end
 
-  def msg(msg) do
-    ~r/\d\d\:\d\d\:\d\d\.\d\d\d #{Regex.escape(msg)}/
-  end
-
-  def wait_for_handler(manager, handler) do
-    unless handler in :gen_event.which_handlers(manager) do
-      Process.sleep(10)
-      wait_for_handler(manager, handler)
-    end
-  end
-
-  def wait_for_logger do
-    try do
-      :gen_event.which_handlers(Logger)
-    else
-      _ ->
-        :ok
-    catch
-      :exit, _ ->
-        Process.sleep(10)
-        wait_for_logger()
-    end
-  end
-
   def capture_log(level \\ :debug, fun) do
     Logger.configure(level: level)
 
@@ -42,5 +18,15 @@ defmodule Logger.Case do
     end)
   after
     Logger.configure(level: :debug)
+  end
+
+  def decode_or_print_error(data) do
+    try do
+      Jason.decode!(data)
+    rescue
+      _reason ->
+        IO.puts(data)
+        flunk("Failed to decode JSON")
+    end
   end
 end

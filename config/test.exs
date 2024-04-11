@@ -1,4 +1,5 @@
 import Config
 
-config :logger, backends: [LoggerJSON]
-config :logger_json, :backend, json_encoder: Jason
+config :logger,
+  handle_otp_reports: true,
+  handle_sasl_reports: false
