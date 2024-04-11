@@ -43,7 +43,15 @@ or during runtime (eg. in your `application.ex`):
 
     :logger.update_handler_config(:default, :formatter, {Basic, []})
 
-Additionally, you may also be interested in [redirecting otp reports to Logger](https://hexdocs.pm/logger/Logger.html#module-configuration) (see "Configuration" section).
+You might also want to format the log messages when migrations are running:
+
+```elixir
+config :domain, MyApp.Repo,
+  ...
+  start_apps_before_migration: [:logger_json]
+```
+
+Additionally, you may also be try [redirecting otp reports to Logger](https://hexdocs.pm/logger/Logger.html#module-configuration) (see "Configuration" section).
 
 ## Configuration
 
