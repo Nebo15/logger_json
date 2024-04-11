@@ -23,9 +23,9 @@ jobs:
       matrix:
         include:
           - otp-version: 24.3
-            elixir-version: 1.16.0
-          - otp-version: 25.0
-            elixir-version: 1.16.0
+            elixir-version: 1.16
+          - otp-version: 25
+            elixir-version: 1.16
             check-formatted: true
             report-coverage: true
     steps:
@@ -62,7 +62,7 @@ jobs:
       if: success() || failure()
       with:
         name: Mix Tests on Elixir ${{ matrix.elixir-version }} / OTP ${{ matrix.otp-version }}
-        path: _build/test/lib/sage/test-junit-report.xml
+        path: _build/test/lib/logger_json/test-junit-report.xml
         reporter: java-junit
     - name: Report code coverage
       env:
