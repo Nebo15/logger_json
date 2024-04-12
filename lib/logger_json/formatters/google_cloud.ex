@@ -118,14 +118,15 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
     line =
       %{
         time: utc_time(meta),
-        severity: log_level(level),
-        message: encode(Map.merge(message, metadata))
+        severity: log_level(level)
       }
       |> maybe_put(:"logging.googleapis.com/sourceLocation", format_source_location(meta))
       |> maybe_put(:"logging.googleapis.com/operation", format_operation(meta))
       |> maybe_put(:"logging.googleapis.com/spanId", format_span(meta, project_id))
       |> maybe_put(:"logging.googleapis.com/trace", format_trace(meta, project_id))
       |> maybe_put(:httpRequest, format_http_request(meta))
+      |> maybe_merge(encode(message))
+      |> maybe_merge(encode(metadata))
       |> Jason.encode_to_iodata!()
 
     [line, "\n"]
@@ -278,7 +279,7 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
 
   # https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogEntryOperation
   defp format_operation(%{request_id: request_id, pid: pid}), do: json_map(id: request_id, producer: inspect(pid))
-  defp format_operation(%{pid: pid}), do: json_map(pid: inspect(pid))
+  defp format_operation(%{pid: pid}), do: json_map(producer: inspect(pid))
   defp format_operation(_meta), do: nil
 
   # https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogEntrySourceLocation

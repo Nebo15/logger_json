@@ -171,7 +171,7 @@ defmodule LoggerJSON.Formatters.DatadogTest do
     assert %{
              "atom" => "atom",
              "binary" => "binary",
-             "date" => "2024-04-11",
+             "date" => _,
              "domain" => ["elixir"],
              "list" => [1, 2, 3],
              "map" => %{"foo" => "bar"},

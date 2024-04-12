@@ -14,8 +14,7 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
       assert capture_log(fn ->
                Logger.debug(message)
              end)
-             |> decode_or_print_error()
-             |> Map.has_key?("message")
+             |> Jason.decode!()
     end
   end
 
@@ -24,16 +23,14 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
       assert capture_log(fn ->
                Logger.debug(message)
              end)
-             |> decode_or_print_error()
-             |> Map.has_key?("message")
+             |> Jason.decode!()
     end
 
     check all message <- StreamData.keyword_of(StreamData.term()) do
       assert capture_log(fn ->
                Logger.debug(message)
              end)
-             |> decode_or_print_error()
-             |> Map.has_key?("message")
+             |> Jason.decode!()
     end
   end
 
@@ -49,13 +46,14 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
       level_string = String.upcase(to_string(level))
 
       assert %{
-               "logging.googleapis.com/operation" => %{"pid" => ^pid},
+               "logging.googleapis.com/operation" => %{"producer" => ^pid},
                "logging.googleapis.com/sourceLocation" => %{
                  "file" => _,
                  "function" => _,
                  "line" => _
                },
-               "message" => %{"domain" => ["elixir"], "message" => "Hello"},
+               "domain" => ["elixir"],
+               "message" => "Hello",
                "severity" => ^level_string,
                "time" => _
              } = log_entry
@@ -69,11 +67,10 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
       end)
       |> decode_or_print_error()
 
-    assert log_entry["message"] == %{
+    assert %{
              "fiz" => [1, 2, 3, "buz"],
-             "foo" => "bar",
-             "domain" => ["elixir"]
-           }
+             "foo" => "bar"
+           } = log_entry
   end
 
   test "logs an LogEntry with a keyword payload" do
@@ -83,10 +80,9 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
       end)
       |> decode_or_print_error()
 
-    assert log_entry["message"] == %{
-             "a" => [0, false],
-             "domain" => ["elixir"]
-           }
+    assert %{
+             "a" => [0, false]
+           } = log_entry
   end
 
   test "logs OpenTelemetry span and trace ids" do
@@ -133,8 +129,7 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
 
     assert log_entry["logging.googleapis.com/operation"]["id"] == "1234567890"
 
-    assert log_entry["message"]["domain"] == ["elixir"]
-    assert log_entry["message"]["request_id"] == "1234567890"
+    assert log_entry["request_id"] == "1234567890"
   end
 
   test "logs metadata" do
@@ -158,27 +153,25 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
       |> decode_or_print_error()
 
     assert %{
-             "message" => %{
-               "atom" => "atom",
-               "binary" => "binary",
-               "date" => "2024-04-11",
-               "domain" => ["elixir"],
-               "list" => [1, 2, 3],
-               "map" => %{"foo" => "bar"},
-               "message" => "Hello",
-               "node" => "nonode@nohost",
-               "ref" => _ref,
-               "float" => 3.14,
-               "struct" => %{
-                 "authority" => "example.com",
-                 "fragment" => nil,
-                 "host" => "example.com",
-                 "path" => nil,
-                 "port" => 443,
-                 "query" => nil,
-                 "scheme" => "https",
-                 "userinfo" => nil
-               }
+             "atom" => "atom",
+             "binary" => "binary",
+             "date" => _,
+             "domain" => ["elixir"],
+             "list" => [1, 2, 3],
+             "map" => %{"foo" => "bar"},
+             "message" => "Hello",
+             "node" => "nonode@nohost",
+             "ref" => _ref,
+             "float" => 3.14,
+             "struct" => %{
+               "authority" => "example.com",
+               "fragment" => nil,
+               "host" => "example.com",
+               "path" => nil,
+               "port" => 443,
+               "query" => nil,
+               "scheme" => "https",
+               "userinfo" => nil
              }
            } = log_entry
   end
@@ -198,12 +191,10 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
       |> decode_or_print_error()
 
     assert %{
-             "message" => %{
-               "@type" => "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent",
-               "message" => "runtime error",
-               "stack_trace" => stacktrace,
-               "serviceContext" => %{"service" => "nonode@nohost"}
-             }
+             "@type" => "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent",
+             "message" => "runtime error",
+             "stack_trace" => stacktrace,
+             "serviceContext" => %{"service" => "nonode@nohost"}
            } = log_entry
 
     assert stacktrace =~ "** (RuntimeError) runtime error"
@@ -227,7 +218,7 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
       end)
       |> decode_or_print_error()
 
-    assert log_entry["message"]["stack_trace"] ==
+    assert log_entry["stack_trace"] ==
              """
              ** (RuntimeError) oops
                  foo/bar.ex:123:in `Foo.bar/0'
@@ -253,7 +244,7 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
 
       [entity, _id] = key |> Atom.to_string() |> String.split("_")
 
-      assert log_entry["message"]["context"]["user"] == "#{entity}:foo_#{key}"
+      assert log_entry["context"]["user"] == "#{entity}:foo_#{key}"
 
       metadata
     end)
@@ -302,7 +293,7 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
       end)
       |> decode_or_print_error()
 
-    assert log_entry["message"]["context"]["httpRequest"] == %{
+    assert log_entry["context"]["httpRequest"] == %{
              "protocol" => "HTTP/1.1",
              "referer" => "http://www.example.com/",
              "remoteIp" => "",
@@ -323,17 +314,15 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
       |> decode_or_print_error()
 
     assert %{
-             "message" => %{
-               "@type" => "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent",
-               "message" => "oops!",
-               "stack_trace" => "** (throw) {:error, :whatever}",
-               "serviceContext" => %{"service" => "nonode@nohost"},
-               "context" => %{
-                 "reportLocation" => %{
-                   "filePath" => _,
-                   "functionName" => _,
-                   "lineNumber" => _
-                 }
+             "@type" => "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent",
+             "message" => "oops!",
+             "stack_trace" => "** (throw) {:error, :whatever}",
+             "serviceContext" => %{"service" => "nonode@nohost"},
+             "context" => %{
+               "reportLocation" => %{
+                 "filePath" => _,
+                 "functionName" => _,
+                 "lineNumber" => _
                }
              }
            } = log_entry
@@ -349,12 +338,10 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
       |> decode_or_print_error()
 
     assert %{
-             "message" => %{
-               "@type" => "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent",
-               "message" => "oops!",
-               "stack_trace" => "** (exit) :sad_failure",
-               "serviceContext" => %{"service" => "nonode@nohost"}
-             }
+             "@type" => "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent",
+             "message" => "oops!",
+             "stack_trace" => "** (exit) :sad_failure",
+             "serviceContext" => %{"service" => "nonode@nohost"}
            } = log_entry
   end
 
@@ -368,12 +355,10 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
       |> decode_or_print_error()
 
     assert %{
-             "message" => %{
-               "@type" => "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent",
-               "message" => "oops!",
-               "stack_trace" => stacktrace,
-               "serviceContext" => %{"service" => "nonode@nohost"}
-             }
+             "@type" => "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent",
+             "message" => "oops!",
+             "stack_trace" => stacktrace,
+             "serviceContext" => %{"service" => "nonode@nohost"}
            } = log_entry
 
     assert stacktrace =~ "** (EXIT from #PID<"
@@ -390,12 +375,10 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
       |> decode_or_print_error()
 
     assert %{
-             "message" => %{
-               "@type" => "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent",
-               "message" => "oops!",
-               "stack_trace" => "** (socket_closed_unexpectedly) []",
-               "serviceContext" => %{"service" => "nonode@nohost"}
-             }
+             "@type" => "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent",
+             "message" => "oops!",
+             "stack_trace" => "** (socket_closed_unexpectedly) []",
+             "serviceContext" => %{"service" => "nonode@nohost"}
            } = log_entry
   end
 end
