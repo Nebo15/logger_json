@@ -24,30 +24,36 @@ A collection of formatters and utilities for JSON-based logging for various clou
 
 Add `logger_json` to your list of dependencies in `mix.exs`:
 
-    def deps do
-      [
-        # ...
-        {:logger_json, "~> 6.0"}
-        # ...
-      ]
-    end
+```elixir
+def deps do
+  [
+    # ...
+    {:logger_json, "~> 6.0"}
+    # ...
+  ]
+end
+```
 
 and install it running `mix deps.get`.
 
 Then, enable the formatter in your `config.exs`:
 
-    config :logger, :default_handler,
-      formatter: {LoggerJSON.Formatters.Basic, []}
+```elixir
+config :logger, :default_handler,
+  formatter: {LoggerJSON.Formatters.Basic, []}
+```
 
 or during runtime (eg. in your `application.ex`):
 
-    :logger.update_handler_config(:default, :formatter, {Basic, []})
+```elixir
+:logger.update_handler_config(:default, :formatter, {Basic, []})
+```
 
 You might also want to format the log messages when migrations are running:
 
 ```elixir
 config :domain, MyApp.Repo,
-  ...
+  # ...
   start_apps_before_migration: [:logger_json]
 ```
 
@@ -58,12 +64,16 @@ Additionally, you may also be try [redirecting otp reports to Logger](https://he
 Configuration can be set using 2nd element of the tuple of the `:formatter` option in `Logger` configuration.
 For example in `config.exs`:
 
-    config :logger, :default_handler,
-      formatter: {LoggerJSON.Formatters.GoogleCloud, metadata: :all, project_id: "logger-101"}
+```elixir
+config :logger, :default_handler,
+  formatter: {LoggerJSON.Formatters.GoogleCloud, metadata: :all, project_id: "logger-101"}
+```
 
 or during runtime:
 
-    :logger.update_handler_config(:default, :formatter, {Basic, metadata: {:all_except, [:conn]}})
+```elixir
+:logger.update_handler_config(:default, :formatter, {Basic, metadata: {:all_except, [:conn]}})
+```
 
 ## Docs
 
