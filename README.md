@@ -104,7 +104,7 @@ for more details see [special fields in structured payloads](https://cloud.googl
   "logging.googleapis.com/trace": "projects/my-projectid/traces/0679686673a",
   "logging.googleapis.com/spanId": "000000000000004a",
   "logging.googleapis.com/operation": {
-    "pid": "#PID<0.228.0>"
+    "pid": "#PID<0.29081.0>"
   },
   "logging.googleapis.com/sourceLocation": {
     "file": "/Users/andrew/Projects/os/logger_json/test/formatters/google_cloud_test.exs",
@@ -116,7 +116,43 @@ for more details see [special fields in structured payloads](https://cloud.googl
     "message": "Hello"
   },
   "severity": "NOTICE",
-  "time": "2024-04-11T21:32:46.957Z"
+  "time": "2024-04-12T15:07:55.020Z"
+}
+```
+
+and this is how it looks in Google Cloud Logger:
+
+```json
+{
+  "insertId": "1d4hmnafsj7vy1",
+  "jsonPayload": {
+    "message": "Hello",
+    "logging.googleapis.com/spanId": "000000000000004a",
+    "domain": ["elixir"],
+    "time": "2024-04-12T15:07:55.020Z"
+  },
+  "resource": {
+    "type": "gce_instance",
+    "labels": {
+      "zone": "us-east1-d",
+      "project_id": "firezone-staging",
+      "instance_id": "3168853301020468373"
+    }
+  },
+  "timestamp": "2024-04-12T15:07:55.023307594Z",
+  "severity": "NOTICE",
+  "logName": "projects/firezone-staging/logs/cos_containers",
+  "operation": {
+    "id": "F8WQ1FsdFAm5ZY0AC1PB",
+    "producer": "#PID<0.29081.0>"
+  },
+  "trace": "projects/firezone-staging/traces/bc007e40a2e9edffa23785d8badc43b8",
+  "sourceLocation": {
+    "file": "lib/phoenix/logger.ex",
+    "line": "231",
+    "function": "Elixir.Phoenix.Logger.phoenix_endpoint_stop/4"
+  },
+  "receiveTimestamp": "2024-04-12T15:07:55.678986520Z"
 }
 ```
 
