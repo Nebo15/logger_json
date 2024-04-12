@@ -83,12 +83,14 @@ The docs can be found at [https://hexdocs.pm/logger_json](https://hexdocs.pm/log
 
 ### Basic
 
-```elixir
-%{
-  "message" => "Hello",
-  "metadata" => %{"domain" => ["elixir"]},
-  "severity" => "notice",
-  "time" => "2024-04-11T21:31:01.403Z"
+```json
+{
+  "message": "Hello",
+  "metadata": {
+    "domain": ["elixir"]
+  },
+  "severity": "notice",
+  "time": "2024-04-11T21:31:01.403Z"
 }
 ```
 
@@ -97,64 +99,73 @@ The docs can be found at [https://hexdocs.pm/logger_json](https://hexdocs.pm/log
 Follows the [Google Cloud Logger LogEntry](https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry) format,
 for more details see [special fields in structured payloads](https://cloud.google.com/logging/docs/agent/configuration#special_fields_in_structured_payloads).
 
-```elixir
-%{
-  "logging.googleapis.com/operation" => %{"pid" => "#PID<0.228.0>"},
-  "logging.googleapis.com/sourceLocation" => %{
-    "file" => "/Users/andrew/Projects/os/logger_json/test/formatters/google_cloud_test.exs",
-    "function" => "Elixir.LoggerJSON.Formatters.GoogleCloudTest.test logs an LogEntry of a given level/1",
-    "line" => 44
+```json
+{
+  "logging.googleapis.com/operation": {
+    "pid": "#PID<0.228.0>"
   },
-  "message" => %{"domain" => ["elixir"], "message" => "Hello"},
-  "severity" => "NOTICE",
-  "time" => "2024-04-11T21:32:46.957Z"
+  "logging.googleapis.com/sourceLocation": {
+    "file": "/Users/andrew/Projects/os/logger_json/test/formatters/google_cloud_test.exs",
+    "function": "Elixir.LoggerJSON.Formatters.GoogleCloudTest.test logs an LogEntry of a given level/1",
+    "line": 44
+  },
+  "message": {
+    "domain": ["elixir"],
+    "message": "Hello"
+  },
+  "severity": "NOTICE",
+  "time": "2024-04-11T21:32:46.957Z"
 }
 ```
 
 Exception that can be sent to Google Cloud Error Reporter:
 
-```elixir
-%{
-  "httpRequest" => %{
-    "protocol" => "HTTP/1.1",
-    "referer" => "http://www.example.com/",
-    "remoteIp" => "",
-    "requestMethod" => "PATCH",
-    "requestUrl" => "http://www.example.com/",
-    "status" => 503,
-    "userAgent" => "Mozilla/5.0"
+```json
+{
+  "httpRequest": {
+    "protocol": "HTTP/1.1",
+    "referer": "http://www.example.com/",
+    "remoteIp": "",
+    "requestMethod": "PATCH",
+    "requestUrl": "http://www.example.com/",
+    "status": 503,
+    "userAgent": "Mozilla/5.0"
   },
-  "logging.googleapis.com/operation" => %{"pid" => "#PID<0.250.0>"},
-  "logging.googleapis.com/sourceLocation" => %{
-    "file" => "/Users/andrew/Projects/os/logger_json/test/formatters/google_cloud_test.exs",
-    "function" => "Elixir.LoggerJSON.Formatters.GoogleCloudTest.test logs exception http context/1",
-    "line" => 301
+  "logging.googleapis.com/operation": {
+    "pid": "#PID<0.250.0>"
   },
-  "message" => %{
-    "@type" => "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent",
-    "context" => %{
-      "httpRequest" => %{
-        "protocol" => "HTTP/1.1",
-        "referer" => "http://www.example.com/",
-        "remoteIp" => "",
-        "requestMethod" => "PATCH",
-        "requestUrl" => "http://www.example.com/",
-        "status" => 503,
-        "userAgent" => "Mozilla/5.0"
+  "logging.googleapis.com/sourceLocation": {
+    "file": "/Users/andrew/Projects/os/logger_json/test/formatters/google_cloud_test.exs",
+    "function": "Elixir.LoggerJSON.Formatters.GoogleCloudTest.test logs exception http context/1",
+    "line": 301
+  },
+  "message": {
+    "@type": "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent",
+    "context": {
+      "httpRequest": {
+        "protocol": "HTTP/1.1",
+        "referer": "http://www.example.com/",
+        "remoteIp": "",
+        "requestMethod": "PATCH",
+        "requestUrl": "http://www.example.com/",
+        "status": 503,
+        "userAgent": "Mozilla/5.0"
       },
-      "reportLocation" => %{
-        "filePath" => "/Users/andrew/Projects/os/logger_json/test/formatters/google_cloud_test.exs",
-        "functionName" => "Elixir.LoggerJSON.Formatters.GoogleCloudTest.test logs exception http context/1",
-        "lineNumber" => 301
+      "reportLocation": {
+        "filePath": "/Users/andrew/Projects/os/logger_json/test/formatters/google_cloud_test.exs",
+        "functionName": "Elixir.LoggerJSON.Formatters.GoogleCloudTest.test logs exception http context/1",
+        "lineNumber": 301
       }
     },
-    "domain" => ["elixir"],
-    "message" => "Hello",
-    "serviceContext" => %{"service" => "nonode@nohost"},
-    "stack_trace" => "** (EXIT from #PID<0.250.0>) :foo"
+    "domain": ["elixir"],
+    "message": "Hello",
+    "serviceContext": {
+      "service": "nonode@nohost"
+    },
+    "stack_trace": "** (EXIT from #PID<0.250.0>) :foo"
   },
-  "severity" => "DEBUG",
-  "time" => "2024-04-11T21:34:53.503Z"
+  "severity": "DEBUG",
+  "time": "2024-04-11T21:34:53.503Z"
 }
 ```
 
@@ -163,36 +174,40 @@ Exception that can be sent to Google Cloud Error Reporter:
 Adheres to the [default standard attribute list](https://docs.datadoghq.com/logs/processing/attributes_naming_convention/#default-standard-attribute-list)
 as much as possible.
 
-```elixir
-%{
-  "domain" => ["elixir"],
-  "http" => %{
-    "method" => "GET",
-    "referer" => "http://www.example2.com/",
-    "request_id" => nil,
-    "status_code" => 200,
-    "url" => "http://www.example.com/",
-    "url_details" => %{
-      "host" => "www.example.com",
-      "path" => "/",
-      "port" => 80,
-      "queryString" => "",
-      "scheme" => "http"
+```json
+{
+  "domain": ["elixir"],
+  "http": {
+    "method": "GET",
+    "referer": "http://www.example2.com/",
+    "request_id": null,
+    "status_code": 200,
+    "url": "http://www.example.com/",
+    "url_details": {
+      "host": "www.example.com",
+      "path": "/",
+      "port": 80,
+      "queryString": "",
+      "scheme": "http"
     },
-    "useragent" => "Mozilla/5.0"
+    "useragent": "Mozilla/5.0"
   },
-  "logger" => %{
-    "file_name" => "/Users/andrew/Projects/os/logger_json/test/formatters/datadog_test.exs",
-    "line" => 239,
-    "method_name" => "Elixir.LoggerJSON.Formatters.DatadogTest.test logs http context/1",
-    "thread_name" => "#PID<0.225.0>"
+  "logger": {
+    "file_name": "/Users/andrew/Projects/os/logger_json/test/formatters/datadog_test.exs",
+    "line": 239,
+    "method_name": "Elixir.LoggerJSON.Formatters.DatadogTest.test logs http context/1",
+    "thread_name": "#PID<0.225.0>"
   },
-  "message" => "Hello",
-  "network" => %{"client" => %{"ip" => "127.0.0.1"}},
-  "syslog" => %{
-    "hostname" => "MacBook-Pro",
-    "severity" => "debug",
-    "timestamp" => "2024-04-11T23:10:47.967Z"
+  "message": "Hello",
+  "network": {
+    "client": {
+      "ip": "127.0.0.1"
+    }
+  },
+  "syslog": {
+    "hostname": "MacBook-Pro",
+    "severity": "debug",
+    "timestamp": "2024-04-11T23:10:47.967Z"
   }
 }
 ```
