@@ -130,6 +130,9 @@ defmodule LoggerJSON.Formatters.DatadogTest do
 
     assert log["dd.span_id"] == "13831127321250661286"
     assert log["dd.trace_id"] == "3309500741668975922"
+
+    assert log["otel_span_id"] == "bff20904aa5883a6"
+    assert log["otel_trace_id"] == "294740ce41cc9f202dedb563db123532"
   end
 
   test "logs span and trace ids" do
@@ -146,6 +149,9 @@ defmodule LoggerJSON.Formatters.DatadogTest do
 
     assert log["dd.span_id"] == "bff20904aa5883a6"
     assert log["dd.trace_id"] == "294740ce41cc9f202dedb563db123532"
+
+    assert log["span_id"] == "bff20904aa5883a6"
+    assert log["trace_id"] == "294740ce41cc9f202dedb563db123532"
   end
 
   test "logs metadata" do

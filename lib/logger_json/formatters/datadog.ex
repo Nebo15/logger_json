@@ -44,10 +44,7 @@ defmodule LoggerJSON.Formatters.Datadog do
   import Jason.Helpers, only: [json_map: 1]
   import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, Code, Plug, Encoder}
 
-  @processed_metadata_keys ~w[pid file line mfa
-                              otel_span_id span_id
-                              otel_trace_id trace_id
-                              conn]a
+  @processed_metadata_keys ~w[pid file line mfa conn]a
 
   @spec format(any(), any()) :: none()
   def format(%{level: level, meta: meta, msg: msg}, opts) do
@@ -67,6 +64,8 @@ defmodule LoggerJSON.Formatters.Datadog do
       take_metadata(meta, metadata_selector)
       |> maybe_put(:"dd.span_id", format_span(meta))
       |> maybe_put(:"dd.trace_id", format_trace(meta))
+      |> maybe_update(:otel_span_id, &IO.chardata_to_string/1)
+      |> maybe_update(:otel_trace_id, &IO.chardata_to_string/1)
 
     line =
       %{syslog: syslog(level, meta, hostname)}
