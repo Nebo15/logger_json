@@ -101,6 +101,8 @@ for more details see [special fields in structured payloads](https://cloud.googl
 
 ```json
 {
+  "logging.googleapis.com/trace": "projects/my-projectid/traces/0679686673a",
+  "logging.googleapis.com/spanId": "000000000000004a",
   "logging.googleapis.com/operation": {
     "pid": "#PID<0.228.0>"
   },
@@ -139,31 +141,29 @@ Exception that can be sent to Google Cloud Error Reporter:
     "function": "Elixir.LoggerJSON.Formatters.GoogleCloudTest.test logs exception http context/1",
     "line": 301
   },
-  "message": {
-    "@type": "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent",
-    "context": {
-      "httpRequest": {
-        "protocol": "HTTP/1.1",
-        "referer": "http://www.example.com/",
-        "remoteIp": "",
-        "requestMethod": "PATCH",
-        "requestUrl": "http://www.example.com/",
-        "status": 503,
-        "userAgent": "Mozilla/5.0"
-      },
-      "reportLocation": {
-        "filePath": "/Users/andrew/Projects/os/logger_json/test/formatters/google_cloud_test.exs",
-        "functionName": "Elixir.LoggerJSON.Formatters.GoogleCloudTest.test logs exception http context/1",
-        "lineNumber": 301
-      }
+  "@type": "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent",
+  "context": {
+    "httpRequest": {
+      "protocol": "HTTP/1.1",
+      "referer": "http://www.example.com/",
+      "remoteIp": "",
+      "requestMethod": "PATCH",
+      "requestUrl": "http://www.example.com/",
+      "status": 503,
+      "userAgent": "Mozilla/5.0"
     },
-    "domain": ["elixir"],
-    "message": "Hello",
-    "serviceContext": {
-      "service": "nonode@nohost"
-    },
-    "stack_trace": "** (EXIT from #PID<0.250.0>) :foo"
+    "reportLocation": {
+      "filePath": "/Users/andrew/Projects/os/logger_json/test/formatters/google_cloud_test.exs",
+      "functionName": "Elixir.LoggerJSON.Formatters.GoogleCloudTest.test logs exception http context/1",
+      "lineNumber": 301
+    }
   },
+  "domain": ["elixir"],
+  "message": "Hello",
+  "serviceContext": {
+    "service": "nonode@nohost"
+  },
+  "stack_trace": "** (EXIT from #PID<0.250.0>) :foo",
   "severity": "DEBUG",
   "time": "2024-04-11T21:34:53.503Z"
 }
