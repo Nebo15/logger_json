@@ -44,7 +44,7 @@ defmodule LoggerJSON.Formatters.Basic do
       |> maybe_put(:request, format_http_request(meta))
       |> maybe_put(:span, format_span(meta))
       |> maybe_put(:trace, format_trace(meta))
-      |> Jason.encode_to_iodata!(pretty: true)
+      |> Jason.encode_to_iodata!()
 
     [line, "\n"]
   end
