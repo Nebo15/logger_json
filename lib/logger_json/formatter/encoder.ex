@@ -41,32 +41,29 @@ defmodule LoggerJSON.Formatter.Encoder do
 
   def encode(%{} = map, redactors) do
     for {key, value} <- map, into: %{} do
-      key = encode_map_key(key)
-      {key, encode(redact(key, value, redactors), redactors)}
+      encode_key_value({key, value}, redactors)
     end
   end
 
   def encode([{key, _} | _] = keyword, redactors) when is_atom(key) do
     Enum.into(keyword, %{}, fn {key, value} ->
-      key = encode_map_key(key)
-      {key, encode(redact(key, value, redactors), redactors)}
+      encode_key_value({key, value}, redactors)
     end)
   rescue
     _ -> for(el <- keyword, do: encode(el, redactors))
   end
 
   def encode(list, redactors) when is_list(list), do: for(el <- list, do: encode(el, redactors))
-
-  def encode({key, value}, redactors) when is_binary(key) or is_atom(key) do
-    key = encode_map_key(key)
-    %{key => encode(redact(key, value, redactors), redactors)}
-  end
-
   def encode(data, _redactors), do: inspect(data, pretty: true, width: 80)
 
-  defp encode_map_key(key) when is_binary(key), do: encode_binary(key)
-  defp encode_map_key(key) when is_atom(key) or is_number(key), do: key
-  defp encode_map_key(key), do: inspect(key)
+  def encode_key_value({key, value}, redactors) do
+    key = encode_key(key)
+    {key, encode(redact(key, value, redactors), redactors)}
+  end
+
+  defp encode_key(key) when is_binary(key), do: encode_binary(key)
+  defp encode_key(key) when is_atom(key) or is_number(key), do: key
+  defp encode_key(key), do: inspect(key)
 
   defp encode_binary(data) when is_binary(data) do
     if String.valid?(data) && String.printable?(data) do
