@@ -28,6 +28,7 @@ defmodule LoggerJSON.Formatters.Basic do
   def format(%{level: level, meta: meta, msg: msg}, opts) do
     metadata_keys_or_selector = Keyword.get(opts, :metadata, [])
     metadata_selector = update_metadata_selector(metadata_keys_or_selector, @processed_metadata_keys)
+    redactors = Keyword.get(opts, :redactors, [])
 
     message =
       format_message(msg, meta, %{
@@ -40,8 +41,8 @@ defmodule LoggerJSON.Formatters.Basic do
       %{
         time: utc_time(meta),
         severity: Atom.to_string(level),
-        message: encode(message),
-        metadata: encode(take_metadata(meta, metadata_selector))
+        message: encode(message, redactors),
+        metadata: encode(take_metadata(meta, metadata_selector), redactors)
       }
       |> maybe_put(:request, format_http_request(meta))
       |> maybe_put(:span, format_span(meta))

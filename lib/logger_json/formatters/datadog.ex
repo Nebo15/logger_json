@@ -50,6 +50,7 @@ defmodule LoggerJSON.Formatters.Datadog do
 
   @spec format(any(), any()) :: none()
   def format(%{level: level, meta: meta, msg: msg}, opts) do
+    redactors = Keyword.get(opts, :redactors, [])
     hostname = Keyword.get(opts, :hostname, :system)
 
     metadata_keys_or_selector = Keyword.get(opts, :metadata, [])
@@ -73,8 +74,8 @@ defmodule LoggerJSON.Formatters.Datadog do
       %{syslog: syslog(level, meta, hostname)}
       |> maybe_put(:logger, format_logger(meta))
       |> maybe_merge(format_http_request(meta))
-      |> maybe_merge(encode(metadata))
-      |> maybe_merge(encode(message))
+      |> maybe_merge(encode(metadata, redactors))
+      |> maybe_merge(encode(message, redactors))
       |> Jason.encode_to_iodata!()
 
     [line, "\n"]
@@ -137,7 +138,7 @@ defmodule LoggerJSON.Formatters.Datadog do
 
   defp format_logger(%{file: file, line: line, mfa: {m, f, a}} = meta) do
     %{
-      thread_name: encode(meta[:pid]),
+      thread_name: inspect(meta[:pid]),
       method_name: format_function(m, f, a),
       file_name: IO.chardata_to_string(file),
       line: line

@@ -1,56 +1,68 @@
 defmodule LoggerJSON.Formatter.Encoder do
-  @moduledoc """
-  Utilities for converting metadata into data structures that can be safely passed to `Jason.encode!/1`.
-  """
-
   @doc """
-  Produces metadata that is "safe" for calling Jason.encode!/1 on without errors.
-  This means that unexpected Logger metadata won't cause logging crashes.
+  Takes a term and makes sure that it can be encoded by Jason.encode!/1 without errors
+  and without leaking sensitive information.
 
-  Current formatting is...
-    * Maps: as is
-    * Printable binaries: as is
-    * Numbers: as is
-    * Structs that don't implement Jason.Encoder: converted to maps
-    * Tuples: converted to lists
-    * Keyword lists: converted to Maps
-    * everything else: inspected
+  ## Encoding rules
+
+  Type                | Encoding                                            | Redaction
+  --------------------|-----------------------------------------------------|---------------
+  `boolean()`         | unchanged                                           | unchanged
+  `map()`             | unchanged                                           | values are redacted
+  `list()`            | unchanged                                           | unchanged
+  `tuple()`           | converted to list                                   | unchanged
+  `binary()`          | unchanged if printable, otherwise using `inspect/2` | unchanged
+  `number()`          | unchanged                                           | unchanged
+  `atom()`            | unchanged                                           | unchanged
+  `struct()`          | converted to map                                    | values are redacted
+  `keyword()`         | converted to map                                    | values are redacted
+  `%Jason.Fragment{}` | unchanged                                           | unchanged
+  everything else     | using `inspect/2`                                   | unchanged
   """
-  @spec encode(any()) :: any()
-  def encode(nil), do: nil
-  def encode(true), do: true
-  def encode(false), do: false
-  def encode(atom) when is_atom(atom), do: atom
-  def encode(tuple) when is_tuple(tuple), do: tuple |> Tuple.to_list() |> encode()
-  def encode(number) when is_number(number), do: number
-  def encode(binary) when is_binary(binary), do: encode_binary(binary)
-  def encode(%Jason.Fragment{} = fragment), do: fragment
 
-  def encode(%_struct{} = struct) do
-    if protocol_implemented?(struct) do
-      struct
-    else
-      struct
-      |> Map.from_struct()
-      |> encode()
+  @type redactor :: {redactor :: module(), redactor_opts :: term()}
+
+  @spec encode(term(), redactors :: [redactor()]) :: term()
+  def encode(nil, _redactors), do: nil
+  def encode(true, _redactors), do: true
+  def encode(false, _redactors), do: false
+  def encode(atom, _redactors) when is_atom(atom), do: atom
+  def encode(tuple, redactors) when is_tuple(tuple), do: tuple |> Tuple.to_list() |> encode(redactors)
+  def encode(number, _redactors) when is_number(number), do: number
+  def encode("[REDACTED]", _redactors), do: "[REDACTED]"
+  def encode(binary, _redactors) when is_binary(binary), do: encode_binary(binary)
+  def encode(%Jason.Fragment{} = fragment, _redactors), do: fragment
+
+  def encode(%_struct{} = struct, redactors) do
+    struct
+    |> Map.from_struct()
+    |> encode(redactors)
+  end
+
+  def encode(%{} = map, redactors) do
+    for {key, value} <- map, into: %{} do
+      key = encode_map_key(key)
+      {key, encode(redact(key, value, redactors), redactors)}
     end
   end
 
-  def encode(%{} = map) do
-    for {key, value} <- map, into: %{}, do: {encode_map_key(key), encode(value)}
-  end
-
-  def encode([{key, _} | _] = keyword) when is_atom(key) do
-    Enum.into(keyword, %{}, fn
-      {key, value} -> {encode_map_key(key), encode(value)}
+  def encode([{key, _} | _] = keyword, redactors) when is_atom(key) do
+    Enum.into(keyword, %{}, fn {key, value} ->
+      key = encode_map_key(key)
+      {key, encode(redact(key, value, redactors), redactors)}
     end)
   rescue
-    _ -> for(el <- keyword, do: encode(el))
+    _ -> for(el <- keyword, do: encode(el, redactors))
   end
 
-  def encode(list) when is_list(list), do: for(el <- list, do: encode(el))
-  def encode({key, data}) when is_binary(key) or is_atom(key), do: %{encode_map_key(key) => encode(data)}
-  def encode(data), do: inspect(data, pretty: true, width: 80)
+  def encode(list, redactors) when is_list(list), do: for(el <- list, do: encode(el, redactors))
+
+  def encode({key, value}, redactors) when is_binary(key) or is_atom(key) do
+    key = encode_map_key(key)
+    %{key => encode(redact(key, value, redactors), redactors)}
+  end
+
+  def encode(data, _redactors), do: inspect(data, pretty: true, width: 80)
 
   defp encode_map_key(key) when is_binary(key), do: encode_binary(key)
   defp encode_map_key(key) when is_atom(key) or is_number(key), do: key
@@ -64,8 +76,9 @@ defmodule LoggerJSON.Formatter.Encoder do
     end
   end
 
-  def protocol_implemented?(data) do
-    impl = Jason.Encoder.impl_for(data)
-    impl && impl != Jason.Encoder.Any
+  defp redact(key, value, redactors) do
+    Enum.reduce(redactors, value, fn {redactor, opts}, acc ->
+      redactor.redact(key, acc, opts)
+    end)
   end
 end

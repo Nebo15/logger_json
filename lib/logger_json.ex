@@ -56,6 +56,9 @@ defmodule LoggerJSON do
     If `:all`is given, all metadata is included. If `{:all_except, keys}` is given, all metadata except
     the specified keys is included.
 
+    * `:redactors` - a list of tuples, where first element is the module that implements the `LoggerJSON.Redactor` behaviour,
+    and the second element is the options to pass to the redactor module. By default, no redactors are used.
+
   ## Metadata
 
   You can set some well-known metadata keys to be included in the log entry. The following keys are supported

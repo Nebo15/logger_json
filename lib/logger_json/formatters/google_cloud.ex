@@ -100,6 +100,7 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
 
   @spec format(any(), any()) :: none()
   def format(%{level: level, meta: meta, msg: msg}, opts) do
+    redactors = Keyword.get(opts, :redactors, [])
     service_context = Keyword.get_lazy(opts, :service_context, fn -> %{service: to_string(node())} end)
     project_id = Keyword.get(opts, :project_id)
     metadata_keys_or_selector = Keyword.get(opts, :metadata, [])
@@ -125,8 +126,8 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
       |> maybe_put(:"logging.googleapis.com/spanId", format_span(meta, project_id))
       |> maybe_put(:"logging.googleapis.com/trace", format_trace(meta, project_id))
       |> maybe_put(:httpRequest, format_http_request(meta))
-      |> maybe_merge(encode(message))
-      |> maybe_merge(encode(metadata))
+      |> maybe_merge(encode(message, redactors))
+      |> maybe_merge(encode(metadata, redactors))
       |> Jason.encode_to_iodata!()
 
     [line, "\n"]
