@@ -17,6 +17,8 @@ defmodule LoggerJSON.Formatters.Basic do
   import Jason.Helpers, only: [json_map: 1]
   import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, Plug, Encoder}
 
+  @behaviour LoggerJSON.Formatter
+
   @processed_metadata_keys ~w[file line mfa
                               otel_span_id span_id
                               otel_trace_id trace_id

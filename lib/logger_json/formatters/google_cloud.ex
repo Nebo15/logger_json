@@ -91,6 +91,8 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
   import Jason.Helpers, only: [json_map: 1]
   import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, Code, Plug, Encoder}
 
+  @behaviour LoggerJSON.Formatter
+
   @processed_metadata_keys ~w[pid file line mfa
                               otel_span_id span_id
                               otel_trace_id trace_id

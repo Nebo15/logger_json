@@ -44,6 +44,8 @@ defmodule LoggerJSON.Formatters.Datadog do
   import Jason.Helpers, only: [json_map: 1]
   import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, Code, Plug, Encoder}
 
+  @behaviour LoggerJSON.Formatter
+
   @processed_metadata_keys ~w[pid file line mfa conn]a
 
   @spec format(any(), any()) :: none()
