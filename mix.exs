@@ -2,7 +2,7 @@ defmodule LoggerJSON.Mixfile do
   use Mix.Project
 
   @source_url "https://github.com/Nebo15/logger_json"
-  @version "6.0.0"
+  @version "6.0.0-rc.0"
 
   def project do
     [
@@ -38,7 +38,7 @@ defmodule LoggerJSON.Mixfile do
       {:jason, "~> 1.4"},
       {:plug, "~> 1.15", optional: true},
       {:telemetry, "~> 1.0", optional: true},
-      {:stream_data, "~> 0.5", only: [:dev, :test]},
+      {:stream_data, "~> 1.0", only: [:dev, :test]},
       {:castore, "~> 1.0", only: [:dev, :test]},
       {:excoveralls, ">= 0.15.0", only: [:dev, :test]},
       {:junit_formatter, "~> 3.3", only: [:test]},
