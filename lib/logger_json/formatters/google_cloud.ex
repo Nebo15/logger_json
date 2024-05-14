@@ -98,7 +98,7 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
                               otel_trace_id trace_id
                               conn]a
 
-  @spec format(any(), any()) :: none()
+  @impl true
   def format(%{level: level, meta: meta, msg: msg}, opts) do
     redactors = Keyword.get(opts, :redactors, [])
     service_context = Keyword.get_lazy(opts, :service_context, fn -> %{service: to_string(node())} end)

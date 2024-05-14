@@ -24,7 +24,7 @@ defmodule LoggerJSON.Formatters.Basic do
                               otel_trace_id trace_id
                               conn]a
 
-  @spec format(any(), any()) :: none()
+  @impl true
   def format(%{level: level, meta: meta, msg: msg}, opts) do
     metadata_keys_or_selector = Keyword.get(opts, :metadata, [])
     metadata_selector = update_metadata_selector(metadata_keys_or_selector, @processed_metadata_keys)

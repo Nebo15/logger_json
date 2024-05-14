@@ -48,7 +48,7 @@ defmodule LoggerJSON.Formatters.Datadog do
 
   @processed_metadata_keys ~w[pid file line mfa conn]a
 
-  @spec format(any(), any()) :: none()
+  @impl true
   def format(%{level: level, meta: meta, msg: msg}, opts) do
     redactors = Keyword.get(opts, :redactors, [])
     hostname = Keyword.get(opts, :hostname, :system)
