@@ -10,13 +10,13 @@ defmodule LoggerJSON.PlugTest do
 
   describe "telemetry_logging_handler/4" do
     test "logs request latency and metadata" do
-      conn = Plug.Test.conn(:get, "/")
+      conn = Plug.Test.conn(:get, "/") |> Plug.Conn.put_status(200)
 
       log =
         capture_log(fn ->
           telemetry_logging_handler(
             [:phoenix, :endpoint, :stop],
-            %{duration: 5000},
+            %{duration: 500_000},
             %{conn: conn},
             :info
           )
@@ -25,11 +25,11 @@ defmodule LoggerJSON.PlugTest do
         end)
 
       assert %{
-               "message" => "",
-               "metadata" => %{"duration_μs" => 5},
+               "message" => "GET / [Sent 200 in 500µs]",
+               "metadata" => %{"duration_μs" => 500},
                "request" => %{
                  "client" => %{"ip" => "127.0.0.1", "user_agent" => nil},
-                 "connection" => %{"method" => "GET", "path" => "/", "protocol" => "HTTP/1.1", "status" => nil}
+                 "connection" => %{"method" => "GET", "path" => "/", "protocol" => "HTTP/1.1", "status" => 200}
                }
              } = decode_or_print_error(log)
     end

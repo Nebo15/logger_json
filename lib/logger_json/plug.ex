@@ -42,7 +42,7 @@ defmodule LoggerJSON.Plug do
       LoggerJSON.Plug.attach("logger-json-phoenix-requests", [:phoenix, :endpoint, :stop], :info)
   """
   def attach(name, event, level) do
-    :telemetry.attach(name, event, &telemetry_logging_handler/4, level)
+    :telemetry.attach(name, event, &__MODULE__.telemetry_logging_handler/4, level)
   end
 
   @doc """
@@ -58,7 +58,47 @@ defmodule LoggerJSON.Plug do
     duration = System.convert_time_unit(duration, :native, :microsecond)
 
     if level = level(level, conn) do
-      Logger.log(level, "", conn: conn, duration_μs: duration)
+      Logger.log(
+        level,
+        fn ->
+          %{
+            method: method,
+            request_path: request_path,
+            state: state,
+            status: status
+          } = conn
+
+          [
+            method,
+            ?\s,
+            request_path,
+            ?\s,
+            "[",
+            connection_type(state),
+            ?\s,
+            status(status),
+            "in ",
+            duration(duration),
+            "]"
+          ]
+        end,
+        conn: conn,
+        duration_μs: duration
+      )
+    end
+  end
+
+  defp connection_type(:set_chunked), do: "Chunked"
+  defp connection_type(_), do: "Sent"
+
+  defp status(nil), do: ""
+  defp status(status), do: [status |> Plug.Conn.Status.code() |> Integer.to_string(), ?\s]
+
+  def duration(duration) do
+    if duration > 1000 do
+      [duration |> div(1000) |> Integer.to_string(), "ms"]
+    else
+      [Integer.to_string(duration), "µs"]
     end
   end
 
