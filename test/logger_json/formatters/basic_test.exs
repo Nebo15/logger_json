@@ -1,5 +1,5 @@
 defmodule LoggerJSON.Formatters.BasicTest do
-  use Logger.Case
+  use LoggerJSON.Case
   use ExUnitProperties
   alias LoggerJSON.Formatters.Basic
   require Logger

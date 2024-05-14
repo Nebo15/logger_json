@@ -1,11 +1,11 @@
-defmodule Logger.Case do
+defmodule LoggerJSON.Case do
   @moduledoc false
   use ExUnit.CaseTemplate
   import ExUnit.CaptureIO
 
   using _ do
     quote do
-      import Logger.Case
+      import LoggerJSON.Case
     end
   end
 

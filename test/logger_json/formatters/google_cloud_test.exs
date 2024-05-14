@@ -1,5 +1,5 @@
 defmodule LoggerJSON.Formatters.GoogleCloudTest do
-  use Logger.Case
+  use LoggerJSON.Case
   use ExUnitProperties
   alias LoggerJSON.Formatters.GoogleCloud
   require Logger

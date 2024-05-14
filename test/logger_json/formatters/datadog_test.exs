@@ -1,5 +1,5 @@
 defmodule LoggerJSON.Formatters.DatadogTest do
-  use Logger.Case
+  use LoggerJSON.Case
   use ExUnitProperties
   alias LoggerJSON.Formatters.Datadog
   require Logger

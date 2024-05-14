@@ -1,5 +1,5 @@
 defmodule LoggerJSON.Formatter.EncoderTest do
-  use Logger.Case, async: true
+  use LoggerJSON.Case, async: true
   use ExUnitProperties
   import LoggerJSON.Formatter.Encoder
 
