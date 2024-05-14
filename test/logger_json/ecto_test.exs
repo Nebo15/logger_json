@@ -3,6 +3,11 @@ defmodule LoggerJSON.EctoTest do
   import LoggerJSON.Ecto
   require Logger
 
+  setup do
+    formatter = {LoggerJSON.Formatters.Basic, metadata: :all}
+    :logger.update_handler_config(:default, :formatter, formatter)
+  end
+
   describe "telemetry_logging_handler/4" do
     test "logs ecto queries received via telemetry event" do
       log =
@@ -43,8 +48,7 @@ defmodule LoggerJSON.EctoTest do
                    "queue_time_μs" => 106,
                    "repo" => "Repo"
                  }
-               },
-               "severity" => "info"
+               }
              } = decode_or_print_error(log)
     end
 
