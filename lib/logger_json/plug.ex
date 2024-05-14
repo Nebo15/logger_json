@@ -33,13 +33,20 @@ defmodule LoggerJSON.Plug do
 
   Attaching the telemetry handler to the `MyApp.Repo` events with the `:info` log level:
 
-      LoggerJSON.Plug.attach("logger-json-queries, [:my_app, :repo, :query], :info)
+      # in the endpoint
+      plug Plug.Telemetry, event_prefix: [:myapp, :plug]
 
-  For more details on event and handler naming see
-  (`Ecto.Repo` documentation)[https://hexdocs.pm/ecto/Ecto.Repo.html#module-telemetry-events].
+      # in your application.ex
+      LoggerJSON.Plug.attach("logger-json-requests, [:myapp, :plug, :stop], :info)
+
+  To make plug broadcast those events see [`Plug.Telemetry`](https://hexdocs.pm/plug/Plug.Telemetry.html) documentation.
+
+  You can also attach to the `[:phoenix, :endpoint, :stop]` event to log request latency from Phoenix endpoints:
+
+      LoggerJSON.Plug.attach("logger-json-phoenix-requests, [:phoenix, :endpoint, :stop], :info)
   """
-  def attach(level) do
-    :telemetry.attach("logger-json", [:phoenix, :endpoint, :stop], &telemetry_logging_handler/4, level)
+  def attach(name, event, level) do
+    :telemetry.attach(name, event, &telemetry_logging_handler/4, level)
   end
 
   @doc """
