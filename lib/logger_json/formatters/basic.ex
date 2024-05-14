@@ -40,7 +40,7 @@ defmodule LoggerJSON.Formatters.Basic do
     line =
       %{
         time: utc_time(meta),
-        severity: Atom.to_string(level),
+        severity: Atom.to_string(level) |> String.downcase(),
         message: encode(message, redactors),
         metadata: encode(take_metadata(meta, metadata_selector), redactors)
       }
