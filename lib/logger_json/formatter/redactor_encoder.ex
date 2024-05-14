@@ -6,7 +6,7 @@ defmodule LoggerJSON.Formatter.RedactorEncoder do
   ## Encoding rules
 
   Type                | Encoding                                            | Redaction
-  --------------------|-----------------------------------------------------|---------------
+  ------------------- | --------------------------------------------------- | --------------
   `boolean()`         | unchanged                                           | unchanged
   `map()`             | unchanged                                           | values are redacted
   `list()`            | unchanged                                           | unchanged
@@ -18,7 +18,6 @@ defmodule LoggerJSON.Formatter.RedactorEncoder do
   `keyword()`         | converted to map                                    | values are redacted
   `%Jason.Fragment{}` | unchanged                                           | unchanged
   everything else     | using `inspect/2`                                   | unchanged
-
   """
 
   @type redactor :: {redactor :: module(), redactor_opts :: term()}
