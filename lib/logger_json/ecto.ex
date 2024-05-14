@@ -29,7 +29,7 @@ defmodule LoggerJSON.Ecto do
 
   Attaching the telemetry handler to the `MyApp.Repo` events with the `:info` log level:
 
-      LoggerJSON.Ecto.attach("logger-json-queries, [:my_app, :repo, :query], :info)
+      LoggerJSON.Ecto.attach("logger-json-queries", [:my_app, :repo, :query], :info)
 
   For more details on event and handler naming see
   (`Ecto.Repo` documentation)[https://hexdocs.pm/ecto/Ecto.Repo.html#module-telemetry-events].

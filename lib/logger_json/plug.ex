@@ -33,13 +33,13 @@ defmodule LoggerJSON.Plug do
       plug Plug.Telemetry, event_prefix: [:myapp, :plug]
 
       # in your application.ex
-      LoggerJSON.Plug.attach("logger-json-requests, [:myapp, :plug, :stop], :info)
+      LoggerJSON.Plug.attach("logger-json-requests", [:myapp, :plug, :stop], :info)
 
   To make plug broadcast those events see [`Plug.Telemetry`](https://hexdocs.pm/plug/Plug.Telemetry.html) documentation.
 
   You can also attach to the `[:phoenix, :endpoint, :stop]` event to log request latency from Phoenix endpoints:
 
-      LoggerJSON.Plug.attach("logger-json-phoenix-requests, [:phoenix, :endpoint, :stop], :info)
+      LoggerJSON.Plug.attach("logger-json-phoenix-requests", [:phoenix, :endpoint, :stop], :info)
   """
   def attach(name, event, level) do
     :telemetry.attach(name, event, &telemetry_logging_handler/4, level)
