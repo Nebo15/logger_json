@@ -39,7 +39,7 @@ defmodule LoggerJSON.Plug do
   (`Ecto.Repo` documentation)[https://hexdocs.pm/ecto/Ecto.Repo.html#module-telemetry-events].
   """
   def attach(level) do
-    :telemetry.attach("logger-json", [:phoenix, :endpoint, :stop], &LoggerJSON.Plug.telemetry_logging_handler/4, level)
+    :telemetry.attach("logger-json", [:phoenix, :endpoint, :stop], &telemetry_logging_handler/4, level)
   end
 
   @doc """

@@ -43,7 +43,7 @@ defmodule LoggerJSON.Ecto do
             | false
         ) :: :ok | {:error, :already_exists}
   def attach(name, event, level) do
-    :telemetry.attach(name, event, &LoggerJSON.Ecto.telemetry_logging_handler/4, level)
+    :telemetry.attach(name, event, &telemetry_logging_handler/4, level)
   end
 
   @doc """
