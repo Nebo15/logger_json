@@ -1,7 +1,7 @@
-defmodule LoggerJSON.Formatter.EncoderTest do
+defmodule LoggerJSON.Formatter.RedactorEncoderTest do
   use LoggerJSON.Case, async: true
   use ExUnitProperties
-  import LoggerJSON.Formatter.Encoder
+  import LoggerJSON.Formatter.RedactorEncoder
 
   defmodule IDStruct, do: defstruct(id: nil)
 
@@ -79,7 +79,7 @@ defmodule LoggerJSON.Formatter.EncoderTest do
     end
 
     test "inspects functions" do
-      assert encode(&encode/2, []) == "&LoggerJSON.Formatter.Encoder.encode/2"
+      assert encode(&encode/2, []) == "&LoggerJSON.Formatter.RedactorEncoder.encode/2"
     end
 
     test "inspects pids" do

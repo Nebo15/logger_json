@@ -1,4 +1,4 @@
-defmodule LoggerJSON.Formatter.Encoder do
+defmodule LoggerJSON.Formatter.RedactorEncoder do
   @doc """
   Takes a term and makes sure that it can be encoded by Jason.encode!/1 without errors
   and without leaking sensitive information.
@@ -18,6 +18,7 @@ defmodule LoggerJSON.Formatter.Encoder do
   `keyword()`         | converted to map                                    | values are redacted
   `%Jason.Fragment{}` | unchanged                                           | unchanged
   everything else     | using `inspect/2`                                   | unchanged
+
   """
 
   @type redactor :: {redactor :: module(), redactor_opts :: term()}
