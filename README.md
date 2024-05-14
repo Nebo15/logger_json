@@ -12,14 +12,11 @@ A collection of formatters and utilities for JSON-based logging for various clou
 
 ## Supported formatters
 
-- `LoggerJSON.Formatters.Basic` - a basic JSON formatter that logs messages in a structured format,
-  can be used with any JSON-based logging system, like ElasticSearch, Logstash, etc.
+- [`LoggerJSON.Formatters.Basic`](https://hexdocs.pm/logger_json/LoggerJSON.Formatters.Basic.html) - a basic JSON formatter that logs messages in a structured format, can be used with any JSON-based logging system, like ElasticSearch, Logstash, etc.
 
-- `LoggerJSON.Formatters.GoogleCloud` - a formatter that logs messages in a structured format that can be
-  consumed by Google Cloud Logger and Google Cloud Error Reporter.
+- [`LoggerJSON.Formatters.GoogleCloud`](https://hexdocs.pm/logger_json/LoggerJSON.Formatters.GoogleCloud.html) - a formatter that logs messages in a structured format that can be consumed by Google Cloud Logger and Google Cloud Error Reporter.
 
-- `LoggerJSON.Formatters.Datadog` - a formatter that logs messages in a structured format that can be consumed
-  by Datadog.
+- [`LoggerJSON.Formatters.Datadog`](https://hexdocs.pm/logger_json/LoggerJSON.Formatters.Datadog.html) - a formatter that logs messages in a structured format that can be consumed by Datadog.
 
 ## Installation
 
