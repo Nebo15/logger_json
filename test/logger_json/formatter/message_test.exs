@@ -6,7 +6,7 @@ defmodule LoggerJSON.Formatter.MessageTest do
     setup do
       # Define mock formatters
       binary_fmt = fn data -> "Binary: #{data}" end
-      structured_fmt = fn data -> "Structured: #{inspect(data)}" end
+      structured_fmt = fn data -> "Structured: #{data |> Enum.sort() |> inspect()}" end
       crash_fmt = fn message, reason -> "Crash: #{message} - #{reason}" end
 
       {:ok, formatters: %{binary: binary_fmt, structured: structured_fmt, crash: crash_fmt}}
@@ -29,7 +29,7 @@ defmodule LoggerJSON.Formatter.MessageTest do
       meta = %{}
 
       assert format_message(message, meta, %{structured: formatters.structured}) ==
-               "Structured: %{id: 1, content: \"Report data\"}"
+               ~s|Structured: [content: "Report data", id: 1]|
     end
 
     test "formats reports with custom callbacks altering the data", %{formatters: formatters} do
@@ -51,7 +51,7 @@ defmodule LoggerJSON.Formatter.MessageTest do
     test "formats report with default behavior", %{formatters: formatters} do
       message = {:report, %{id: 2, content: "Another report"}}
       meta = %{report_cb: &:logger.format_otp_report/1}
-      assert format_message(message, meta, formatters) == "Structured: %{id: 2, content: \"Another report\"}"
+      assert format_message(message, meta, formatters) == ~s|Structured: [content: "Another report", id: 2]|
     end
 
     test "formats general message using Logger.Utils.scan_inspect", %{formatters: formatters} do

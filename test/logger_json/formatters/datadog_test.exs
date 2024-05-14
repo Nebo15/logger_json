@@ -346,7 +346,7 @@ defmodule LoggerJSON.Formatters.DatadogTest do
     assert %{
              "error" => %{"message" => "error here"},
              "logger" => %{
-               "file_name" => "/Users/andrew/Projects/os/logger_json/test/logger_json/formatters/datadog_test.exs",
+               "file_name" => _file,
                "line" => _line,
                "method_name" => "Elixir.LoggerJSON.Formatters.DatadogTest." <> _,
                "thread_name" => _pid
@@ -366,7 +366,7 @@ defmodule LoggerJSON.Formatters.DatadogTest do
     assert %{
              "error" => %{"message" => "error here"},
              "logger" => %{
-               "file_name" => "/Users/andrew/Projects/os/logger_json/test/logger_json/formatters/datadog_test.exs",
+               "file_name" => _file,
                "line" => _line,
                "method_name" => "Elixir.LoggerJSON.Formatters.DatadogTest." <> _,
                "thread_name" => _pid
@@ -386,7 +386,7 @@ defmodule LoggerJSON.Formatters.DatadogTest do
     assert %{
              "error" => %{"message" => "error here"},
              "logger" => %{
-               "file_name" => "/Users/andrew/Projects/os/logger_json/test/logger_json/formatters/datadog_test.exs",
+               "file_name" => _file,
                "line" => _line,
                "method_name" => "Elixir.LoggerJSON.Formatters.DatadogTest." <> _,
                "thread_name" => _pid
@@ -406,7 +406,7 @@ defmodule LoggerJSON.Formatters.DatadogTest do
     assert %{
              "error" => %{"message" => "error here"},
              "logger" => %{
-               "file_name" => "/Users/andrew/Projects/os/logger_json/test/logger_json/formatters/datadog_test.exs",
+               "file_name" => _file,
                "line" => _line,
                "method_name" => "Elixir.LoggerJSON.Formatters.DatadogTest." <> _,
                "thread_name" => _pid
