@@ -2,7 +2,8 @@ defmodule LoggerJSON.Redactor do
   @moduledoc """
   This module provides a behaviour which allows to redact sensitive information from logs.
 
-  Note: redactor will not be applied on `Jason.Fragment` structs.
+  *Note*: redactor will not be applied on `Jason.Fragment` structs. For more information
+  about encoding and redacting see `LoggerJSON.Formatter.RedactorEncoder.encode/2`.
   """
 
   @doc """
@@ -10,5 +11,5 @@ defmodule LoggerJSON.Redactor do
 
   This callback will be applied on key-value pairs, like elements of structs, maps or keyword lists.
   """
-  @callback redact(key :: term(), value :: term(), opts :: term()) :: term()
+  @callback redact(key :: String.t(), value :: term(), opts :: term()) :: term()
 end

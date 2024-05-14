@@ -52,10 +52,12 @@ defmodule LoggerJSON.Formatters.Basic do
     [line, "\n"]
   end
 
+  @doc false
   def format_binary_message(binary) do
     IO.chardata_to_string(binary)
   end
 
+  @doc false
   def format_structured_message(map) when is_map(map) do
     map
   end
@@ -64,6 +66,7 @@ defmodule LoggerJSON.Formatters.Basic do
     Enum.into(keyword, %{})
   end
 
+  @doc false
   def format_crash_reason(binary, _reason, _meta) do
     IO.chardata_to_string(binary)
   end

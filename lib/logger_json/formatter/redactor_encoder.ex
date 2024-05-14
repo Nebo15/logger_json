@@ -56,7 +56,7 @@ defmodule LoggerJSON.Formatter.RedactorEncoder do
   def encode(list, redactors) when is_list(list), do: for(el <- list, do: encode(el, redactors))
   def encode(data, _redactors), do: inspect(data, pretty: true, width: 80)
 
-  def encode_key_value({key, value}, redactors) do
+  defp encode_key_value({key, value}, redactors) do
     key = encode_key(key)
     {key, encode(redact(key, value, redactors), redactors)}
   end
@@ -75,7 +75,7 @@ defmodule LoggerJSON.Formatter.RedactorEncoder do
 
   defp redact(key, value, redactors) do
     Enum.reduce(redactors, value, fn {redactor, opts}, acc ->
-      redactor.redact(key, acc, opts)
+      redactor.redact(to_string(key), acc, opts)
     end)
   end
 end

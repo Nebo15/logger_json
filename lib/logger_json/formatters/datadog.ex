@@ -81,10 +81,12 @@ defmodule LoggerJSON.Formatters.Datadog do
     [line, "\n"]
   end
 
+  @doc false
   def format_binary_message(binary) do
     %{message: IO.chardata_to_string(binary)}
   end
 
+  @doc false
   def format_structured_message(map) when is_map(map) do
     %{message: map}
   end
@@ -93,6 +95,7 @@ defmodule LoggerJSON.Formatters.Datadog do
     %{message: Enum.into(keyword, %{})}
   end
 
+  @doc false
   def format_crash_reason(binary, {%{} = _exception, stacktrace}, _meta) do
     %{
       error: %{

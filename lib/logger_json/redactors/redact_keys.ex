@@ -10,8 +10,7 @@ defmodule LoggerJSON.Redactors.RedactKeys do
     ]}
   ```
 
-  Keep in mind that LoggerJSON will convert key type to string before comparing it
-  with the list of keys to redact.
+  Keep in mind that the key will be converted to binary before sending it to the redactor.
   """
 
   @behaviour LoggerJSON.Redactor

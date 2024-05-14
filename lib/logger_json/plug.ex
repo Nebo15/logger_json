@@ -1,10 +1,6 @@
 defmodule LoggerJSON.Plug do
   @moduledoc """
-  A Plug to log request information in JSON format.
-
-  It works by setting up a `Plug.Conn.register_before_send/2` callback
-  which logs a structured message with `conn` and `latency` keys,
-  that are handled by the formatter when the message is encoded.
+  A telemetry handler that logs request information in JSON format.
 
   This module is not recommended to be used in production, as it can be
   costly to log every single database query.

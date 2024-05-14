@@ -24,7 +24,7 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
 
   You can extend the log entry with some additional metadata:application
 
-    * `user_id`, `identity_id`, `actor_id`, `account_id` (order shows precedence) - the ID of the user that is performing the action.
+    * `user_id`, `identity_id`, `actor_id`, `account_id` (ordered by precedence) - the ID of the user that is performing the action.
     It will be included along with the error report for Google Cloud Error Reporting;
 
   For list of other well-known metadata keys see "Metadata" in `LoggerJSON`.
@@ -143,10 +143,12 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
   defp log_level(:debug), do: "DEBUG"
   defp log_level(_), do: "DEFAULT"
 
+  @doc false
   def format_binary_message(binary) do
     %{message: IO.chardata_to_string(binary)}
   end
 
+  @doc false
   def format_structured_message(map) when is_map(map) do
     map
   end
@@ -155,6 +157,7 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
     Enum.into(keyword, %{})
   end
 
+  @doc false
   # https://cloud.google.com/error-reporting/docs/formatting-error-messages
   def format_crash_reason(binary, {{:EXIT, pid}, reason}, service_context, meta) do
     stacktrace = Exception.format_banner({:EXIT, pid}, reason, [])
