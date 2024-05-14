@@ -60,6 +60,20 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
     end
   end
 
+  test "logs an LogEntry when an operation" do
+    log_entry =
+      capture_log(:info, fn ->
+        Logger.log(:info, "Hello", request_id: "1234567890")
+      end)
+      |> decode_or_print_error()
+
+    pid = inspect(self())
+
+    assert %{
+             "logging.googleapis.com/operation" => %{"producer" => ^pid, "id" => "1234567890"}
+           } = log_entry
+  end
+
   test "logs an LogEntry with a map payload" do
     log_entry =
       capture_log(fn ->
@@ -100,6 +114,26 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
 
     assert log_entry["logging.googleapis.com/spanId"] == "bff20904aa5883a6"
     assert log_entry["logging.googleapis.com/trace"] == "projects/myproj-101/traces/294740ce41cc9f202dedb563db123532"
+  end
+
+  test "logs span and trace ids without project_id" do
+    formatter = {GoogleCloud, metadata: :all}
+    :logger.update_handler_config(:default, :formatter, formatter)
+
+    Logger.metadata(
+      otel_span_id: ~c"bff20904aa5883a6",
+      otel_trace_flags: ~c"01",
+      otel_trace_id: ~c"294740ce41cc9f202dedb563db123532"
+    )
+
+    log_entry =
+      capture_log(fn ->
+        Logger.debug("Hello")
+      end)
+      |> decode_or_print_error()
+
+    assert log_entry["logging.googleapis.com/spanId"] == "bff20904aa5883a6"
+    assert log_entry["logging.googleapis.com/trace"] == "294740ce41cc9f202dedb563db123532"
   end
 
   test "logs span and trace ids" do
