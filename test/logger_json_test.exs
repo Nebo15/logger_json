@@ -16,6 +16,9 @@ defmodule LoggerJSONTest do
 
       assert LoggerJSON.configure_log_level!(:info) == :ok
       assert Logger.level() == :info
+
+      assert LoggerJSON.configure_log_level!(nil) == :ok
+      assert Logger.level() == :info
     end
 
     test "raises on invalid log level" do

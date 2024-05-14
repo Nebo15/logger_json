@@ -146,6 +146,62 @@ defmodule LoggerJSON.Formatters.DatadogTest do
 
     assert log["dd.span_id"] == ""
     assert log["dd.trace_id"] == ""
+
+    Logger.metadata(
+      otel_span_id: "ghijklmnopqrstuv",
+      otel_trace_id: "ghijklmnopqrstuv"
+    )
+
+    log =
+      capture_log(fn ->
+        Logger.debug("Hello")
+      end)
+      |> decode_or_print_error()
+
+    assert log["dd.span_id"] == ""
+    assert log["dd.trace_id"] == ""
+
+    Logger.metadata(
+      otel_span_id: "🚀🚀🚀🚀🚀🚀🚀🚀",
+      otel_trace_id: "🚀🚀🚀🚀🚀🚀🚀🚀"
+    )
+
+    log =
+      capture_log(fn ->
+        Logger.debug("Hello")
+      end)
+      |> decode_or_print_error()
+
+    assert log["dd.span_id"] == ""
+    assert log["dd.trace_id"] == ""
+
+    Logger.metadata(
+      otel_span_id: ~c"🚀🚀🚀🚀🚀🚀🚀🚀",
+      otel_trace_id: ~c"🚀🚀🚀🚀🚀🚀🚀🚀"
+    )
+
+    log =
+      capture_log(fn ->
+        Logger.debug("Hello")
+      end)
+      |> decode_or_print_error()
+
+    assert log["dd.span_id"] == ""
+    assert log["dd.trace_id"] == ""
+
+    Logger.metadata(
+      otel_span_id: ~c"🚀",
+      otel_trace_id: ~c"🚀"
+    )
+
+    log =
+      capture_log(fn ->
+        Logger.debug("Hello")
+      end)
+      |> decode_or_print_error()
+
+    assert log["dd.span_id"] == ""
+    assert log["dd.trace_id"] == ""
   end
 
   test "logs span and trace ids" do
@@ -276,5 +332,85 @@ defmodule LoggerJSON.Formatters.DatadogTest do
              },
              "useragent" => "Mozilla/5.0"
            }
+  end
+
+  test "logs throws" do
+    Logger.metadata(crash_reason: {:throw, {:error, :whatever}})
+
+    log_entry =
+      capture_log(fn ->
+        Logger.debug("error here")
+      end)
+      |> decode_or_print_error()
+
+    assert %{
+             "error" => %{"message" => "error here"},
+             "logger" => %{
+               "file_name" => "/Users/andrew/Projects/os/logger_json/test/logger_json/formatters/datadog_test.exs",
+               "line" => _line,
+               "method_name" => "Elixir.LoggerJSON.Formatters.DatadogTest." <> _,
+               "thread_name" => _pid
+             }
+           } = log_entry
+  end
+
+  test "logs exits" do
+    Logger.metadata(crash_reason: {:exit, :sad_failure})
+
+    log_entry =
+      capture_log(fn ->
+        Logger.debug("error here")
+      end)
+      |> decode_or_print_error()
+
+    assert %{
+             "error" => %{"message" => "error here"},
+             "logger" => %{
+               "file_name" => "/Users/andrew/Projects/os/logger_json/test/logger_json/formatters/datadog_test.exs",
+               "line" => _line,
+               "method_name" => "Elixir.LoggerJSON.Formatters.DatadogTest." <> _,
+               "thread_name" => _pid
+             }
+           } = log_entry
+  end
+
+  test "logs process exits" do
+    Logger.metadata(crash_reason: {{:EXIT, self()}, :sad_failure})
+
+    log_entry =
+      capture_log(fn ->
+        Logger.debug("error here")
+      end)
+      |> decode_or_print_error()
+
+    assert %{
+             "error" => %{"message" => "error here"},
+             "logger" => %{
+               "file_name" => "/Users/andrew/Projects/os/logger_json/test/logger_json/formatters/datadog_test.exs",
+               "line" => _line,
+               "method_name" => "Elixir.LoggerJSON.Formatters.DatadogTest." <> _,
+               "thread_name" => _pid
+             }
+           } = log_entry
+  end
+
+  test "logs reasons in tuple" do
+    Logger.metadata(crash_reason: {:socket_closed_unexpectedly, []})
+
+    log_entry =
+      capture_log(fn ->
+        Logger.debug("error here")
+      end)
+      |> decode_or_print_error()
+
+    assert %{
+             "error" => %{"message" => "error here"},
+             "logger" => %{
+               "file_name" => "/Users/andrew/Projects/os/logger_json/test/logger_json/formatters/datadog_test.exs",
+               "line" => _line,
+               "method_name" => "Elixir.LoggerJSON.Formatters.DatadogTest." <> _,
+               "thread_name" => _pid
+             }
+           } = log_entry
   end
 end

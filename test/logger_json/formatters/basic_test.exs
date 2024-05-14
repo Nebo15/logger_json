@@ -37,7 +37,7 @@ defmodule LoggerJSON.Formatters.BasicTest do
     end
   end
 
-  test "logs an LogEntry of a given level" do
+  test "logs message of a given level" do
     for level <- Logger.levels() do
       log =
         capture_log(level, fn ->
@@ -56,7 +56,7 @@ defmodule LoggerJSON.Formatters.BasicTest do
     end
   end
 
-  test "logs an LogEntry with a map payload" do
+  test "logs message with a map payload" do
     log =
       capture_log(fn ->
         Logger.debug(%{foo: :bar, fiz: [1, 2, 3, "buz"]})
@@ -69,7 +69,7 @@ defmodule LoggerJSON.Formatters.BasicTest do
            }
   end
 
-  test "logs an LogEntry with a keyword payload" do
+  test "logs message with a keyword payload" do
     log =
       capture_log(fn ->
         Logger.debug(a: {0, false})

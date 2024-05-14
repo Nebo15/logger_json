@@ -141,7 +141,6 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
   defp log_level(:notice), do: "NOTICE"
   defp log_level(:info), do: "INFO"
   defp log_level(:debug), do: "DEBUG"
-  defp log_level(_), do: "DEFAULT"
 
   @doc false
   def format_binary_message(binary) do
@@ -264,8 +263,11 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
 
   defp format_line(line) do
     case Regex.run(~r/(.+)\:(\d+)\: (.*)/, line) do
-      [_, file, line, function] -> {:trace, "#{file}:#{line}:in `#{function}'"}
-      _ -> {:context, line}
+      [_, file, line, function] ->
+        {:trace, "#{file}:#{line}:in `#{function}'"}
+
+      _ ->
+        {:context, line}
     end
   end
 
@@ -299,7 +301,7 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
     do: nil
 
   defp format_span(%{otel_span_id: otel_span_id}, _project_id_or_nil),
-    do: IO.chardata_to_string(otel_span_id)
+    do: safe_chardata_to_string(otel_span_id)
 
   defp format_span(%{span_id: span_id}, _project_id_or_nil),
     do: span_id
@@ -308,14 +310,20 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
     do: nil
 
   defp format_trace(%{otel_trace_id: otel_trace_id}, nil),
-    do: IO.chardata_to_string(otel_trace_id)
+    do: safe_chardata_to_string(otel_trace_id)
 
   defp format_trace(%{otel_trace_id: otel_trace_id}, project_id),
-    do: "projects/#{project_id}/traces/#{IO.chardata_to_string(otel_trace_id)}"
+    do: "projects/#{project_id}/traces/#{safe_chardata_to_string(otel_trace_id)}"
 
   defp format_trace(%{trace_id: trace_id}, _project_id_or_nil),
     do: trace_id
 
   defp format_trace(_meta, _project_id_or_nil),
     do: nil
+
+  def safe_chardata_to_string(chardata) when is_list(chardata) or is_binary(chardata) do
+    IO.chardata_to_string(chardata)
+  end
+
+  def safe_chardata_to_string(other), do: other
 end
