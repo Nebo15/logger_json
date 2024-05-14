@@ -266,6 +266,9 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
       [_, file, line, function] ->
         {:trace, "#{file}:#{line}:in `#{function}'"}
 
+      # There is no way how Exception.format_stacktrace/1 can return something
+      # that does not match the clause above, but we keep this clause "just in case"
+      # coveralls-ignore-next-line
       _ ->
         {:context, line}
     end
@@ -279,13 +282,19 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
     Enum.map(lines, fn {:trace, line} -> line end)
   end
 
+  # There is no way how Exception.format_stacktrace/1 can return context at the moment
+  # coveralls-ignore-start
   defp format_lines(:context, lines) do
     ["Context:" | Enum.map(lines, fn {:context, line} -> line end)]
   end
 
+  # coveralls-ignore-stop
+
   # https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogEntryOperation
   defp format_operation(%{request_id: request_id, pid: pid}), do: json_map(id: request_id, producer: inspect(pid))
   defp format_operation(%{pid: pid}), do: json_map(producer: inspect(pid))
+  # Erlang logger always has `pid` in the metadata but we keep this clause "just in case"
+  # coveralls-ignore-next-line
   defp format_operation(_meta), do: nil
 
   # https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogEntrySourceLocation

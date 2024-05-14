@@ -152,6 +152,41 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
     assert log_entry["logging.googleapis.com/trace"] == "294740ce41cc9f202dedb563db123532"
   end
 
+  test "does not crash on invalid span and trace ids" do
+    Logger.metadata(
+      span_id: :foo,
+      trace_id: 123
+    )
+
+    log_entry =
+      capture_log(fn ->
+        Logger.debug("Hello")
+      end)
+      |> decode_or_print_error()
+
+    assert log_entry["logging.googleapis.com/spanId"] == "foo"
+    assert log_entry["logging.googleapis.com/trace"] == 123
+  end
+
+  test "does not crash on invalid OTEL span and trace ids" do
+    formatter = {GoogleCloud, metadata: :all}
+    :logger.update_handler_config(:default, :formatter, formatter)
+
+    Logger.metadata(
+      otel_span_id: :foo,
+      otel_trace_id: 123
+    )
+
+    log_entry =
+      capture_log(fn ->
+        Logger.debug("Hello")
+      end)
+      |> decode_or_print_error()
+
+    assert log_entry["logging.googleapis.com/spanId"] == "foo"
+    assert log_entry["logging.googleapis.com/trace"] == 123
+  end
+
   test "logs request id" do
     Logger.metadata(request_id: "1234567890")
 
