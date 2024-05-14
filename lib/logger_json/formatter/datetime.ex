@@ -1,4 +1,6 @@
 defmodule LoggerJSON.Formatter.DateTime do
+  @moduledoc false
+
   @doc """
   Returns either a `time` taken from metadata or current time in RFC3339 UTC "Zulu" format.
   """

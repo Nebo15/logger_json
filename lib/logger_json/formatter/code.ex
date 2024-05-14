@@ -1,4 +1,6 @@
 defmodule LoggerJSON.Formatter.Code do
+  @moduledoc false
+
   @doc """
   Provide a string output of the MFA log entry.
   """

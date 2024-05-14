@@ -1,5 +1,7 @@
 if Code.ensure_loaded?(Plug) do
   defmodule LoggerJSON.Formatter.Plug do
+    @moduledoc false
+
     alias Plug.Conn
 
     @doc """

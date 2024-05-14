@@ -1,4 +1,6 @@
 defmodule LoggerJSON.Formatter.Metadata do
+  @moduledoc false
+
   @ignored_metadata_keys ~w[ansi_color initial_call crash_reason pid gl mfa report_cb time]a
 
   @doc """

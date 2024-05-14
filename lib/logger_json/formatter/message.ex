@@ -1,4 +1,6 @@
 defmodule LoggerJSON.Formatter.Message do
+  @moduledoc false
+
   # crash
   def format_message({:string, message}, %{crash_reason: crash_reason}, %{crash: crash_fmt}) do
     crash_fmt.(message, crash_reason)

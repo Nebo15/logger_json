@@ -1,4 +1,6 @@
 defmodule LoggerJSON.Formatter.MapBuilder do
+  @moduledoc false
+
   @doc """
   Optionally put a value to a map.
   """
