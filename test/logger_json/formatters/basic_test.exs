@@ -157,6 +157,40 @@ defmodule LoggerJSON.Formatters.BasicTest do
                }
              }
            } = log
+
+    formatter = {Basic, metadata: {:all_except, [:struct]}}
+    :logger.update_handler_config(:default, :formatter, formatter)
+
+    log =
+      capture_log(fn ->
+        Logger.debug("Hello", float: 3.14)
+      end)
+      |> decode_or_print_error()
+
+    assert %{
+             "metadata" => %{
+               "atom" => "atom",
+               "binary" => "binary",
+               "date" => _,
+               "domain" => ["elixir"],
+               "list" => [1, 2, 3],
+               "map" => %{"foo" => "bar"},
+               "node" => "nonode@nohost",
+               "ref" => _ref,
+               "float" => 3.14
+             }
+           } = log
+
+    formatter = {Basic, metadata: [:node]}
+    :logger.update_handler_config(:default, :formatter, formatter)
+
+    log =
+      capture_log(fn ->
+        Logger.debug("Hello", float: 3.14)
+      end)
+      |> decode_or_print_error()
+
+    assert log["metadata"] == %{"node" => "nonode@nohost"}
   end
 
   test "logs exceptions" do

@@ -12,8 +12,8 @@ defmodule LoggerJSON.Formatter.Metadata do
   def update_metadata_selector({:all_except, except_keys}, processed_keys),
     do: {:all_except, except_keys ++ processed_keys}
 
-  def update_metadata_selector(keys, _processed_keys),
-    do: keys
+  def update_metadata_selector(keys, processed_keys),
+    do: keys -- processed_keys
 
   @doc """
   Takes metadata and returns a map with the given keys.
@@ -42,21 +42,5 @@ defmodule LoggerJSON.Formatter.Metadata do
 
   def take_metadata(meta, keys) when is_list(keys) do
     Map.take(meta, keys)
-  end
-
-  @doc """
-  Takes a map and a list of mappings and transforms the keys of the map according to the them.
-
-  Transformers can override each other results but the last one in this list wins
-  """
-  def transform_metadata_keys(output, md, mappings) do
-    Enum.reduce(mappings, output, fn {key, {new_key, transformer}}, acc ->
-      if Keyword.has_key?(md, key) do
-        new_value = transformer.(Keyword.get(md, key))
-        Map.put(acc, new_key, new_value)
-      else
-        acc
-      end
-    end)
   end
 end

@@ -6,5 +6,5 @@ defmodule LoggerJSON.Formatter.Code do
   """
   def format_function(nil, function), do: function
   def format_function(module, function), do: "#{module}.#{function}"
-  def format_function(module, function, arity), do: "#{module}.#{function}/#{arity}"
+  def format_function(module, function, arity), do: "#{format_function(module, function)}/#{arity}"
 end

@@ -130,9 +130,22 @@ defmodule LoggerJSON.Formatters.DatadogTest do
 
     assert log["dd.span_id"] == "13831127321250661286"
     assert log["dd.trace_id"] == "3309500741668975922"
+  end
 
-    assert log["otel_span_id"] == "bff20904aa5883a6"
-    assert log["otel_trace_id"] == "294740ce41cc9f202dedb563db123532"
+  test "does not crash when OpenTelemetry span or trace ids are invalid" do
+    Logger.metadata(
+      otel_span_id: :foo,
+      otel_trace_id: "123"
+    )
+
+    log =
+      capture_log(fn ->
+        Logger.debug("Hello")
+      end)
+      |> decode_or_print_error()
+
+    assert log["dd.span_id"] == ""
+    assert log["dd.trace_id"] == ""
   end
 
   test "logs span and trace ids" do

@@ -67,8 +67,8 @@ defmodule LoggerJSON.Formatters.Datadog do
       take_metadata(meta, metadata_selector)
       |> maybe_put(:"dd.span_id", format_span(meta))
       |> maybe_put(:"dd.trace_id", format_trace(meta))
-      |> maybe_update(:otel_span_id, &IO.chardata_to_string/1)
-      |> maybe_update(:otel_trace_id, &IO.chardata_to_string/1)
+      |> maybe_update(:otel_span_id, &safe_chardata_to_string/1)
+      |> maybe_update(:otel_trace_id, &safe_chardata_to_string/1)
 
     line =
       %{syslog: syslog(level, meta, hostname)}
@@ -175,7 +175,7 @@ defmodule LoggerJSON.Formatters.Datadog do
 
   defp convert_otel_field(value) when byte_size(value) < 16, do: ""
 
-  defp convert_otel_field(value) do
+  defp convert_otel_field(value) when is_binary(value) or is_list(value) do
     value = to_string(value)
     len = byte_size(value) - 16
     <<_front::binary-size(len), value::binary>> = value
@@ -183,6 +183,16 @@ defmodule LoggerJSON.Formatters.Datadog do
   rescue
     _ -> ""
   end
+
+  defp convert_otel_field(_other) do
+    ""
+  end
+
+  def safe_chardata_to_string(chardata) when is_list(chardata) or is_binary(chardata) do
+    IO.chardata_to_string(chardata)
+  end
+
+  def safe_chardata_to_string(other), do: other
 
   if Code.ensure_loaded?(Plug.Conn) do
     defp format_http_request(%{conn: %Plug.Conn{} = conn} = meta) do

@@ -8,6 +8,25 @@ defmodule LoggerJSON.EctoTest do
     :logger.update_handler_config(:default, :formatter, formatter)
   end
 
+  describe "attach/3" do
+    test "attaches a telemetry handler" do
+      assert attach(
+               "logger-json-queries",
+               [:my_app, :repo, :query],
+               :info
+             ) == :ok
+
+      assert [
+               %{
+                 function: _function,
+                 id: "logger-json-queries",
+                 config: :info,
+                 event_name: [:my_app, :repo, :query]
+               }
+             ] = :telemetry.list_handlers([:my_app, :repo, :query])
+    end
+  end
+
   describe "telemetry_logging_handler/4" do
     test "logs ecto queries received via telemetry event" do
       log =
