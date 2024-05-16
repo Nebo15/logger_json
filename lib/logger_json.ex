@@ -67,7 +67,7 @@ defmodule LoggerJSON do
     * `:conn` - the `Plug.Conn` struct. This is useful when logging HTTP requests and responses,
     each formatter may use it differently.
   """
-  @log_levels Logger.levels()
+  @log_levels [:error, :info, :debug, :emergency, :alert, :critical, :warning, :notice]
   @log_level_strings Enum.map(@log_levels, &to_string/1)
 
   @doc """
