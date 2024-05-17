@@ -12,15 +12,78 @@ defmodule LoggerJSON.Formatters.ECS do
 
   For list of other well-known metadata keys see "Metadata" in `LoggerJSON`.
 
+  Any custom metadata that you set with `Logger.metadata/1` will be included top-level in the log entry.
+
   ## Examples
 
-  TODO: update examples
+  Example of an info log (`Logger.info("Hello")` without any metadata):
 
       %{
-        "message" => "Hello",
-        "metadata" => %{"domain" => ["elixir"]},
-        "severity" => "notice",
-        "time" => "2024-04-11T21:31:01.403Z"
+        "@timestamp" => "2024-05-17T16:20:00.000Z",
+        "ecs.version" => "8.11.0",
+        "log.level" => "info",
+        "log.logger" => "Elixir.LoggerJSON.Formatters.ECSTest",
+        "log.origin" => %{
+          "file.name" => ~c"/app/logger_json/test/formatters/ecs_test.exs",
+          "file.line" => 18,
+          "function" => "test logs an LogEntry of every level/1"
+        },
+        "message" => "Hello"
+      }
+
+  Example of logging by keywords or by map (Logger.info(%{message: "Hello", foo: :bar, fiz: %{buz: "buz"}})).
+  The keywords or map items are added to the top-level of the log entry:
+
+      %{
+        "@timestamp" => "2024-05-17T16:20:00.000Z",
+        "ecs.version" => "8.11.0",
+        "fiz" => %{"buz" => "buz"},
+        "foo" => "bar",
+        "log.level" => "debug",
+        "log.logger" => "Elixir.LoggerJSON.Formatters.ECSTest",
+        "log.origin" => %{
+          "file.line" => 68,
+          "file.name" => ~c"/app/logger_json/test/formatters/ecs_test.exs",
+          "function" => "test logs an LogEntry with a map payload containing message/1"},
+        "message" => "Hello"
+      }
+
+  Example of logging due to raising an exception (`raise RuntimeError`):
+
+      %{
+        "@timestamp" => "2024-05-17T16:20:00.000Z",
+        "ecs.version" => "8.11.0",
+        "error.message" => "runtime error",
+        "error.stack_trace" => "** (RuntimeError) runtime error\\n    Elixir.LoggerJSON.Formatters.ECSTest.erl:159: anonymous fn/4 in LoggerJSON.Formatters.ECSTest.\\"test logs exceptions\\"/1\\n",
+        "error.type" => "Elixir.RuntimeError",
+        "log.level" => "error",
+        "message" => "runtime error"
+      }
+
+  Note that if you raise an exception that contains an `id` or a `code` property, they will be included in the log entry as `error.id` and `error.code` respectively.
+
+  Example:
+
+      defmodule TestException do
+        defexception [:message, :id, :code]
+      end
+
+      ...
+
+      raise TestException, id: :oops_id, code: 42, message: "oops!"
+
+  results in:
+
+      %{
+        "@timestamp" => "2024-05-17T16:20:00.000Z",
+        "ecs.version" => "8.11.0",
+        "error.code" => 42,
+        "error.id" => "oops_id",
+        "error.message" => "oops!",
+        "error.stack_trace" => "** (LoggerJSON.Formatters.ECSTest.TestException) oops!\n    test/formatters/ecs_test.exs:190: anonymous fn/0 in LoggerJSON.Formatters.ECSTest.\"test logs exceptions with id and code\"/1\n",
+        "error.type" => "Elixir.LoggerJSON.Formatters.ECSTest.TestException",
+        "log.level" => "error",
+        "message" => "oops!"
       }
   """
   import Jason.Helpers, only: [json_map: 1]
@@ -28,7 +91,7 @@ defmodule LoggerJSON.Formatters.ECS do
 
   @ecs_version "8.11.0"
 
-  @processed_metadata_keys ~w[file line mfa
+  @processed_metadata_keys ~w[file line mfa domain error_logger
                               otel_span_id span_id
                               otel_trace_id trace_id
                               conn]a

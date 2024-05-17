@@ -38,6 +38,7 @@ defmodule LoggerJSON.Formatters.ECSTest do
       assert origin_line > 0
       assert String.ends_with?(to_string(origin_file), "test/formatters/ecs_test.exs")
       assert String.starts_with?(to_string(origin_function), "test logs an LogEntry of every level/1")
+      assert log_entry["domain"] == nil
     end
   end
 
@@ -132,7 +133,6 @@ defmodule LoggerJSON.Formatters.ECSTest do
              "atom" => "atom",
              "binary" => "binary",
              "date" => _,
-             "domain" => ["elixir"],
              "list" => [1, 2, 3],
              "map" => %{"foo" => "bar"},
              "node" => "nonode@nohost",
@@ -175,6 +175,7 @@ defmodule LoggerJSON.Formatters.ECSTest do
     assert stacktrace =~ "** (RuntimeError) runtime error"
     assert stacktrace =~ ~r/test\/formatters\/ecs_test.exs:\d+: anonymous fn\/0/
     assert stacktrace =~ "in LoggerJSON.Formatters.ECSTest.\"test logs exceptions\"/1"
+    assert log_entry["error_logger"] == nil
   end
 
   test "logs exceptions with id and code" do
