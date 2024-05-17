@@ -248,6 +248,6 @@ as much as possible.
 
 ## Copyright and License
 
-Copyright (c) 2016 Nebo #15
+Copyright (c) 2016 Andrew Dryga
 
 Released under the MIT License, which can be found in [LICENSE.md](./LICENSE.md).
