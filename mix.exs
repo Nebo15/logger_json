@@ -2,7 +2,7 @@ defmodule LoggerJSON.Mixfile do
   use Mix.Project
 
   @source_url "https://github.com/Nebo15/logger_json"
-  @version "6.0.0-rc.3"
+  @version "6.0.0-rc.4"
 
   def project do
     [
