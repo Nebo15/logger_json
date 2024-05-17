@@ -8,7 +8,7 @@ defmodule LoggerJSON.Mixfile do
     [
       app: :logger_json,
       version: @version,
-      elixir: "~> 1.15.1",
+      elixir: "~> 1.16 or ~> 1.15.1",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [] ++ Mix.compilers(),
       build_embedded: Mix.env() == :prod,
