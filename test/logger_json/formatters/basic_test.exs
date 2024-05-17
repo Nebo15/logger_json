@@ -38,7 +38,7 @@ defmodule LoggerJSON.Formatters.BasicTest do
   end
 
   test "logs message of a given level" do
-    for level <- Logger.levels() do
+    for level <- [:error, :info, :debug, :emergency, :alert, :critical, :warning, :notice] do
       log =
         capture_log(level, fn ->
           Logger.log(level, "Hello")
