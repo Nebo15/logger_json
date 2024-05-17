@@ -117,7 +117,7 @@ defmodule LoggerJSON.Formatters.ECS do
       |> maybe_merge(encode(message))
       |> maybe_merge(encode(take_metadata(meta, metadata_selector)))
       |> maybe_merge(format_logger_fields(meta))
-      # |> maybe_put(:request, format_http_request(meta))
+      |> maybe_merge(format_http_request(meta))
       |> maybe_put(:"span.id", format_span_id(meta))
       |> maybe_put(:"trace.id", format_trace_id(meta))
       |> Jason.encode_to_iodata!()
@@ -213,18 +213,13 @@ defmodule LoggerJSON.Formatters.ECS do
   if Code.ensure_loaded?(Plug.Conn) do
     defp format_http_request(%{conn: %Plug.Conn{} = conn}) do
       json_map(
-        connection:
-          json_map(
-            protocol: Plug.Conn.get_http_protocol(conn),
-            method: conn.method,
-            path: conn.request_path,
-            status: conn.status
-          ),
-        client:
-          json_map(
-            user_agent: get_header(conn, "user-agent"),
-            ip: remote_ip(conn)
-          )
+        "client.ip": remote_ip(conn),
+        "http.version": Plug.Conn.get_http_protocol(conn),
+        "http.request.method": conn.method,
+        "http.request.referrer": get_header(conn, "referer"),
+        "http.response.status_code": conn.status,
+        "url.path": conn.request_path,
+        "user_agent.original": get_header(conn, "user-agent")
       )
     end
   end

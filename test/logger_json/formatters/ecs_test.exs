@@ -324,4 +324,58 @@ defmodule LoggerJSON.Formatters.ECSTest do
              }
            } = log_entry
   end
+
+  test "logs http context" do
+    conn =
+      Plug.Test.conn("GET", "/", "")
+      |> Plug.Conn.put_req_header("user-agent", "Mozilla/5.0")
+      |> Plug.Conn.put_req_header("referer", "http://www.example2.com/")
+      |> Plug.Conn.put_req_header("x-forwarded-for", "")
+      |> Plug.Conn.send_resp(200, "Hi!")
+
+    Logger.metadata(conn: conn)
+
+    log_entry =
+      capture_log(fn ->
+        Logger.debug("Hello")
+      end)
+      |> decode_or_print_error()
+
+    assert %{
+             "client.ip" => "",
+             "http.version" => "HTTP/1.1",
+             "http.request.method" => "GET",
+             "http.request.referrer" => "http://www.example2.com/",
+             "http.response.status_code" => 200,
+             "url.path" => "/",
+             "user_agent.original" => "Mozilla/5.0"
+           } = log_entry
+  end
+
+  test "logs exception http context" do
+    conn =
+      Plug.Test.conn("patch", "/", "")
+      |> Plug.Conn.put_req_header("user-agent", "Mozilla/5.0")
+      |> Plug.Conn.put_req_header("referer", "http://www.example.com/")
+      |> Plug.Conn.put_req_header("x-forwarded-for", "")
+      |> Plug.Conn.send_resp(503, "oops")
+
+    Logger.metadata(crash_reason: {{:EXIT, self()}, :foo}, conn: conn)
+
+    log_entry =
+      capture_log(fn ->
+        Logger.debug("Hello")
+      end)
+      |> decode_or_print_error()
+
+    assert %{
+             "client.ip" => "",
+             "http.version" => "HTTP/1.1",
+             "http.request.method" => "PATCH",
+             "http.request.referrer" => "http://www.example.com/",
+             "http.response.status_code" => 503,
+             "url.path" => "/",
+             "user_agent.original" => "Mozilla/5.0"
+           } = log_entry
+  end
 end
