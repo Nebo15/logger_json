@@ -5,7 +5,7 @@
 [![Module Version](https://img.shields.io/hexpm/v/logger_json.svg)](https://hex.pm/packages/logger_json)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/logger_json/)
 [![Hex Download Total](https://img.shields.io/hexpm/dt/logger_json.svg)](https://hex.pm/packages/logger_json)
-[![License](https://img.shields.io/hexpm/l/logger_json.svg)](https://github.com/Nebo15/logger_json/blob/master/LICENSE)
+[![License](https://img.shields.io/hexpm/l/logger_json.svg)](https://github.com/Nebo15/logger_json/blob/master/LICENSE.md)
 [![Last Updated](https://img.shields.io/github/last-commit/Nebo15/logger_json.svg)](https://github.com/Nebo15/logger_json/commits/master)
 
 A collection of formatters and utilities for JSON-based logging for various cloud tools and platforms.
