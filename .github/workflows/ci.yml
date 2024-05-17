@@ -25,6 +25,8 @@ jobs:
           - otp-version: 24.3
             elixir-version: 1.16
           - otp-version: 25
+            elixir-version: 1.15.1
+          - otp-version: 25
             elixir-version: 1.16
             check-formatted: true
             report-coverage: true
