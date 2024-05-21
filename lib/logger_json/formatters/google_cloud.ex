@@ -89,7 +89,7 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
       }
   """
   import Jason.Helpers, only: [json_map: 1]
-  import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, Code, Plug, RedactorEncoder}
+  import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, Code, RedactorEncoder}
 
   @behaviour LoggerJSON.Formatter
 
@@ -224,9 +224,9 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
       request_method = conn.method |> to_string() |> String.upcase()
       request_url = Plug.Conn.request_url(conn)
       status = conn.status
-      user_agent = get_header(conn, "user-agent")
-      remote_ip = remote_ip(conn)
-      referer = get_header(conn, "referer")
+      user_agent = LoggerJSON.Formatter.Plug.get_header(conn, "user-agent")
+      remote_ip = LoggerJSON.Formatter.Plug.remote_ip(conn)
+      referer = LoggerJSON.Formatter.Plug.get_header(conn, "referer")
 
       json_map(
         protocol: Plug.Conn.get_http_protocol(conn),

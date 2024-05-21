@@ -15,7 +15,7 @@ defmodule LoggerJSON.Formatters.Basic do
       }
   """
   import Jason.Helpers, only: [json_map: 1]
-  import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, Plug, RedactorEncoder}
+  import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, RedactorEncoder}
 
   @behaviour LoggerJSON.Formatter
 
@@ -83,8 +83,8 @@ defmodule LoggerJSON.Formatters.Basic do
           ),
         client:
           json_map(
-            user_agent: get_header(conn, "user-agent"),
-            ip: remote_ip(conn)
+            user_agent: LoggerJSON.Formatter.Plug.get_header(conn, "user-agent"),
+            ip: LoggerJSON.Formatter.Plug.remote_ip(conn)
           )
       )
     end

@@ -97,7 +97,7 @@ defmodule LoggerJSON.Formatters.Elastic do
   ```
   """
   import Jason.Helpers, only: [json_map: 1]
-  import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, Plug, RedactorEncoder}
+  import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, RedactorEncoder}
 
   @behaviour LoggerJSON.Formatter
 
@@ -230,13 +230,13 @@ defmodule LoggerJSON.Formatters.Elastic do
     # - user_agent.original: https://www.elastic.co/guide/en/ecs/8.11/ecs-user_agent.html
     defp format_http_request(%{conn: %Plug.Conn{} = conn}) do
       json_map(
-        "client.ip": remote_ip(conn),
+        "client.ip": LoggerJSON.Formatter.Plug.remote_ip(conn),
         "http.version": Plug.Conn.get_http_protocol(conn),
         "http.request.method": conn.method,
-        "http.request.referrer": get_header(conn, "referer"),
+        "http.request.referrer": LoggerJSON.Formatter.Plug.get_header(conn, "referer"),
         "http.response.status_code": conn.status,
         "url.path": conn.request_path,
-        "user_agent.original": get_header(conn, "user-agent")
+        "user_agent.original": LoggerJSON.Formatter.Plug.get_header(conn, "user-agent")
       )
     end
   end
