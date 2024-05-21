@@ -18,73 +18,83 @@ defmodule LoggerJSON.Formatters.Elastic do
 
   Example of an info log (`Logger.info("Hello")` without any metadata):
 
-      %{
-        "@timestamp" => "2024-05-17T16:20:00.000Z",
-        "ecs.version" => "8.11.0",
-        "log.level" => "info",
-        "log.logger" => "Elixir.LoggerJSON.Formatters.ElasticTest",
-        "log.origin" => %{
-          "file.name" => ~c"/app/logger_json/test/formatters/elastic_test.exs",
-          "file.line" => 18,
-          "function" => "test logs an LogEntry of every level/1"
-        },
-        "message" => "Hello"
-      }
+  ```elixir
+  %{
+    "@timestamp" => "2024-05-17T16:20:00.000Z",
+    "ecs.version" => "8.11.0",
+    "log.level" => "info",
+    "log.logger" => "Elixir.LoggerJSON.Formatters.ElasticTest",
+    "log.origin" => %{
+      "file.name" => ~c"/app/logger_json/test/formatters/elastic_test.exs",
+      "file.line" => 18,
+      "function" => "test logs an LogEntry of every level/1"
+    },
+    "message" => "Hello"
+  }
+  ```
 
   Example of logging by keywords or by map (Logger.info(%{message: "Hello", foo: :bar, fiz: %{buz: "buz"}})).
   The keywords or map items are added to the top-level of the log entry:
 
-      %{
-        "@timestamp" => "2024-05-17T16:20:00.000Z",
-        "ecs.version" => "8.11.0",
-        "fiz" => %{"buz" => "buz"},
-        "foo" => "bar",
-        "log.level" => "debug",
-        "log.logger" => "Elixir.LoggerJSON.Formatters.ElasticTest",
-        "log.origin" => %{
-          "file.line" => 68,
-          "file.name" => ~c"/app/logger_json/test/formatters/elastic_test.exs",
-          "function" => "test logs an LogEntry with a map payload containing message/1"},
-        "message" => "Hello"
-      }
+  ```elixir
+  %{
+    "@timestamp" => "2024-05-17T16:20:00.000Z",
+    "ecs.version" => "8.11.0",
+    "fiz" => %{"buz" => "buz"},
+    "foo" => "bar",
+    "log.level" => "debug",
+    "log.logger" => "Elixir.LoggerJSON.Formatters.ElasticTest",
+    "log.origin" => %{
+      "file.line" => 68,
+      "file.name" => ~c"/app/logger_json/test/formatters/elastic_test.exs",
+      "function" => "test logs an LogEntry with a map payload containing message/1"},
+    "message" => "Hello"
+  }
+  ```
 
   Example of logging due to raising an exception (`raise RuntimeError`):
 
-      %{
-        "@timestamp" => "2024-05-17T16:20:00.000Z",
-        "ecs.version" => "8.11.0",
-        "error.message" => "runtime error",
-        "error.stack_trace" => "** (RuntimeError) runtime error\\n    Elixir.LoggerJSON.Formatters.ElasticTest.erl:159: anonymous fn/4 in LoggerJSON.Formatters.ElasticTest.\\"test logs exceptions\\"/1\\n",
-        "error.type" => "Elixir.RuntimeError",
-        "log.level" => "error",
-        "message" => "runtime error"
-      }
+  ```elixir
+  %{
+    "@timestamp" => "2024-05-17T16:20:00.000Z",
+    "ecs.version" => "8.11.0",
+    "error.message" => "runtime error",
+    "error.stack_trace" => "** (RuntimeError) runtime error\\n    Elixir.LoggerJSON.Formatters.ElasticTest.erl:159: anonymous fn/4 in LoggerJSON.Formatters.ElasticTest.\\"test logs exceptions\\"/1\\n",
+    "error.type" => "Elixir.RuntimeError",
+    "log.level" => "error",
+    "message" => "runtime error"
+  }
+  ```
 
   Note that if you raise an exception that contains an `id` or a `code` property, they will be included in the log entry as `error.id` and `error.code` respectively.
 
   Example:
 
-      defmodule TestException do
-        defexception [:message, :id, :code]
-      end
+  ```elixir
+  defmodule TestException do
+    defexception [:message, :id, :code]
+  end
 
-      ...
+  ...
 
-      raise TestException, id: :oops_id, code: 42, message: "oops!"
+  raise TestException, id: :oops_id, code: 42, message: "oops!"
+  ```
 
   results in:
 
-      %{
-        "@timestamp" => "2024-05-17T16:20:00.000Z",
-        "ecs.version" => "8.11.0",
-        "error.code" => 42,
-        "error.id" => "oops_id",
-        "error.message" => "oops!",
-        "error.stack_trace" => "** (LoggerJSON.Formatters.ElasticTest.TestException) oops!\n    test/formatters/elastic_test.exs:190: anonymous fn/0 in LoggerJSON.Formatters.ElasticTest.\"test logs exceptions with id and code\"/1\n",
-        "error.type" => "Elixir.LoggerJSON.Formatters.ElasticTest.TestException",
-        "log.level" => "error",
-        "message" => "oops!"
-      }
+  ```elixir
+  %{
+    "@timestamp" => "2024-05-17T16:20:00.000Z",
+    "ecs.version" => "8.11.0",
+    "error.code" => 42,
+    "error.id" => "oops_id",
+    "error.message" => "oops!",
+    "error.stack_trace" => "** (LoggerJSON.Formatters.ElasticTest.TestException) oops!\\n    test/formatters/elastic_test.exs:190: anonymous fn/0 in LoggerJSON.Formatters.ElasticTest.\\"test logs exceptions with id and code\\"/1\\n",
+    "error.type" => "Elixir.LoggerJSON.Formatters.ElasticTest.TestException",
+    "log.level" => "error",
+    "message" => "oops!"
+  }
+  ```
   """
   import Jason.Helpers, only: [json_map: 1]
   import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, Plug, RedactorEncoder}
