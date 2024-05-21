@@ -50,9 +50,11 @@ defmodule LoggerJSON.Mixfile do
 
   defp package do
     [
-      description:
-        "A collection of Logger formatters that that write logs in JSON format. " <>
-          "Works with GoogleCloud, Datadog, ElasticSearch, LogStash, FileBeat, Kibana and any other JSON-compatible log management system.",
+      description: """
+      This package includes a set of :logger formatters designed to output logs in JSON format.
+      It is compatible with a variety of log management systems that support JSON,
+      including Google Cloud Logging and Error Reporting, Datadog, ElasticSearch, LogStash, FileBeat, and Kibana.
+      """,
       contributors: ["Andrew Dryga"],
       maintainers: ["Andrew Dryga"],
       licenses: ["MIT"],
