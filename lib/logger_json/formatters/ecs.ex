@@ -2,7 +2,7 @@ defmodule LoggerJSON.Formatters.ECS do
   @moduledoc """
   Custom Erlang's [`:logger` formatter](https://www.erlang.org/doc/apps/kernel/logger_chapter.html#formatters) which
   writes logs in a JSON-structured format that conforms to the Elastic Common Schema (ECS), so it can be consumed by
-  the Elastic Stack.
+  ElasticSearch, LogStash, FileBeat and Kibana.
 
   ## Formatter Configuration
 
@@ -87,7 +87,9 @@ defmodule LoggerJSON.Formatters.ECS do
       }
   """
   import Jason.Helpers, only: [json_map: 1]
-  import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, Plug, Encoder}
+  import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, Plug, RedactorEncoder}
+
+  @behaviour LoggerJSON.Formatter
 
   @ecs_version "8.11.0"
 
@@ -96,10 +98,11 @@ defmodule LoggerJSON.Formatters.ECS do
                               otel_trace_id trace_id
                               conn]a
 
-  @spec format(any(), any()) :: none()
+  @impl LoggerJSON.Formatter
   def format(%{level: level, meta: meta, msg: msg}, opts) do
     metadata_keys_or_selector = Keyword.get(opts, :metadata, [])
     metadata_selector = update_metadata_selector(metadata_keys_or_selector, @processed_metadata_keys)
+    redactors = Keyword.get(opts, :redactors, [])
 
     message =
       format_message(msg, meta, %{
@@ -114,8 +117,8 @@ defmodule LoggerJSON.Formatters.ECS do
         "log.level": Atom.to_string(level),
         "ecs.version": @ecs_version
       }
-      |> maybe_merge(encode(message))
-      |> maybe_merge(encode(take_metadata(meta, metadata_selector)))
+      |> maybe_merge(encode(message, redactors))
+      |> maybe_merge(encode(take_metadata(meta, metadata_selector), redactors))
       |> maybe_merge(format_logger_fields(meta))
       |> maybe_merge(format_http_request(meta))
       |> maybe_put(:"span.id", format_span_id(meta))
@@ -125,10 +128,12 @@ defmodule LoggerJSON.Formatters.ECS do
     [line, "\n"]
   end
 
+  @doc false
   def format_binary_message(binary) do
     %{message: IO.chardata_to_string(binary)}
   end
 
+  @doc false
   def format_structured_message(map) when is_map(map) do
     map
   end
@@ -137,6 +142,7 @@ defmodule LoggerJSON.Formatters.ECS do
     Enum.into(keyword, %{})
   end
 
+  @doc false
   def format_crash_reason(message, {{:EXIT, pid}, reason}, _meta) do
     stacktrace = Exception.format_banner({:EXIT, pid}, reason, [])
     error_message = "process #{inspect(pid)} exit: #{inspect(reason)}"
@@ -187,10 +193,10 @@ defmodule LoggerJSON.Formatters.ECS do
   """
   def format_error_fields(message, error_message, stacktrace, type) do
     %{
-      message: encode(message),
-      "error.message": encode(error_message),
-      "error.stack_trace": encode(stacktrace),
-      "error.type": encode(type)
+      message: message,
+      "error.message": error_message,
+      "error.stack_trace": stacktrace,
+      "error.type": type
     }
   end
 
@@ -199,11 +205,11 @@ defmodule LoggerJSON.Formatters.ECS do
   """
   def format_logger_fields(%{file: file, line: line, mfa: {module, function, arity}}) do
     %{
-      "log.logger": encode(module),
+      "log.logger": module,
       "log.origin": %{
-        "file.name": encode(file),
-        "file.line": encode(line),
-        function: encode("#{function}/#{arity}")
+        "file.name": file,
+        "file.line": line,
+        function: "#{function}/#{arity}"
       }
     }
   end
@@ -211,6 +217,11 @@ defmodule LoggerJSON.Formatters.ECS do
   def format_logger_fields(_meta), do: nil
 
   if Code.ensure_loaded?(Plug.Conn) do
+    # See the formats for the following fields in ECS:
+    # - client.ip: https://www.elastic.co/guide/en/ecs/8.11/ecs-client.html
+    # - http.*: https://www.elastic.co/guide/en/ecs/8.11/ecs-http.html
+    # - url.path: https://www.elastic.co/guide/en/ecs/8.11/ecs-url.html
+    # - user_agent.original: https://www.elastic.co/guide/en/ecs/8.11/ecs-user_agent.html
     defp format_http_request(%{conn: %Plug.Conn{} = conn}) do
       json_map(
         "client.ip": remote_ip(conn),
@@ -226,11 +237,17 @@ defmodule LoggerJSON.Formatters.ECS do
 
   defp format_http_request(_meta), do: nil
 
-  defp format_span_id(%{otel_span_id: otel_span_id}), do: IO.chardata_to_string(otel_span_id)
+  defp format_span_id(%{otel_span_id: otel_span_id}), do: safe_chardata_to_string(otel_span_id)
   defp format_span_id(%{span_id: span_id}), do: span_id
   defp format_span_id(_meta), do: nil
 
-  defp format_trace_id(%{otel_trace_id: otel_trace_id}), do: IO.chardata_to_string(otel_trace_id)
+  defp format_trace_id(%{otel_trace_id: otel_trace_id}), do: safe_chardata_to_string(otel_trace_id)
   defp format_trace_id(%{trace_id: trace_id}), do: trace_id
   defp format_trace_id(_meta), do: nil
+
+  def safe_chardata_to_string(chardata) when is_list(chardata) or is_binary(chardata) do
+    IO.chardata_to_string(chardata)
+  end
+
+  def safe_chardata_to_string(other), do: other
 end

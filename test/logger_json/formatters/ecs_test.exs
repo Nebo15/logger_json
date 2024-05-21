@@ -1,5 +1,5 @@
 defmodule LoggerJSON.Formatters.ECSTest do
-  use Logger.Case
+  use LoggerJSON.Case
   use ExUnitProperties
   alias LoggerJSON.Formatters.ECS
   require Logger
@@ -9,8 +9,8 @@ defmodule LoggerJSON.Formatters.ECSTest do
     :logger.update_handler_config(:default, :formatter, formatter)
   end
 
-  test "logs an LogEntry of every level" do
-    for level <- Logger.levels() do
+  test "logs message of every level" do
+    for level <- [:error, :info, :debug, :emergency, :alert, :critical, :warning, :notice] do
       message = "Hello"
 
       log_entry =
@@ -36,13 +36,13 @@ defmodule LoggerJSON.Formatters.ECSTest do
 
       assert {:ok, _, _} = DateTime.from_iso8601(timestamp)
       assert origin_line > 0
-      assert String.ends_with?(to_string(origin_file), "test/formatters/ecs_test.exs")
-      assert String.starts_with?(to_string(origin_function), "test logs an LogEntry of every level/1")
+      assert String.ends_with?(to_string(origin_file), "test/logger_json/formatters/ecs_test.exs")
+      assert String.starts_with?(to_string(origin_function), "test logs message of every level/1")
       assert log_entry["domain"] == nil
     end
   end
 
-  test "logs an LogEntry with a map payload" do
+  test "logs message with a map payload" do
     log =
       capture_log(fn ->
         Logger.debug(%{foo: :bar, fiz: [1, 2, 3, "buz"]})
@@ -53,7 +53,7 @@ defmodule LoggerJSON.Formatters.ECSTest do
     assert log["foo"] == "bar"
   end
 
-  test "logs an LogEntry with a keyword payload" do
+  test "logs message with a keyword payload" do
     log =
       capture_log(fn ->
         Logger.debug(a: {0, false})
@@ -106,6 +106,38 @@ defmodule LoggerJSON.Formatters.ECSTest do
 
     assert log["span.id"] == "bff20904aa5883a6"
     assert log["trace.id"] == "294740ce41cc9f202dedb563db123532"
+  end
+
+  test "does not crash on invalid span and trace ids" do
+    Logger.metadata(
+      span_id: :foo,
+      trace_id: 123
+    )
+
+    log =
+      capture_log(fn ->
+        Logger.debug("Hello")
+      end)
+      |> decode_or_print_error()
+
+    assert log["span.id"] == "foo"
+    assert log["trace.id"] == 123
+  end
+
+  test "does not crash on invalid OTEL span and trace ids" do
+    Logger.metadata(
+      otel_span_id: :foo,
+      otel_trace_id: 123
+    )
+
+    log =
+      capture_log(fn ->
+        Logger.debug("Hello")
+      end)
+      |> decode_or_print_error()
+
+    assert log["span.id"] == "foo"
+    assert log["trace.id"] == 123
   end
 
   test "logs metadata" do
@@ -173,7 +205,7 @@ defmodule LoggerJSON.Formatters.ECSTest do
            } = log_entry
 
     assert stacktrace =~ "** (RuntimeError) runtime error"
-    assert stacktrace =~ ~r/test\/formatters\/ecs_test.exs:\d+: anonymous fn\/0/
+    assert stacktrace =~ ~r/test\/logger_json\/formatters\/ecs_test.exs:\d+: anonymous fn\/0/
     assert stacktrace =~ "in LoggerJSON.Formatters.ECSTest.\"test logs exceptions\"/1"
     assert log_entry["error_logger"] == nil
   end
