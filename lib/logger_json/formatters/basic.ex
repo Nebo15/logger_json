@@ -15,7 +15,7 @@ defmodule LoggerJSON.Formatters.Basic do
       }
   """
   import Jason.Helpers, only: [json_map: 1]
-  import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, Plug, RedactorEncoder}
+  import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, RedactorEncoder}
 
   @behaviour LoggerJSON.Formatter
 

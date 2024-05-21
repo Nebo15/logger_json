@@ -89,7 +89,7 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
       }
   """
   import Jason.Helpers, only: [json_map: 1]
-  import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, Code, Plug, RedactorEncoder}
+  import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, Code, RedactorEncoder}
 
   @behaviour LoggerJSON.Formatter
 
