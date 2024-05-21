@@ -1,4 +1,4 @@
-defmodule LoggerJSON.Formatters.ECS do
+defmodule LoggerJSON.Formatters.Elastic do
   @moduledoc """
   Custom Erlang's [`:logger` formatter](https://www.erlang.org/doc/apps/kernel/logger_chapter.html#formatters) which
   writes logs in a JSON-structured format that conforms to the Elastic Common Schema (ECS), so it can be consumed by
@@ -22,9 +22,9 @@ defmodule LoggerJSON.Formatters.ECS do
         "@timestamp" => "2024-05-17T16:20:00.000Z",
         "ecs.version" => "8.11.0",
         "log.level" => "info",
-        "log.logger" => "Elixir.LoggerJSON.Formatters.ECSTest",
+        "log.logger" => "Elixir.LoggerJSON.Formatters.ElasticTest",
         "log.origin" => %{
-          "file.name" => ~c"/app/logger_json/test/formatters/ecs_test.exs",
+          "file.name" => ~c"/app/logger_json/test/formatters/elastic_test.exs",
           "file.line" => 18,
           "function" => "test logs an LogEntry of every level/1"
         },
@@ -40,10 +40,10 @@ defmodule LoggerJSON.Formatters.ECS do
         "fiz" => %{"buz" => "buz"},
         "foo" => "bar",
         "log.level" => "debug",
-        "log.logger" => "Elixir.LoggerJSON.Formatters.ECSTest",
+        "log.logger" => "Elixir.LoggerJSON.Formatters.ElasticTest",
         "log.origin" => %{
           "file.line" => 68,
-          "file.name" => ~c"/app/logger_json/test/formatters/ecs_test.exs",
+          "file.name" => ~c"/app/logger_json/test/formatters/elastic_test.exs",
           "function" => "test logs an LogEntry with a map payload containing message/1"},
         "message" => "Hello"
       }
@@ -54,7 +54,7 @@ defmodule LoggerJSON.Formatters.ECS do
         "@timestamp" => "2024-05-17T16:20:00.000Z",
         "ecs.version" => "8.11.0",
         "error.message" => "runtime error",
-        "error.stack_trace" => "** (RuntimeError) runtime error\\n    Elixir.LoggerJSON.Formatters.ECSTest.erl:159: anonymous fn/4 in LoggerJSON.Formatters.ECSTest.\\"test logs exceptions\\"/1\\n",
+        "error.stack_trace" => "** (RuntimeError) runtime error\\n    Elixir.LoggerJSON.Formatters.ElasticTest.erl:159: anonymous fn/4 in LoggerJSON.Formatters.ElasticTest.\\"test logs exceptions\\"/1\\n",
         "error.type" => "Elixir.RuntimeError",
         "log.level" => "error",
         "message" => "runtime error"
@@ -80,8 +80,8 @@ defmodule LoggerJSON.Formatters.ECS do
         "error.code" => 42,
         "error.id" => "oops_id",
         "error.message" => "oops!",
-        "error.stack_trace" => "** (LoggerJSON.Formatters.ECSTest.TestException) oops!\n    test/formatters/ecs_test.exs:190: anonymous fn/0 in LoggerJSON.Formatters.ECSTest.\"test logs exceptions with id and code\"/1\n",
-        "error.type" => "Elixir.LoggerJSON.Formatters.ECSTest.TestException",
+        "error.stack_trace" => "** (LoggerJSON.Formatters.ElasticTest.TestException) oops!\n    test/formatters/elastic_test.exs:190: anonymous fn/0 in LoggerJSON.Formatters.ElasticTest.\"test logs exceptions with id and code\"/1\n",
+        "error.type" => "Elixir.LoggerJSON.Formatters.ElasticTest.TestException",
         "log.level" => "error",
         "message" => "oops!"
       }

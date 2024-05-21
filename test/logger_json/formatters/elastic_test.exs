@@ -1,11 +1,11 @@
-defmodule LoggerJSON.Formatters.ECSTest do
+defmodule LoggerJSON.Formatters.ElasticTest do
   use LoggerJSON.Case
   use ExUnitProperties
-  alias LoggerJSON.Formatters.ECS
+  alias LoggerJSON.Formatters.Elastic
   require Logger
 
   setup do
-    formatter = {ECS, metadata: :all}
+    formatter = {Elastic, metadata: :all}
     :logger.update_handler_config(:default, :formatter, formatter)
   end
 
@@ -25,7 +25,7 @@ defmodule LoggerJSON.Formatters.ECSTest do
                "@timestamp" => timestamp,
                "ecs.version" => "8.11.0",
                "log.level" => ^level_string,
-               "log.logger" => "Elixir.LoggerJSON.Formatters.ECSTest",
+               "log.logger" => "Elixir.LoggerJSON.Formatters.ElasticTest",
                "log.origin" => %{
                  "file.name" => origin_file,
                  "file.line" => origin_line,
@@ -36,7 +36,7 @@ defmodule LoggerJSON.Formatters.ECSTest do
 
       assert {:ok, _, _} = DateTime.from_iso8601(timestamp)
       assert origin_line > 0
-      assert String.ends_with?(to_string(origin_file), "test/logger_json/formatters/ecs_test.exs")
+      assert String.ends_with?(to_string(origin_file), "test/logger_json/formatters/elastic_test.exs")
       assert String.starts_with?(to_string(origin_function), "test logs message of every level/1")
       assert log_entry["domain"] == nil
     end
@@ -205,8 +205,8 @@ defmodule LoggerJSON.Formatters.ECSTest do
            } = log_entry
 
     assert stacktrace =~ "** (RuntimeError) runtime error"
-    assert stacktrace =~ ~r/test\/logger_json\/formatters\/ecs_test.exs:\d+: anonymous fn\/0/
-    assert stacktrace =~ "in LoggerJSON.Formatters.ECSTest.\"test logs exceptions\"/1"
+    assert stacktrace =~ ~r/test\/logger_json\/formatters\/elastic_test.exs:\d+: anonymous fn\/0/
+    assert stacktrace =~ "in LoggerJSON.Formatters.ElasticTest.\"test logs exceptions\"/1"
     assert log_entry["error_logger"] == nil
   end
 
@@ -232,7 +232,7 @@ defmodule LoggerJSON.Formatters.ECSTest do
              "message" => "oops!",
              "error.message" => "oops!",
              "error.stack_trace" => _,
-             "error.type" => "Elixir.LoggerJSON.Formatters.ECSTest.TestException",
+             "error.type" => "Elixir.LoggerJSON.Formatters.ElasticTest.TestException",
              "error.id" => "oops_id",
              "error.code" => 42
            } = log_entry
@@ -276,7 +276,7 @@ defmodule LoggerJSON.Formatters.ECSTest do
              "error.message" => "throw: {:error, :whatever}",
              "error.stack_trace" => "** (throw) {:error, :whatever}",
              "error.type" => "throw",
-             "log.logger" => "Elixir.LoggerJSON.Formatters.ECSTest",
+             "log.logger" => "Elixir.LoggerJSON.Formatters.ElasticTest",
              "log.origin" => %{
                "file.line" => _,
                "file.name" => _,
@@ -299,7 +299,7 @@ defmodule LoggerJSON.Formatters.ECSTest do
              "error.message" => "exit: :sad_failure",
              "error.stack_trace" => "** (exit) :sad_failure",
              "error.type" => "exit",
-             "log.logger" => "Elixir.LoggerJSON.Formatters.ECSTest",
+             "log.logger" => "Elixir.LoggerJSON.Formatters.ElasticTest",
              "log.origin" => %{
                "file.line" => _,
                "file.name" => _,
@@ -322,7 +322,7 @@ defmodule LoggerJSON.Formatters.ECSTest do
              "error.message" => error_message,
              "error.stack_trace" => stacktrace,
              "error.type" => "EXIT",
-             "log.logger" => "Elixir.LoggerJSON.Formatters.ECSTest",
+             "log.logger" => "Elixir.LoggerJSON.Formatters.ElasticTest",
              "log.origin" => %{
                "file.line" => _,
                "file.name" => _,
@@ -348,7 +348,7 @@ defmodule LoggerJSON.Formatters.ECSTest do
              "error.message" => "socket_closed_unexpectedly: []",
              "error.stack_trace" => "** (socket_closed_unexpectedly) []",
              "error.type" => "socket_closed_unexpectedly",
-             "log.logger" => "Elixir.LoggerJSON.Formatters.ECSTest",
+             "log.logger" => "Elixir.LoggerJSON.Formatters.ElasticTest",
              "log.origin" => %{
                "file.line" => _,
                "file.name" => _,
