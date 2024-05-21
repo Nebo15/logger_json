@@ -207,7 +207,7 @@ defmodule LoggerJSON.Formatters.Elastic do
     %{
       "log.logger": module,
       "log.origin": %{
-        "file.name": file,
+        "file.name": to_string(file),
         "file.line": line,
         function: "#{function}/#{arity}"
       }

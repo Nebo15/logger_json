@@ -36,8 +36,8 @@ defmodule LoggerJSON.Formatters.ElasticTest do
 
       assert {:ok, _, _} = DateTime.from_iso8601(timestamp)
       assert origin_line > 0
-      assert String.ends_with?(to_string(origin_file), "test/logger_json/formatters/elastic_test.exs")
-      assert String.starts_with?(to_string(origin_function), "test logs message of every level/1")
+      assert String.ends_with?(origin_file, "test/logger_json/formatters/elastic_test.exs")
+      assert String.starts_with?(origin_function, "test logs message of every level/1")
       assert log_entry["domain"] == nil
     end
   end
@@ -196,6 +196,8 @@ defmodule LoggerJSON.Formatters.ElasticTest do
         Process.sleep(100)
       end)
       |> decode_or_print_error()
+
+    Jason.encode_to_iodata!(log_entry, pretty: true) |> IO.puts()
 
     assert %{
              "message" => "runtime error",

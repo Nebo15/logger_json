@@ -13,6 +13,10 @@ defmodule LoggerJSON do
   * `LoggerJSON.Formatters.Datadog` - a formatter that logs messages in a structured format that can be consumed
   by Datadog.
 
+  * `LoggerJSON.Formatters.Elastic` - a formatter that logs messages in a structured format that conforms to the
+  [Elastic Common Schema (ECS)](https://www.elastic.co/guide/en/ecs/8.11/ecs-reference.html),
+  so it can be consumed by ElasticSearch, LogStash, FileBeat and Kibana.
+
   ## Installation
 
   Add `logger_json` to your list of dependencies in `mix.exs`:

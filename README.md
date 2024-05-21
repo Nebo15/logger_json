@@ -11,11 +11,13 @@ A collection of formatters and utilities for JSON-based logging for various clou
 
 ## Supported formatters
 
-- [`LoggerJSON.Formatters.Basic`](https://hexdocs.pm/logger_json/LoggerJSON.Formatters.Basic.html) - a basic JSON formatter that logs messages in a structured format, can be used with any JSON-based logging system, like ElasticSearch, Logstash, etc.
+- [`LoggerJSON.Formatters.Basic`](https://hexdocs.pm/logger_json/LoggerJSON.Formatters.Basic.html) - a basic JSON formatter that logs messages in a structured, but generic format, can be used with any JSON-based logging system.
 
 - [`LoggerJSON.Formatters.GoogleCloud`](https://hexdocs.pm/logger_json/LoggerJSON.Formatters.GoogleCloud.html) - a formatter that logs messages in a structured format that can be consumed by Google Cloud Logger and Google Cloud Error Reporter.
 
 - [`LoggerJSON.Formatters.Datadog`](https://hexdocs.pm/logger_json/LoggerJSON.Formatters.Datadog.html) - a formatter that logs messages in a structured format that can be consumed by Datadog.
+
+- [`LoggerJSON.Formatters.Elastic`](https://hexdocs.pm/logger_json/LoggerJSON.Formatters.Elastic.html) - a formatter that logs messages in a structured format that conforms to the [Elastic Common Schema (ECS)](https://www.elastic.co/guide/en/ecs/8.11/ecs-reference.html), so it can be consumed by ElasticSearch, LogStash, FileBeat and Kibana.
 
 ## Installation
 
@@ -242,6 +244,62 @@ as much as possible.
     "severity": "debug",
     "timestamp": "2024-04-11T23:10:47.967Z"
   }
+}
+```
+
+## Elastic
+
+Follows the [Elastic Common Schema (ECS)](https://www.elastic.co/guide/en/ecs/8.11/ecs-reference.html) format.
+
+```json
+{
+  "@timestamp": "2024-05-21T15:17:35.374Z",
+  "ecs.version": "8.11.0",
+  "log.level": "info",
+  "log.logger": "Elixir.LoggerJSON.Formatters.ElasticTest",
+  "log.origin": {
+    "file.line": 18,
+    "file.name": "/app/logger_json/test/logger_json/formatters/elastic_test.exs",
+    "function": "test logs message of every level/1"
+  },
+  "message": "Hello"
+}
+```
+
+When an error is thrown, the message field is populated with the error message and the `error.` fields will be set:
+
+> Note: when throwing a custom exception type that defines the fields `id` and/or `code`, then the `error.id` and/or `error.code` fields will be set respectively.
+
+```json
+{
+  "@timestamp": "2024-05-21T15:20:11.623Z",
+  "ecs.version": "8.11.0",
+  "error.message": "runtime error",
+  "error.stack_trace": "** (RuntimeError) runtime error\n    test/logger_json/formatters/elastic_test.exs:191: anonymous fn/0 in LoggerJSON.Formatters.ElasticTest.\"test logs exceptions\"/1\n",
+  "error.type": "Elixir.RuntimeError",
+  "log.level": "error",
+  "message": "runtime error"
+}
+```
+
+Any custom metadata fields will be added to the root of the message, so that your application can fill any other ECS fields that you require:
+
+> Note that this also allows you to produce messages that do not strictly adhere to the ECS specification.
+
+```json
+// with Logger.metadata(:"device.model.name": "My Awesome Device")
+{
+  "@timestamp": "2024-05-21T15:17:35.374Z",
+  "ecs.version": "8.11.0",
+  "log.level": "info",
+  "log.logger": "Elixir.LoggerJSON.Formatters.ElasticTest",
+  "log.origin": {
+    "file.line": 18,
+    "file.name": "/app/logger_json/test/logger_json/formatters/elastic_test.exs",
+    "function": "test logs message of every level/1"
+  },
+  "message": "Hello",
+  "device.model.name": "My Awesome Device"
 }
 ```
 
