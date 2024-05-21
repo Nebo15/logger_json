@@ -197,8 +197,6 @@ defmodule LoggerJSON.Formatters.ElasticTest do
       end)
       |> decode_or_print_error()
 
-    Jason.encode_to_iodata!(log_entry, pretty: true) |> IO.puts()
-
     assert %{
              "message" => "runtime error",
              "error.message" => "runtime error",
