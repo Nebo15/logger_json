@@ -96,7 +96,6 @@ defmodule LoggerJSON.Formatters.Elastic do
   }
   ```
   """
-  import Jason.Helpers, only: [json_map: 1]
   import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, RedactorEncoder}
 
   @behaviour LoggerJSON.Formatter
@@ -223,6 +222,8 @@ defmodule LoggerJSON.Formatters.Elastic do
   defp format_logger_fields(_meta), do: nil
 
   if Code.ensure_loaded?(Plug.Conn) do
+    import Jason.Helpers, only: [json_map: 1]
+
     # See the formats for the following fields in ECS:
     # - client.ip: https://www.elastic.co/guide/en/ecs/8.11/ecs-client.html
     # - http.*: https://www.elastic.co/guide/en/ecs/8.11/ecs-http.html

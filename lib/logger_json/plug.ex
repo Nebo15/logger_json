@@ -1,4 +1,4 @@
-if Code.ensure_loaded?(Plug) do
+if Code.ensure_loaded?(Plug) and Code.ensure_loaded?(:telemetry) do
   defmodule LoggerJSON.Plug do
     @moduledoc """
     A telemetry handler that logs request information in JSON format.

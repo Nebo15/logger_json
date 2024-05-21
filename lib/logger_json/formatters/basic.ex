@@ -14,7 +14,6 @@ defmodule LoggerJSON.Formatters.Basic do
         "time" => "2024-04-11T21:31:01.403Z"
       }
   """
-  import Jason.Helpers, only: [json_map: 1]
   import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, RedactorEncoder}
 
   @behaviour LoggerJSON.Formatter
@@ -72,6 +71,8 @@ defmodule LoggerJSON.Formatters.Basic do
   end
 
   if Code.ensure_loaded?(Plug.Conn) do
+    import Jason.Helpers, only: [json_map: 1]
+
     defp format_http_request(%{conn: %Plug.Conn{} = conn}) do
       json_map(
         connection:

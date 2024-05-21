@@ -41,7 +41,6 @@ defmodule LoggerJSON.Formatters.Datadog do
         }
       }
   """
-  import Jason.Helpers, only: [json_map: 1]
   import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, Code, RedactorEncoder}
 
   @behaviour LoggerJSON.Formatter
@@ -195,6 +194,8 @@ defmodule LoggerJSON.Formatters.Datadog do
   defp safe_chardata_to_string(other), do: other
 
   if Code.ensure_loaded?(Plug.Conn) do
+    import Jason.Helpers, only: [json_map: 1]
+
     defp format_http_request(%{conn: %Plug.Conn{} = conn} = meta) do
       request_url = Plug.Conn.request_url(conn)
       user_agent = LoggerJSON.Formatter.Plug.get_header(conn, "user-agent")
