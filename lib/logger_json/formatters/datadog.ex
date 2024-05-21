@@ -188,11 +188,11 @@ defmodule LoggerJSON.Formatters.Datadog do
     ""
   end
 
-  def safe_chardata_to_string(chardata) when is_list(chardata) or is_binary(chardata) do
+  defp safe_chardata_to_string(chardata) when is_list(chardata) or is_binary(chardata) do
     IO.chardata_to_string(chardata)
   end
 
-  def safe_chardata_to_string(other), do: other
+  defp safe_chardata_to_string(other), do: other
 
   if Code.ensure_loaded?(Plug.Conn) do
     defp format_http_request(%{conn: %Plug.Conn{} = conn} = meta) do

@@ -188,10 +188,8 @@ defmodule LoggerJSON.Formatters.Elastic do
   defp get_exception_code(%{code: code}), do: code
   defp get_exception_code(_), do: nil
 
-  @doc """
-  Formats the error fields as specified in https://www.elastic.co/guide/en/ecs/8.11/ecs-error.html
-  """
-  def format_error_fields(message, error_message, stacktrace, type) do
+  # Formats the error fields as specified in https://www.elastic.co/guide/en/ecs/8.11/ecs-error.html
+  defp format_error_fields(message, error_message, stacktrace, type) do
     %{
       message: message,
       "error.message": error_message,
@@ -200,10 +198,8 @@ defmodule LoggerJSON.Formatters.Elastic do
     }
   end
 
-  @doc """
-  Formats the log.logger and log.origin fields as specified in https://www.elastic.co/guide/en/ecs/8.11/ecs-log.html
-  """
-  def format_logger_fields(%{file: file, line: line, mfa: {module, function, arity}}) do
+  # Formats the log.logger and log.origin fields as specified in https://www.elastic.co/guide/en/ecs/8.11/ecs-log.html
+  defp format_logger_fields(%{file: file, line: line, mfa: {module, function, arity}}) do
     %{
       "log.logger": module,
       "log.origin": %{
@@ -214,7 +210,7 @@ defmodule LoggerJSON.Formatters.Elastic do
     }
   end
 
-  def format_logger_fields(_meta), do: nil
+  defp format_logger_fields(_meta), do: nil
 
   if Code.ensure_loaded?(Plug.Conn) do
     # See the formats for the following fields in ECS:
@@ -245,9 +241,9 @@ defmodule LoggerJSON.Formatters.Elastic do
   defp format_trace_id(%{trace_id: trace_id}), do: trace_id
   defp format_trace_id(_meta), do: nil
 
-  def safe_chardata_to_string(chardata) when is_list(chardata) or is_binary(chardata) do
+  defp safe_chardata_to_string(chardata) when is_list(chardata) or is_binary(chardata) do
     IO.chardata_to_string(chardata)
   end
 
-  def safe_chardata_to_string(other), do: other
+  defp safe_chardata_to_string(other), do: other
 end
