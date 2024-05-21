@@ -42,6 +42,7 @@ defmodule LoggerJSON.Formatters.Datadog do
       }
   """
   import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, Code, RedactorEncoder}
+  require Jason.Helpers
 
   @behaviour LoggerJSON.Formatter
 
@@ -194,8 +195,6 @@ defmodule LoggerJSON.Formatters.Datadog do
   defp safe_chardata_to_string(other), do: other
 
   if Code.ensure_loaded?(Plug.Conn) do
-    import Jason.Helpers, only: [json_map: 1]
-
     defp format_http_request(%{conn: %Plug.Conn{} = conn} = meta) do
       request_url = Plug.Conn.request_url(conn)
       user_agent = LoggerJSON.Formatter.Plug.get_header(conn, "user-agent")
@@ -204,7 +203,7 @@ defmodule LoggerJSON.Formatters.Datadog do
 
       %{
         http:
-          json_map(
+          Jason.Helpers.json_map(
             url: request_url,
             status_code: conn.status,
             method: conn.method,
@@ -212,7 +211,7 @@ defmodule LoggerJSON.Formatters.Datadog do
             request_id: meta[:request_id],
             useragent: user_agent,
             url_details:
-              json_map(
+              Jason.Helpers.json_map(
                 host: conn.host,
                 port: conn.port,
                 path: conn.request_path,
@@ -220,7 +219,7 @@ defmodule LoggerJSON.Formatters.Datadog do
                 scheme: conn.scheme
               )
           ),
-        network: json_map(client: json_map(ip: remote_ip))
+        network: Jason.Helpers.json_map(client: Jason.Helpers.json_map(ip: remote_ip))
       }
     end
   end

@@ -15,6 +15,7 @@ defmodule LoggerJSON.Formatters.Basic do
       }
   """
   import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, RedactorEncoder}
+  require Jason.Helpers
 
   @behaviour LoggerJSON.Formatter
 
@@ -71,19 +72,17 @@ defmodule LoggerJSON.Formatters.Basic do
   end
 
   if Code.ensure_loaded?(Plug.Conn) do
-    import Jason.Helpers, only: [json_map: 1]
-
     defp format_http_request(%{conn: %Plug.Conn{} = conn}) do
-      json_map(
+      Jason.Helpers.json_map(
         connection:
-          json_map(
+          Jason.Helpers.json_map(
             protocol: Plug.Conn.get_http_protocol(conn),
             method: conn.method,
             path: conn.request_path,
             status: conn.status
           ),
         client:
-          json_map(
+          Jason.Helpers.json_map(
             user_agent: LoggerJSON.Formatter.Plug.get_header(conn, "user-agent"),
             ip: LoggerJSON.Formatter.Plug.remote_ip(conn)
           )
