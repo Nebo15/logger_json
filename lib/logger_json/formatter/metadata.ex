@@ -12,6 +12,9 @@ defmodule LoggerJSON.Formatter.Metadata do
   def update_metadata_selector({:all_except, except_keys}, processed_keys),
     do: {:all_except, except_keys ++ processed_keys}
 
+  def update_metadata_selector(nil, processed_keys),
+    do: {:all_except, processed_keys}
+
   def update_metadata_selector(keys, processed_keys),
     do: keys -- processed_keys
 
