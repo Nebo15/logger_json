@@ -183,6 +183,48 @@ defmodule LoggerJSON.PlugTest do
              } = decode_or_print_error(log)
     end
 
+    test "logs requests" do
+      conn =
+        Plug.Test.conn(:get, "/foo/bar?baz=qux#frag")
+        |> Plug.Conn.put_req_header("user-agent", "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)")
+        |> Plug.Conn.put_req_header("referer", "http://www.example.com/")
+        |> Plug.Conn.put_status(200)
+
+      log =
+        capture_log(fn ->
+          Logger.metadata(request_id: "123")
+
+          telemetry_logging_handler(
+            [:phoenix, :endpoint, :stop],
+            %{duration: 500_000},
+            %{conn: conn},
+            :info
+          )
+
+          Logger.flush()
+        end)
+
+      assert %{
+               "http" => %{
+                 "method" => "GET",
+                 "referer" => "http://www.example.com/",
+                 "request_id" => "123",
+                 "status_code" => 200,
+                 "url" => "http://www.example.com/foo/bar?baz=qux",
+                 "url_details" => %{
+                   "host" => "www.example.com",
+                   "path" => "/foo/bar",
+                   "port" => 80,
+                   "queryString" => "baz=qux",
+                   "scheme" => "http"
+                 },
+                 "useragent" => "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)"
+               },
+               "message" => "GET /foo/bar [Sent 200 in 500µs]",
+               "network" => %{"client" => %{"ip" => "127.0.0.1"}}
+             } = decode_or_print_error(log)
+    end
+
     test "logs unsent connections" do
       conn = Plug.Test.conn(:get, "/")
 
