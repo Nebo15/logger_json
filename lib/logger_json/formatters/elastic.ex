@@ -229,7 +229,7 @@ defmodule LoggerJSON.Formatters.Elastic do
     # - url.path: https://www.elastic.co/guide/en/ecs/8.11/ecs-url.html
     # - user_agent.original: https://www.elastic.co/guide/en/ecs/8.11/ecs-user_agent.html
     defp format_http_request(%{conn: %Plug.Conn{} = conn}) do
-      Jason.Helpers.json_map(
+      %{
         "client.ip": LoggerJSON.Formatter.Plug.remote_ip(conn),
         "http.version": Plug.Conn.get_http_protocol(conn),
         "http.request.method": conn.method,
@@ -237,7 +237,7 @@ defmodule LoggerJSON.Formatters.Elastic do
         "http.response.status_code": conn.status,
         "url.path": conn.request_path,
         "user_agent.original": LoggerJSON.Formatter.Plug.get_header(conn, "user-agent")
-      )
+      }
     end
   end
 
