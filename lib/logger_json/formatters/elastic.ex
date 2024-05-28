@@ -25,7 +25,7 @@ defmodule LoggerJSON.Formatters.Elastic do
     "log.level" => "info",
     "log.logger" => "Elixir.LoggerJSON.Formatters.ElasticTest",
     "log.origin" => %{
-      "file.name" => ~c"/app/logger_json/test/formatters/elastic_test.exs",
+      "file.name" => "/app/logger_json/test/formatters/elastic_test.exs",
       "file.line" => 18,
       "function" => "test logs an LogEntry of every level/1"
     },
@@ -46,8 +46,9 @@ defmodule LoggerJSON.Formatters.Elastic do
     "log.logger" => "Elixir.LoggerJSON.Formatters.ElasticTest",
     "log.origin" => %{
       "file.line" => 68,
-      "file.name" => ~c"/app/logger_json/test/formatters/elastic_test.exs",
-      "function" => "test logs an LogEntry with a map payload containing message/1"},
+      "file.name" => "/app/logger_json/test/formatters/elastic_test.exs",
+      "function" => "test logs an LogEntry with a map payload containing message/1"
+    },
     "message" => "Hello"
   }
   ```
@@ -59,10 +60,10 @@ defmodule LoggerJSON.Formatters.Elastic do
     "@timestamp" => "2024-05-17T16:20:00.000Z",
     "ecs.version" => "8.11.0",
     "error.message" => "runtime error",
-    "error.stack_trace" => "** (RuntimeError) runtime error\\n    Elixir.LoggerJSON.Formatters.ElasticTest.erl:159: anonymous fn/4 in LoggerJSON.Formatters.ElasticTest.\\"test logs exceptions\\"/1\\n",
+    "error.stack_trace" => "** (RuntimeError) runtime error\n    test/logger_json/formatters/elastic_test.exs:191: anonymous fn/0 in LoggerJSON.Formatters.ElasticTest.\"test logs exceptions\"/1\n",
     "error.type" => "Elixir.RuntimeError",
     "log.level" => "error",
-    "message" => "runtime error"
+    "message" => "Process #PID<0.322.0> raised an exception\n** (RuntimeError) runtime error\n    test/logger_json/formatters/elastic_test.exs:191: anonymous fn/0 in LoggerJSON.Formatters.ElasticTest.\"test logs exceptions\"/1"
   }
   ```
 
@@ -89,12 +90,44 @@ defmodule LoggerJSON.Formatters.Elastic do
     "error.code" => 42,
     "error.id" => "oops_id",
     "error.message" => "oops!",
-    "error.stack_trace" => "** (LoggerJSON.Formatters.ElasticTest.TestException) oops!\\n    test/formatters/elastic_test.exs:190: anonymous fn/0 in LoggerJSON.Formatters.ElasticTest.\\"test logs exceptions with id and code\\"/1\\n",
+    "error.stack_trace" => "** (LoggerJSON.Formatters.ElasticTest.TestException) oops!\n    test/logger_json/formatters/elastic_test.exs:223: anonymous fn/0 in LoggerJSON.Formatters.ElasticTest.\"test logs exceptions with id and code\"/1\n",
     "error.type" => "Elixir.LoggerJSON.Formatters.ElasticTest.TestException",
     "log.level" => "error",
-    "message" => "oops!"
+    "message" => "Process #PID<0.325.0> raised an exception\n** (LoggerJSON.Formatters.ElasticTest.TestException) oops!\n    test/logger_json/formatters/elastic_test.exs:223: anonymous fn/0 in LoggerJSON.Formatters.ElasticTest.\"test logs exceptions with id and code\"/1"
   }
   ```
+
+  You can also choose to log caught exceptions with a custom message.
+  For example, after catching an exception with `try`/`rescue`:
+
+  ```elixir
+  try do
+    raise "oops"
+  rescue
+    e in RuntimeError -> Logger.error("Something went wrong", crash_reason: {e, __STACKTRACE__})
+  end
+  ```
+
+  then you'll get a message like:
+
+  ```elixir
+  %{
+    "@timestamp" => "2024-05-17T16:20:00.000Z",
+    "ecs.version" => "8.11.0",
+    "error.message" => "oops",
+    "error.stack_trace" => "** (RuntimeError) oops\n    test/logger_json/formatters/elastic_test.exs:421: anonymous fn/0 in LoggerJSON.Formatters.ElasticTest.\"test logs caught errors\"/1\n    (logger_json 6.0.2) test/support/logger_case.ex:16: anonymous fn/1 in LoggerJSON.Case.capture_log/2\n    (ex_unit 1.16.3) lib/ex_unit/capture_io.ex:258: ExUnit.CaptureIO.do_with_io/3\n    (ex_unit 1.16.3) lib/ex_unit/capture_io.ex:134: ExUnit.CaptureIO.capture_io/2\n    (logger_json 6.0.2) test/support/logger_case.ex:15: LoggerJSON.Case.capture_log/2\n    test/logger_json/formatters/elastic_test.exs:419: LoggerJSON.Formatters.ElasticTest.\"test logs caught errors\"/1\n    (ex_unit 1.16.3) lib/ex_unit/runner.ex:472: ExUnit.Runner.exec_test/2\n    (stdlib 5.2.3) timer.erl:270: :timer.tc/2\n    (ex_unit 1.16.3) lib/ex_unit/runner.ex:394: anonymous fn/6 in ExUnit.Runner.spawn_test_monitor/4\n",
+    "error.type" => "Elixir.RuntimeError",
+    "log.level" => "error",
+    "log.logger" => "Elixir.LoggerJSON.Formatters.ElasticTest",
+    "log.origin" => %{
+      "file.line" => 423,
+      "file.name" => "/app/logger_json/test/logger_json/formatters/elastic_test.exs",
+      "function" => "test logs caught errors/1"
+    },
+    "message" => "Something went wrong"
+  }
+  ```
+
   """
   import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, RedactorEncoder}
   require Jason.Helpers
@@ -171,9 +204,7 @@ defmodule LoggerJSON.Formatters.Elastic do
     format_error_fields(message, error_message, stacktrace, "throw")
   end
 
-  def format_crash_reason(_message, {%type{} = exception, stacktrace}, _meta) do
-    message = Exception.message(exception)
-
+  def format_crash_reason(message, {%type{} = exception, stacktrace}, _meta) do
     formatted_stacktrace =
       [
         Exception.format_banner(:error, exception, stacktrace),
@@ -181,7 +212,7 @@ defmodule LoggerJSON.Formatters.Elastic do
       ]
       |> Enum.join("\n")
 
-    format_error_fields(message, message, formatted_stacktrace, type)
+    format_error_fields(message, Exception.message(exception), formatted_stacktrace, type)
     |> maybe_put(:"error.id", get_exception_id(exception))
     |> maybe_put(:"error.code", get_exception_code(exception))
   end
@@ -201,9 +232,9 @@ defmodule LoggerJSON.Formatters.Elastic do
   # Formats the error fields as specified in https://www.elastic.co/guide/en/ecs/8.11/ecs-error.html
   defp format_error_fields(message, error_message, stacktrace, type) do
     %{
-      message: message,
-      "error.message": error_message,
+      message: safe_chardata_to_string(message),
       "error.stack_trace": stacktrace,
+      "error.message": error_message,
       "error.type": type
     }
   end

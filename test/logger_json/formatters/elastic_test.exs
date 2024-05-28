@@ -198,12 +198,13 @@ defmodule LoggerJSON.Formatters.ElasticTest do
       |> decode_or_print_error()
 
     assert %{
-             "message" => "runtime error",
+             "message" => message,
              "error.message" => "runtime error",
              "error.stack_trace" => stacktrace,
              "error.type" => "Elixir.RuntimeError"
            } = log_entry
 
+    assert message =~ ~r/Process #PID<\d.\d+.\d> raised an exception/
     assert stacktrace =~ "** (RuntimeError) runtime error"
     assert stacktrace =~ ~r/test\/logger_json\/formatters\/elastic_test.exs:\d+: anonymous fn\/0/
     assert stacktrace =~ "in LoggerJSON.Formatters.ElasticTest.\"test logs exceptions\"/1"
@@ -229,13 +230,15 @@ defmodule LoggerJSON.Formatters.ElasticTest do
       |> decode_or_print_error()
 
     assert %{
-             "message" => "oops!",
+             "message" => message,
              "error.message" => "oops!",
              "error.stack_trace" => _,
              "error.type" => "Elixir.LoggerJSON.Formatters.ElasticTest.TestException",
              "error.id" => "oops_id",
              "error.code" => 42
            } = log_entry
+
+    assert message =~ ~r/Process #PID<\d.\d+.\d> raised an exception/
   end
 
   test "logged exception stacktrace is in default Elixir format" do
@@ -409,5 +412,36 @@ defmodule LoggerJSON.Formatters.ElasticTest do
              "url.path" => "/",
              "user_agent.original" => "Mozilla/5.0"
            } = log_entry
+  end
+
+  test "logs caught errors" do
+    log_entry =
+      capture_log(fn ->
+        try do
+          raise "oops"
+        rescue
+          e in RuntimeError -> Logger.error("Something went wrong", crash_reason: {e, __STACKTRACE__})
+        end
+      end)
+      |> decode_or_print_error()
+
+    assert %{
+             "message" => "Something went wrong",
+             "error.message" => "oops",
+             "error.type" => "Elixir.RuntimeError",
+             "error.stack_trace" => stacktrace,
+             "log.level" => "error",
+             "log.logger" => "Elixir.LoggerJSON.Formatters.ElasticTest",
+             "log.origin" => %{
+               "file.name" => origin_file,
+               "file.line" => origin_line,
+               "function" => origin_function
+             }
+           } = log_entry
+
+    assert origin_line > 0
+    assert String.ends_with?(origin_file, "test/logger_json/formatters/elastic_test.exs")
+    assert String.starts_with?(origin_function, "test logs caught errors/1")
+    assert String.starts_with?(stacktrace, "** (RuntimeError) oops")
   end
 end
