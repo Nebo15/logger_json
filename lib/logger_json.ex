@@ -70,6 +70,9 @@ defmodule LoggerJSON do
 
     * `:conn` - the `Plug.Conn` struct. This is useful when logging HTTP requests and responses,
     each formatter may use it differently.
+    * `:crash_reason` - accepts a tuple where the first element is the exception struct
+    and the second is the stacktrace. For example: `Logger.error("Exception!", crash_reason: {e, __STACKTRACE__})`.
+    Each formatter may encode it differently.
   """
   @log_levels [:error, :info, :debug, :emergency, :alert, :critical, :warning, :notice]
   @log_level_strings Enum.map(@log_levels, &to_string/1)
