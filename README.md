@@ -287,7 +287,8 @@ Any custom metadata fields will be added to the root of the message, so that you
 > Note that this also allows you to produce messages that do not strictly adhere to the ECS specification.
 
 ```json
-// with Logger.metadata(:"device.model.name": "My Awesome Device")
+// Logger.info("Hello") with Logger.metadata(:"device.model.name": "My Awesome Device")
+// or Logger.info("Hello", "device.model.name": "My Awesome Device")
 {
   "@timestamp": "2024-05-21T15:17:35.374Z",
   "ecs.version": "8.11.0",
