@@ -68,11 +68,13 @@ defmodule LoggerJSON do
   You can set some well-known metadata keys to be included in the log entry. The following keys are supported
   for all formatters:
 
-    * `:conn` - the `Plug.Conn` struct. This is useful when logging HTTP requests and responses,
-    each formatter may use it differently.
-    * `:crash_reason` - accepts a tuple where the first element is the exception struct
-    and the second is the stacktrace. For example: `Logger.error("Exception!", crash_reason: {e, __STACKTRACE__})`.
-    Each formatter may encode it differently.
+    * `:conn` - the `Plug.Conn` struct, setting it will include the request and response details in the log entry;
+    * `:crash_reason` - a tuple where the first element is the exception struct and the second is the stacktrace.
+    For example: `Logger.error("Exception!", crash_reason: {e, __STACKTRACE__})`. Setting it will include the exception
+    details in the log entry.
+
+  Formatters may encode the well-known metadata differently and support additional metadata keys, see the documentation
+  of the formatter for more details.
   """
   @log_levels [:error, :info, :debug, :emergency, :alert, :critical, :warning, :notice]
   @log_level_strings Enum.map(@log_levels, &to_string/1)
