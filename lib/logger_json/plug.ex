@@ -2,9 +2,6 @@ if Code.ensure_loaded?(Plug) and Code.ensure_loaded?(:telemetry) do
   defmodule LoggerJSON.Plug do
     @moduledoc """
     A telemetry handler that logs request information in JSON format.
-
-    This module is not recommended to be used in production, as it can be
-    costly to log every single database query.
     """
     require Logger
 
