@@ -71,7 +71,7 @@ config :logger, :default_handler,
 or during runtime:
 
 ```elixir
-:logger.update_handler_config(:default, :formatter, {Basic, metadata: {:all_except, [:conn]}})
+:logger.update_handler_config(:default, :formatter, {Basic, %{metadata: {:all_except, [:conn]}}})
 ```
 
 ## Docs

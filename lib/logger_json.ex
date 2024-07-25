@@ -38,7 +38,7 @@ defmodule LoggerJSON do
 
   or during runtime (eg. in your `application.ex`):
 
-      :logger.update_handler_config(:default, :formatter, {Basic, []})
+      :logger.update_handler_config(:default, :formatter, {Basic, %{}})
 
   ## Configuration
 
@@ -50,7 +50,7 @@ defmodule LoggerJSON do
 
   or during runtime:
 
-      :logger.update_handler_config(:default, :formatter, {Basic, metadata: {:all_except, [:conn]}})
+      :logger.update_handler_config(:default, :formatter, {Basic, %{metadata: {:all_except, [:conn]}}})
 
   ### Shared Options
 
