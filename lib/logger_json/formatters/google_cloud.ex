@@ -100,6 +100,7 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
 
   @impl true
   def format(%{level: level, meta: meta, msg: msg}, opts) do
+    opts = Keyword.new(opts)
     redactors = Keyword.get(opts, :redactors, [])
     service_context = Keyword.get_lazy(opts, :service_context, fn -> %{service: to_string(node())} end)
     project_id = Keyword.get(opts, :project_id)
