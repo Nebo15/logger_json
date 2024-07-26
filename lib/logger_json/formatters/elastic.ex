@@ -143,6 +143,7 @@ defmodule LoggerJSON.Formatters.Elastic do
 
   @impl LoggerJSON.Formatter
   def format(%{level: level, meta: meta, msg: msg}, opts) do
+    opts = Keyword.new(opts)
     metadata_keys_or_selector = Keyword.get(opts, :metadata, [])
     metadata_selector = update_metadata_selector(metadata_keys_or_selector, @processed_metadata_keys)
     redactors = Keyword.get(opts, :redactors, [])

@@ -50,6 +50,7 @@ defmodule LoggerJSON.Formatters.Datadog do
 
   @impl true
   def format(%{level: level, meta: meta, msg: msg}, opts) do
+    opts = Keyword.new(opts)
     redactors = Keyword.get(opts, :redactors, [])
     hostname = Keyword.get(opts, :hostname, :system)
 
