@@ -32,6 +32,9 @@ defmodule LoggerJSON.Formatter.RedactorEncoder do
   def encode("[REDACTED]", _redactors), do: "[REDACTED]"
   def encode(binary, _redactors) when is_binary(binary), do: encode_binary(binary)
   def encode(%Jason.Fragment{} = fragment, _redactors), do: fragment
+  def encode(%DateTime{} = datetime, _redactors), do: datetime
+  def encode(%Date{} = date, _redactors), do: date
+  def encode(%Time{} = time, _redactors), do: time
 
   def encode(%_struct{} = struct, redactors) do
     struct
