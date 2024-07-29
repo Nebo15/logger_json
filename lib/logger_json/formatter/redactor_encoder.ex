@@ -36,6 +36,7 @@ defmodule LoggerJSON.Formatter.RedactorEncoder do
   def encode(%DateTime{} = datetime, _redactors), do: datetime
   def encode(%Date{} = date, _redactors), do: date
   def encode(%Time{} = time, _redactors), do: time
+  def encode(%Decimal{} = decimal, _redactors), do: decimal
 
   def encode(%_struct{} = struct, redactors) do
     struct
