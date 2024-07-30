@@ -35,6 +35,17 @@ defmodule LoggerJSON.Formatter.RedactorEncoderTest do
       assert encode(123, @redactors) == 123
     end
 
+    test "allows dates and times" do
+      assert encode(~U[2024-01-01 00:00:00Z], @redactors) == ~U[2024-01-01 00:00:00Z]
+      assert encode(~N[2024-01-01 00:00:00], @redactors) == ~N[2024-01-01 00:00:00]
+      assert encode(~D[2024-01-01], @redactors) == ~D[2024-01-01]
+      assert encode(~T[00:00:00], @redactors) == ~T[00:00:00]
+    end
+
+    test "allows decimals" do
+      assert encode(Decimal.new("1.2"), @redactors) == Decimal.new("1.2")
+    end
+
     test "strips Structs" do
       assert encode(%IDStruct{id: "hello"}, @redactors) == %{id: "hello"}
     end
