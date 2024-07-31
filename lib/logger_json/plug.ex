@@ -83,6 +83,8 @@ if Code.ensure_loaded?(Plug) and Code.ensure_loaded?(:telemetry) do
           conn: conn,
           duration_μs: duration
         )
+      else
+        :ok
       end
     end
 
