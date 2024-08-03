@@ -593,5 +593,16 @@ defmodule LoggerJSON.PlugTest do
     end
   end
 
+  test "telemetry_logging_handler/4 returns :ok even when Logger is not called" do
+    log =
+      capture_log(fn ->
+        assert :ok == telemetry_logging_handler([], %{duration: 0}, %{conn: %Plug.Conn{}}, false)
+
+        Logger.flush()
+      end)
+
+    assert log == ""
+  end
+
   def ignore_log(%Plug.Conn{}, :arg), do: false
 end
