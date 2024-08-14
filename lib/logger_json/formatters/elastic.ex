@@ -260,7 +260,8 @@ defmodule LoggerJSON.Formatters.Elastic do
     # - http.*: https://www.elastic.co/guide/en/ecs/8.11/ecs-http.html
     # - url.path: https://www.elastic.co/guide/en/ecs/8.11/ecs-url.html
     # - user_agent.original: https://www.elastic.co/guide/en/ecs/8.11/ecs-user_agent.html
-    defp format_http_request(%{conn: %Plug.Conn{} = conn}) do
+    # - event.duration (note: ns, not μs): https://www.elastic.co/guide/en/ecs/current/ecs-event.html#field-event-duration
+    defp format_http_request(%{conn: %Plug.Conn{} = conn, duration_μs: duration_μs}) do
       %{
         "client.ip": LoggerJSON.Formatter.Plug.remote_ip(conn),
         "http.version": Plug.Conn.get_http_protocol(conn),
@@ -268,7 +269,8 @@ defmodule LoggerJSON.Formatters.Elastic do
         "http.request.referrer": LoggerJSON.Formatter.Plug.get_header(conn, "referer"),
         "http.response.status_code": conn.status,
         "url.path": conn.request_path,
-        "user_agent.original": LoggerJSON.Formatter.Plug.get_header(conn, "user-agent")
+        "user_agent.original": LoggerJSON.Formatter.Plug.get_header(conn, "user-agent"),
+        "event.duration": duration_μs * 1000
       }
     end
   end
