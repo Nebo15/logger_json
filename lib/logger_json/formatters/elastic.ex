@@ -269,10 +269,12 @@ defmodule LoggerJSON.Formatters.Elastic do
         "http.request.referrer": LoggerJSON.Formatter.Plug.get_header(conn, "referer"),
         "http.response.status_code": conn.status,
         "url.path": conn.request_path,
-        "user_agent.original": LoggerJSON.Formatter.Plug.get_header(conn, "user-agent"),
-        "event.duration": duration_μs * 1000
+        "user_agent.original": LoggerJSON.Formatter.Plug.get_header(conn, "user-agent")
       }
+      |> maybe_put(:"event.duration", to_nanosecs(duration_μs))
     end
+
+    defp format_http_request(%{conn: %Plug.Conn{} = conn}), do: format_http_request(%{conn: conn, duration_μs: nil})
   end
 
   defp format_http_request(_meta), do: nil
@@ -290,4 +292,7 @@ defmodule LoggerJSON.Formatters.Elastic do
   end
 
   defp safe_chardata_to_string(other), do: other
+
+  defp to_nanosecs(duration) when is_number(duration), do: duration * 1000
+  defp to_nanosecs(_), do: nil
 end
