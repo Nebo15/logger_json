@@ -1,6 +1,7 @@
 defmodule LoggerJSON.Formatter do
   @type opts :: [
-          {:metadata, :all | {:all_except, [atom()]} | [atom()]}
+          {:encoder_opts, term}
+          | {:metadata, :all | {:all_except, [atom()]} | [atom()]}
           | {:redactors, [{module(), term()}]}
           | {atom(), term()}
         ]
