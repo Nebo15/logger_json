@@ -56,6 +56,9 @@ defmodule LoggerJSON do
 
   Some formatters require additional configuration options. Here are the options that are common for each formatter:
 
+    * `:encoder_opts` - options to be passed directly to the JSON encoder. This allows you to customize the behavior of the JSON
+    encoder. By default, no options are passed to the encoder.
+
     * `:metadata` - a list of metadata keys to include in the log entry. By default, no metadata is included.
     If `:all`is given, all metadata is included. If `{:all_except, keys}` is given, all metadata except
     the specified keys is included.
