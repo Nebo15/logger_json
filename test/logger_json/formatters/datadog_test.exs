@@ -413,4 +413,14 @@ defmodule LoggerJSON.Formatters.DatadogTest do
              }
            } = log_entry
   end
+
+  test "passing options to encoder" do
+    formatter = {Datadog, encoder_opts: [pretty: true]}
+    :logger.update_handler_config(:default, :formatter, formatter)
+
+    assert capture_log(fn ->
+             Logger.debug("Hello")
+           end) =~
+             ~r/^{\n\s{2}"logger": {\n\s{4}/
+  end
 end

@@ -144,6 +144,7 @@ defmodule LoggerJSON.Formatters.Elastic do
   @impl LoggerJSON.Formatter
   def format(%{level: level, meta: meta, msg: msg}, opts) do
     opts = Keyword.new(opts)
+    encoder_opts = Keyword.get(opts, :encoder_opts, [])
     metadata_keys_or_selector = Keyword.get(opts, :metadata, [])
     metadata_selector = update_metadata_selector(metadata_keys_or_selector, @processed_metadata_keys)
     redactors = Keyword.get(opts, :redactors, [])
@@ -167,7 +168,7 @@ defmodule LoggerJSON.Formatters.Elastic do
       |> maybe_merge(format_http_request(meta))
       |> maybe_put(:"span.id", format_span_id(meta))
       |> maybe_put(:"trace.id", format_trace_id(meta))
-      |> Jason.encode_to_iodata!()
+      |> Jason.encode_to_iodata!(encoder_opts)
 
     [line, "\n"]
   end

@@ -51,6 +51,7 @@ defmodule LoggerJSON.Formatters.Datadog do
   @impl true
   def format(%{level: level, meta: meta, msg: msg}, opts) do
     opts = Keyword.new(opts)
+    encoder_opts = Keyword.get(opts, :encoder_opts, [])
     redactors = Keyword.get(opts, :redactors, [])
     hostname = Keyword.get(opts, :hostname, :system)
 
@@ -77,7 +78,7 @@ defmodule LoggerJSON.Formatters.Datadog do
       |> maybe_merge(format_http_request(meta))
       |> maybe_merge(encode(metadata, redactors))
       |> maybe_merge(encode(message, redactors))
-      |> Jason.encode_to_iodata!()
+      |> Jason.encode_to_iodata!(encoder_opts)
 
     [line, "\n"]
   end
