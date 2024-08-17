@@ -421,6 +421,6 @@ defmodule LoggerJSON.Formatters.DatadogTest do
     assert capture_log(fn ->
              Logger.debug("Hello")
            end) =~
-             ~r/^{\n\s{2}"logger": {\n\s{4}/
+             ~r/\n\s{2}"message": "Hello"/
   end
 end

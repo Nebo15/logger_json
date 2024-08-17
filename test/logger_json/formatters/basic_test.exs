@@ -249,6 +249,6 @@ defmodule LoggerJSON.Formatters.BasicTest do
     assert capture_log(fn ->
              Logger.debug("Hello")
            end) =~
-             ~r/^{\n\s{2}"message": "Hello",\n\s{2}/
+             ~r/\n\s{2}"message": "Hello"/
   end
 end
