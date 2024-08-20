@@ -450,4 +450,14 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
              "serviceContext" => %{"service" => "nonode@nohost"}
            } = log_entry
   end
+
+  test "passing options to encoder" do
+    formatter = {GoogleCloud, encoder_opts: [pretty: true]}
+    :logger.update_handler_config(:default, :formatter, formatter)
+
+    assert capture_log(fn ->
+             Logger.debug("Hello")
+           end) =~
+             ~r/\n\s{2}"message": "Hello"/
+  end
 end

@@ -444,4 +444,14 @@ defmodule LoggerJSON.Formatters.ElasticTest do
     assert String.starts_with?(origin_function, "test logs caught errors/1")
     assert String.starts_with?(stacktrace, "** (RuntimeError) oops")
   end
+
+  test "passing options to encoder" do
+    formatter = {Elastic, encoder_opts: [pretty: true]}
+    :logger.update_handler_config(:default, :formatter, formatter)
+
+    assert capture_log(fn ->
+             Logger.debug("Hello")
+           end) =~
+             ~r/\n\s{2}"message": "Hello"/
+  end
 end

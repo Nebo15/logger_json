@@ -241,4 +241,14 @@ defmodule LoggerJSON.Formatters.BasicTest do
              }
            }
   end
+
+  test "passing options to encoder" do
+    formatter = {Basic, encoder_opts: [pretty: true]}
+    :logger.update_handler_config(:default, :formatter, formatter)
+
+    assert capture_log(fn ->
+             Logger.debug("Hello")
+           end) =~
+             ~r/\n\s{2}"message": "Hello"/
+  end
 end
