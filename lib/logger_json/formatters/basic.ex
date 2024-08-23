@@ -74,14 +74,16 @@ defmodule LoggerJSON.Formatters.Basic do
   end
 
   if Code.ensure_loaded?(Plug.Conn) do
-    defp format_http_request(%{conn: %Plug.Conn{} = conn}) do
+    defp format_http_request(%{conn: %Plug.Conn{} = conn, duration_μs: duration_us}) do
       Jason.Helpers.json_map(
         connection:
           Jason.Helpers.json_map(
             protocol: Plug.Conn.get_http_protocol(conn),
             method: conn.method,
             path: conn.request_path,
-            status: conn.status
+            status: conn.status,
+            # Note: duration_μs is not a valid key in JSON, so we use duration_us instead
+            duration_us: duration_us
           ),
         client:
           Jason.Helpers.json_map(

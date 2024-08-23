@@ -220,7 +220,7 @@ defmodule LoggerJSON.Formatters.BasicTest do
       |> Plug.Conn.put_req_header("x-forwarded-for", "127.0.0.1,200.111.222.111")
       |> Plug.Conn.send_resp(200, "Hi!")
 
-    Logger.metadata(conn: conn)
+    Logger.metadata(conn: conn, duration_μs: 100)
 
     log =
       capture_log(fn ->
@@ -237,7 +237,8 @@ defmodule LoggerJSON.Formatters.BasicTest do
                "method" => "GET",
                "path" => "/",
                "protocol" => "HTTP/1.1",
-               "status" => 200
+               "status" => 200,
+               "duration_us" => 100
              }
            }
   end
