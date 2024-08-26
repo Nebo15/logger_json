@@ -18,7 +18,7 @@ defmodule LoggerJSON.Formatter.Metadata do
   end
 
   def update_metadata_selector({:from_application_env, other}, _processed_keys) do
-    raise """
+    raise ArgumentError, """
     Invalid value for `:metadata` option: `{:from_application_env, #{inspect(other)}}`.
 
     The value must be a tuple with the application and module name,
