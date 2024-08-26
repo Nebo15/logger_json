@@ -62,7 +62,8 @@ defmodule LoggerJSON do
 
     * `:metadata` - a list of metadata keys to include in the log entry. By default, no metadata is included.
     If `:all`is given, all metadata is included. If `{:all_except, keys}` is given, all metadata except
-    the specified keys is included.
+    the specified keys is included. If `{:from_application_env, {app, module}, path}` is given, the metadata is fetched from
+    the application environment (eg. `{:from_application_env, {:logger, :default_formatter}, [:metadata]}`) on each logged message.
 
     * `:redactors` - a list of tuples, where first element is the module that implements the `LoggerJSON.Redactor` behaviour,
     and the second element is the options to pass to the redactor module. By default, no redactors are used.

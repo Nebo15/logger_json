@@ -423,4 +423,40 @@ defmodule LoggerJSON.Formatters.DatadogTest do
            end) =~
              ~r/\n\s{2}"message": "Hello"/
   end
+
+  test "reads metadata from the given application env" do
+    Application.put_env(:logger_json, :test_datadog_metadata_key, [:foo])
+    formatter = {Datadog, metadata: {:from_application_env, {:logger_json, :test_datadog_metadata_key}}}
+    :logger.update_handler_config(:default, :formatter, formatter)
+
+    Logger.metadata(foo: "foo")
+
+    log =
+      capture_log(fn ->
+        Logger.debug("Hello")
+      end)
+      |> decode_or_print_error()
+
+    assert %{
+             "foo" => "foo"
+           } = log
+  end
+
+  test "reads metadata from the given application env at given path" do
+    Application.put_env(:logger_json, :test_datadog_metadata_key, metadata: [:foo])
+    formatter = {Datadog, metadata: {:from_application_env, {:logger_json, :test_datadog_metadata_key}, [:metadata]}}
+    :logger.update_handler_config(:default, :formatter, formatter)
+
+    Logger.metadata(foo: "foo")
+
+    log =
+      capture_log(fn ->
+        Logger.debug("Hello")
+      end)
+      |> decode_or_print_error()
+
+    assert %{
+             "foo" => "foo"
+           } = log
+  end
 end

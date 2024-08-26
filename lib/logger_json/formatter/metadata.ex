@@ -6,6 +6,28 @@ defmodule LoggerJSON.Formatter.Metadata do
   @doc """
   Takes current metadata option value and updates it to exclude the given keys.
   """
+  def update_metadata_selector({:from_application_env, {app, module}, path}, processed_keys) do
+    Application.fetch_env!(app, module)
+    |> get_in(path)
+    |> update_metadata_selector(processed_keys)
+  end
+
+  def update_metadata_selector({:from_application_env, {app, module}}, processed_keys) do
+    Application.fetch_env!(app, module)
+    |> update_metadata_selector(processed_keys)
+  end
+
+  def update_metadata_selector({:from_application_env, other}, _processed_keys) do
+    raise """
+    Invalid value for `:metadata` option: `{:from_application_env, #{inspect(other)}}`.
+
+    The value must be a tuple with the application and module name,
+    and an optional path to the metadata option.
+
+    Eg.: `{:from_application_env, {:logger, :default_formatter}, [:metadata]}`
+    """
+  end
+
   def update_metadata_selector(:all, processed_keys),
     do: {:all_except, processed_keys}
 
