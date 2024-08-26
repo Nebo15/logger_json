@@ -73,10 +73,10 @@ if Code.ensure_loaded?(Ecto) and Code.ensure_loaded?(:telemetry) do
       metadata = [
         query: %{
           repo: inspect(repo),
-          execution_time_μs: query_time,
-          decode_time_μs: decode_time,
-          queue_time_μs: queue_time,
-          latency_μs: latency
+          execution_time_us: query_time,
+          decode_time_us: decode_time,
+          queue_time_us: queue_time,
+          latency_us: latency
         }
       ]
 

@@ -44,8 +44,8 @@ defmodule LoggerJSON.PlugTest do
         end)
 
       assert %{
-               "message" => "GET / [Sent 200 in 500µs]",
-               "metadata" => %{"duration_μs" => 500},
+               "message" => "GET / [Sent 200 in 500us]",
+               "metadata" => %{"duration_us" => 500},
                "request" => %{
                  "client" => %{"ip" => "127.0.0.1", "user_agent" => nil},
                  "connection" => %{"method" => "GET", "path" => "/", "protocol" => "HTTP/1.1", "status" => 200}
@@ -69,8 +69,8 @@ defmodule LoggerJSON.PlugTest do
         end)
 
       assert %{
-               "message" => "GET / [Sent in 500µs]",
-               "metadata" => %{"duration_μs" => 500},
+               "message" => "GET / [Sent in 500us]",
+               "metadata" => %{"duration_us" => 500},
                "request" => %{
                  "client" => %{"ip" => "127.0.0.1", "user_agent" => nil},
                  "connection" => %{"method" => "GET", "path" => "/", "protocol" => "HTTP/1.1", "status" => nil}
@@ -94,8 +94,8 @@ defmodule LoggerJSON.PlugTest do
         end)
 
       assert %{
-               "message" => "GET / [Chunked in 500µs]",
-               "metadata" => %{"duration_μs" => 500},
+               "message" => "GET / [Chunked in 500us]",
+               "metadata" => %{"duration_us" => 500},
                "request" => %{
                  "client" => %{"ip" => "127.0.0.1", "user_agent" => nil},
                  "connection" => %{"method" => "GET", "path" => "/", "protocol" => "HTTP/1.1", "status" => nil}
@@ -162,7 +162,7 @@ defmodule LoggerJSON.PlugTest do
         end)
 
       assert %{
-               "message" => "GET / [Sent 200 in 500µs]",
+               "message" => "GET / [Sent 200 in 500us]",
                "http" => %{
                  "method" => "GET",
                  "referer" => nil,
@@ -220,7 +220,7 @@ defmodule LoggerJSON.PlugTest do
                  },
                  "useragent" => "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)"
                },
-               "message" => "GET /foo/bar [Sent 200 in 500µs]",
+               "message" => "GET /foo/bar [Sent 200 in 500us]",
                "network" => %{"client" => %{"ip" => "127.0.0.1"}}
              } = decode_or_print_error(log)
     end
@@ -241,7 +241,7 @@ defmodule LoggerJSON.PlugTest do
         end)
 
       assert %{
-               "message" => "GET / [Sent in 500µs]",
+               "message" => "GET / [Sent in 500us]",
                "http" => %{
                  "method" => "GET",
                  "referer" => nil,
@@ -278,7 +278,7 @@ defmodule LoggerJSON.PlugTest do
         end)
 
       assert %{
-               "message" => "GET / [Chunked in 500µs]",
+               "message" => "GET / [Chunked in 500us]",
                "http" => %{
                  "method" => "GET",
                  "referer" => nil,
@@ -358,8 +358,8 @@ defmodule LoggerJSON.PlugTest do
         end)
 
       assert %{
-               "message" => "GET / [Sent 200 in 500µs]",
-               "duration_μs" => 500,
+               "message" => "GET / [Sent 200 in 500us]",
+               "duration_us" => 500,
                "httpRequest" => %{
                  "protocol" => "HTTP/1.1",
                  "referer" => nil,
@@ -389,8 +389,8 @@ defmodule LoggerJSON.PlugTest do
         end)
 
       assert %{
-               "message" => "GET / [Sent in 500µs]",
-               "duration_μs" => 500,
+               "message" => "GET / [Sent in 500us]",
+               "duration_us" => 500,
                "httpRequest" => %{
                  "protocol" => "HTTP/1.1",
                  "referer" => nil,
@@ -420,8 +420,8 @@ defmodule LoggerJSON.PlugTest do
         end)
 
       assert %{
-               "message" => "GET / [Chunked in 500µs]",
-               "duration_μs" => 500,
+               "message" => "GET / [Chunked in 500us]",
+               "duration_us" => 500,
                "httpRequest" => %{
                  "protocol" => "HTTP/1.1",
                  "referer" => nil,

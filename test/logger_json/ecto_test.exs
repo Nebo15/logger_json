@@ -61,10 +61,10 @@ defmodule LoggerJSON.EctoTest do
                "message" => "begin",
                "metadata" => %{
                  "query" => %{
-                   "decode_time_μs" => 0,
-                   "execution_time_μs" => 2930,
-                   "latency_μs" => 3036,
-                   "queue_time_μs" => 106,
+                   "decode_time_us" => 0,
+                   "execution_time_us" => 2930,
+                   "latency_us" => 3036,
+                   "queue_time_us" => 106,
                    "repo" => "Repo"
                  }
                }

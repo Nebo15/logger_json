@@ -81,7 +81,7 @@ if Code.ensure_loaded?(Plug) and Code.ensure_loaded?(:telemetry) do
             ]
           end,
           conn: conn,
-          duration_μs: duration
+          duration_us: duration
         )
       else
         :ok
@@ -98,7 +98,7 @@ if Code.ensure_loaded?(Plug) and Code.ensure_loaded?(:telemetry) do
       if duration > 1000 do
         [duration |> div(1000) |> Integer.to_string(), "ms"]
       else
-        [Integer.to_string(duration), "µs"]
+        [Integer.to_string(duration), "us"]
       end
     end
 
