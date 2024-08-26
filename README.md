@@ -27,7 +27,7 @@ Add `logger_json` to your list of dependencies in `mix.exs`:
 def deps do
   [
     # ...
-    {:logger_json, "~> 6.0"}
+    {:logger_json, "~> 6.1"}
     # ...
   ]
 end

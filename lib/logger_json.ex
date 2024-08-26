@@ -24,7 +24,7 @@ defmodule LoggerJSON do
       def deps do
         [
           # ...
-          {:logger_json, "~> 6.0"}
+          {:logger_json, "~> 6.1"}
           # ...
         ]
       end
