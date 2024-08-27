@@ -261,7 +261,8 @@ defmodule LoggerJSON.Formatters.Elastic do
     # - http.*: https://www.elastic.co/guide/en/ecs/8.11/ecs-http.html
     # - url.path: https://www.elastic.co/guide/en/ecs/8.11/ecs-url.html
     # - user_agent.original: https://www.elastic.co/guide/en/ecs/8.11/ecs-user_agent.html
-    defp format_http_request(%{conn: %Plug.Conn{} = conn}) do
+    # - event.duration (note: ns, not μs): https://www.elastic.co/guide/en/ecs/current/ecs-event.html#field-event-duration
+    defp format_http_request(%{conn: %Plug.Conn{} = conn, duration_us: duration_us}) do
       %{
         "client.ip": LoggerJSON.Formatter.Plug.remote_ip(conn),
         "http.version": Plug.Conn.get_http_protocol(conn),
@@ -271,7 +272,10 @@ defmodule LoggerJSON.Formatters.Elastic do
         "url.path": conn.request_path,
         "user_agent.original": LoggerJSON.Formatter.Plug.get_header(conn, "user-agent")
       }
+      |> maybe_put(:"event.duration", to_nanosecs(duration_us))
     end
+
+    defp format_http_request(%{conn: %Plug.Conn{} = conn}), do: format_http_request(%{conn: conn, duration_us: nil})
   end
 
   defp format_http_request(_meta), do: nil
@@ -289,4 +293,7 @@ defmodule LoggerJSON.Formatters.Elastic do
   end
 
   defp safe_chardata_to_string(other), do: other
+
+  defp to_nanosecs(duration_us) when is_number(duration_us), do: duration_us * 1000
+  defp to_nanosecs(_), do: nil
 end
