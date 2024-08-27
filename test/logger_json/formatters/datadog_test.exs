@@ -307,7 +307,7 @@ defmodule LoggerJSON.Formatters.DatadogTest do
       |> Plug.Conn.put_req_header("x-forwarded-for", "127.0.0.1")
       |> Plug.Conn.send_resp(200, "Hi!")
 
-    Logger.metadata(conn: conn)
+    Logger.metadata(conn: conn, duration_us: 1337)
 
     log =
       capture_log(fn ->
@@ -332,6 +332,47 @@ defmodule LoggerJSON.Formatters.DatadogTest do
              },
              "useragent" => "Mozilla/5.0"
            }
+
+    assert log["duration"] == 1_337_000
+  end
+
+  test "logs exception http context" do
+    conn =
+      Plug.Test.conn("patch", "/", "")
+      |> Plug.Conn.put_req_header("user-agent", "Mozilla/5.0")
+      |> Plug.Conn.put_req_header("referer", "http://www.example.com/")
+      |> Plug.Conn.put_req_header("x-forwarded-for", "127.0.0.1")
+      |> Plug.Conn.send_resp(503, "oops")
+
+    Logger.metadata(crash_reason: {{:EXIT, self()}, :foo}, conn: conn)
+
+    log =
+      capture_log(fn ->
+        Logger.debug("Hello")
+      end)
+      |> decode_or_print_error()
+
+    assert log["error"] == %{"message" => "Hello"}
+
+    assert log["network"] == %{"client" => %{"ip" => "127.0.0.1"}}
+
+    assert log["http"] == %{
+             "referer" => "http://www.example.com/",
+             "method" => "PATCH",
+             "request_id" => nil,
+             "status_code" => 503,
+             "url" => "http://www.example.com/",
+             "url_details" => %{
+               "host" => "www.example.com",
+               "path" => "/",
+               "port" => 80,
+               "queryString" => "",
+               "scheme" => "http"
+             },
+             "useragent" => "Mozilla/5.0"
+           }
+
+    assert log["duration"] == nil
   end
 
   test "logs throws" do
