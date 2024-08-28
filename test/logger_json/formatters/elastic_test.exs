@@ -368,7 +368,7 @@ defmodule LoggerJSON.Formatters.ElasticTest do
       |> Plug.Conn.put_req_header("x-forwarded-for", "")
       |> Plug.Conn.send_resp(200, "Hi!")
 
-    Logger.metadata(conn: conn)
+    Logger.metadata(conn: conn, duration_us: 1337)
 
     log_entry =
       capture_log(fn ->
@@ -378,6 +378,7 @@ defmodule LoggerJSON.Formatters.ElasticTest do
 
     assert %{
              "client.ip" => "",
+             "event.duration" => 1_337_000,
              "http.version" => "HTTP/1.1",
              "http.request.method" => "GET",
              "http.request.referrer" => "http://www.example2.com/",

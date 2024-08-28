@@ -197,7 +197,7 @@ defmodule LoggerJSON.Formatters.Datadog do
   defp safe_chardata_to_string(other), do: other
 
   if Code.ensure_loaded?(Plug.Conn) do
-    defp format_http_request(%{conn: %Plug.Conn{} = conn} = meta) do
+    defp format_http_request(%{conn: %Plug.Conn{} = conn, duration_us: duration_us} = meta) do
       request_url = Plug.Conn.request_url(conn)
       user_agent = LoggerJSON.Formatter.Plug.get_header(conn, "user-agent")
       remote_ip = LoggerJSON.Formatter.Plug.remote_ip(conn)
@@ -223,8 +223,14 @@ defmodule LoggerJSON.Formatters.Datadog do
           ),
         network: Jason.Helpers.json_map(client: Jason.Helpers.json_map(ip: remote_ip))
       }
+      |> maybe_put(:duration, to_nanosecs(duration_us))
     end
+
+    defp format_http_request(%{conn: %Plug.Conn{} = conn}), do: format_http_request(%{conn: conn, duration_us: nil})
   end
 
   defp format_http_request(_meta), do: nil
+
+  defp to_nanosecs(duration_us) when is_number(duration_us), do: duration_us * 1000
+  defp to_nanosecs(_), do: nil
 end
