@@ -188,9 +188,13 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
     format_reported_error_event(message, ruby_stacktrace, service_context, meta)
   end
 
-  def format_crash_reason(binary, {error, reason}, service_context, meta) do
+  def format_crash_reason(binary, {error, reason}, service_context, meta) when is_atom(error) or is_binary(error) do
     stacktrace = "** (#{error}) #{inspect(reason)}"
     format_reported_error_event(binary, stacktrace, service_context, meta)
+  end
+
+  def format_crash_reason(binary, {error, reason}, service_context, meta) do
+    format_crash_reason(binary, {inspect(error), reason}, service_context, meta)
   end
 
   defp format_reported_error_event(message, stacktrace, service_context, meta) do
