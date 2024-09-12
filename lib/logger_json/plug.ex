@@ -94,7 +94,7 @@ if Code.ensure_loaded?(Plug) and Code.ensure_loaded?(:telemetry) do
     defp status(nil), do: ""
     defp status(status), do: [status |> Plug.Conn.Status.code() |> Integer.to_string(), ?\s]
 
-    def duration(duration) do
+    defp duration(duration) do
       if duration > 1000 do
         [duration |> div(1000) |> Integer.to_string(), "ms"]
       else
