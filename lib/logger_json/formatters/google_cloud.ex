@@ -226,13 +226,14 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
   defp format_crash_report_location(_meta), do: nil
 
   if Code.ensure_loaded?(Plug.Conn) do
-    defp format_http_request(%{conn: %Plug.Conn{} = conn}) do
+    defp format_http_request(%{conn: %Plug.Conn{} = conn} = assigns) do
       request_method = conn.method |> to_string() |> String.upcase()
       request_url = Plug.Conn.request_url(conn)
       status = conn.status
       user_agent = LoggerJSON.Formatter.Plug.get_header(conn, "user-agent")
       remote_ip = LoggerJSON.Formatter.Plug.remote_ip(conn)
       referer = LoggerJSON.Formatter.Plug.get_header(conn, "referer")
+      latency = http_request_latency(assigns)
 
       json_map(
         protocol: Plug.Conn.get_http_protocol(conn),
@@ -241,12 +242,22 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
         status: status,
         userAgent: user_agent,
         remoteIp: remote_ip,
-        referer: referer
+        referer: referer,
+        latency: latency
       )
     end
   end
 
   defp format_http_request(_meta), do: nil
+
+  defp http_request_latency(%{duration_us: duration_us}) do
+    duration_s = Float.round(duration_us / 1_000_000, 9)
+    "#{duration_s}s"
+  end
+
+  defp http_request_latency(_assigns) do
+    nil
+  end
 
   defp format_affected_user(%{user_id: user_id}), do: "user:" <> user_id
   defp format_affected_user(%{identity_id: identity_id}), do: "identity:" <> identity_id

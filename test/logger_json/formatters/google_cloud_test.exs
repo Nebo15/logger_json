@@ -331,7 +331,7 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
 
     log_entry =
       capture_log(fn ->
-        Logger.debug("Hello")
+        Logger.debug("Hello", duration_us: 123_456)
       end)
       |> decode_or_print_error()
 
@@ -342,7 +342,8 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
              "requestMethod" => "GET",
              "requestUrl" => "http://www.example.com/",
              "status" => 200,
-             "userAgent" => "Mozilla/5.0"
+             "userAgent" => "Mozilla/5.0",
+             "latency" => "0.123456s"
            }
   end
 
@@ -369,7 +370,8 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
              "requestMethod" => "PATCH",
              "requestUrl" => "http://www.example.com/",
              "status" => 503,
-             "userAgent" => "Mozilla/5.0"
+             "userAgent" => "Mozilla/5.0",
+             "latency" => nil
            }
   end
 
