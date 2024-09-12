@@ -446,6 +446,49 @@ defmodule LoggerJSON.Formatters.ElasticTest do
     assert String.starts_with?(stacktrace, "** (RuntimeError) oops")
   end
 
+  test "logs Task/GenServer termination" do
+    test_pid = self()
+
+    logs =
+      capture_log(fn ->
+        {:ok, _} = Supervisor.start_link([{CrashingGenServer, :ok}], strategy: :one_for_one)
+
+        {:ok, _} =
+          Task.start(fn ->
+            try do
+              GenServer.call(CrashingGenServer, :boom)
+            catch
+              _ -> nil
+            after
+              send(test_pid, :done)
+            end
+          end)
+
+        # Wait for task to finish
+        receive do
+          :done -> nil
+        end
+
+        # Let logs flush
+        Process.sleep(100)
+      end)
+
+    [_, log_entry] =
+      logs
+      |> String.trim()
+      |> String.split("\n")
+      |> Enum.map(&decode_or_print_error/1)
+
+    assert %{
+             "error.message" => "boom",
+             "error.type" => "Elixir.RuntimeError",
+             "error.stack_trace" => "** (RuntimeError) boom" <> _,
+             "message" => message
+           } = log_entry
+
+    assert message =~ ~r/Task #PID<\d+.\d+.\d+> started from #{inspect(test_pid)} terminating/
+  end
+
   test "passing options to encoder" do
     formatter = {Elastic, encoder_opts: [pretty: true]}
     :logger.update_handler_config(:default, :formatter, formatter)

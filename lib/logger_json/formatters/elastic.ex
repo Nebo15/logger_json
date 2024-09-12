@@ -219,10 +219,29 @@ defmodule LoggerJSON.Formatters.Elastic do
     |> maybe_put(:"error.code", get_exception_code(exception))
   end
 
-  def format_crash_reason(message, {error, reason}, _meta) do
+  def format_crash_reason(message, {{{%type{} = exception, _}, _}, stacktrace}, _meta) do
+    formatted_stacktrace =
+      [
+        Exception.format_banner(:error, exception, stacktrace),
+        Exception.format_stacktrace(stacktrace)
+      ]
+      |> Enum.join("\n")
+
+    format_error_fields(message, Exception.message(exception), formatted_stacktrace, type)
+    |> maybe_put(:"error.id", get_exception_id(exception))
+    |> maybe_put(:"error.code", get_exception_code(exception))
+  end
+
+  def format_crash_reason(message, {error, reason}, _meta) when is_atom(error) or is_binary(error) do
     stacktrace = "** (#{error}) #{inspect(reason)}"
     error_message = "#{error}: #{inspect(reason)}"
     format_error_fields(message, error_message, stacktrace, error)
+  end
+
+  def format_crash_reason(message, {error, reason}, _meta) do
+    stacktrace = "** (#{inspect(error)}) #{inspect(reason)}"
+    error_message = "#{inspect(error)}: #{inspect(reason)}"
+    format_error_fields(message, error_message, stacktrace, "error")
   end
 
   defp get_exception_id(%{id: id}), do: id

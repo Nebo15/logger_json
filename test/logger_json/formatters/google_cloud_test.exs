@@ -454,7 +454,7 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
     assert %{
              "@type" => "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent",
              "message" => message,
-             "stack_trace" => "** ({{%RuntimeError{message: \"boom\"}" <> _,
+             "stack_trace" => "** (RuntimeError) boom" <> _,
              "serviceContext" => %{"service" => "nonode@nohost"}
            } = log_entry
 

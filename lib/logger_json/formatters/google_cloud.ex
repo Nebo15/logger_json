@@ -188,6 +188,17 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
     format_reported_error_event(message, ruby_stacktrace, service_context, meta)
   end
 
+  def format_crash_reason(message, {{{%{} = exception, _}, _}, stacktrace}, service_context, meta) do
+    ruby_stacktrace =
+      [
+        Exception.format_banner(:error, exception, stacktrace),
+        format_stacktrace(stacktrace)
+      ]
+      |> Enum.join("\n")
+
+    format_reported_error_event(message, ruby_stacktrace, service_context, meta)
+  end
+
   def format_crash_reason(binary, {error, reason}, service_context, meta) when is_atom(error) or is_binary(error) do
     stacktrace = "** (#{error}) #{inspect(reason)}"
     format_reported_error_event(binary, stacktrace, service_context, meta)
