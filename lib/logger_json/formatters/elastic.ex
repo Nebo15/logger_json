@@ -191,7 +191,7 @@ defmodule LoggerJSON.Formatters.Elastic do
   def format_crash_reason(message, {{:EXIT, pid}, reason}, _meta) do
     stacktrace = Exception.format_banner({:EXIT, pid}, reason, [])
     error_message = "process #{inspect(pid)} exit: #{inspect(reason)}"
-    format_error_fields(message, error_message, stacktrace, "EXIT")
+    format_error_fields(message, error_message, stacktrace, "exit")
   end
 
   def format_crash_reason(message, {:exit, reason}, _meta) do
@@ -238,10 +238,8 @@ defmodule LoggerJSON.Formatters.Elastic do
     format_error_fields(message, error_message, stacktrace, error)
   end
 
-  def format_crash_reason(message, {error, reason}, _meta) do
-    stacktrace = "** (#{inspect(error)}) #{inspect(reason)}"
-    error_message = "#{inspect(error)}: #{inspect(reason)}"
-    format_error_fields(message, error_message, stacktrace, "error")
+  def format_crash_reason(message, other, _meta) do
+    format_error_fields(message, inspect(other), nil, nil)
   end
 
   defp get_exception_id(%{id: id}), do: id
@@ -254,10 +252,10 @@ defmodule LoggerJSON.Formatters.Elastic do
   defp format_error_fields(message, error_message, stacktrace, type) do
     %{
       message: safe_chardata_to_string(message),
-      "error.stack_trace": stacktrace,
-      "error.message": error_message,
-      "error.type": type
+      "error.message": error_message
     }
+    |> maybe_put(:"error.stack_trace", stacktrace)
+    |> maybe_put(:"error.type", type)
   end
 
   # Formats the log.logger and log.origin fields as specified in https://www.elastic.co/guide/en/ecs/8.11/ecs-log.html

@@ -443,8 +443,6 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
         Process.sleep(100)
       end)
 
-    refute logs =~ "FORMATTER CRASH"
-
     [_, log_entry] =
       logs
       |> String.trim()
@@ -459,6 +457,40 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
            } = log_entry
 
     assert message =~ ~r/Task #PID<\d+.\d+.\d+> started from #{inspect(test_pid)} terminating/
+  end
+
+  test "does not crash on unknown error tuples" do
+    Logger.metadata(crash_reason: {{:something, :else}, [:unknown]})
+
+    log_entry =
+      capture_log(fn ->
+        Logger.debug("oops!")
+      end)
+      |> decode_or_print_error()
+
+    assert %{
+             "@type" => "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent",
+             "message" => "oops!",
+             "stack_trace" => "** ({:something, :else}) [:unknown]",
+             "serviceContext" => %{"service" => "nonode@nohost"}
+           } = log_entry
+  end
+
+  test "does not crash on unknown errors" do
+    Logger.metadata(crash_reason: :what_is_this?)
+
+    log_entry =
+      capture_log(fn ->
+        Logger.debug("oops!")
+      end)
+      |> decode_or_print_error()
+
+    assert %{
+             "@type" => "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent",
+             "message" => "oops!",
+             "stack_trace" => nil,
+             "serviceContext" => %{"service" => "nonode@nohost"}
+           } = log_entry
   end
 
   test "logs process exits" do

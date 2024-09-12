@@ -208,6 +208,10 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
     format_crash_reason(binary, {inspect(error), reason}, service_context, meta)
   end
 
+  def format_crash_reason(binary, _other, service_context, meta) do
+    format_reported_error_event(binary, nil, service_context, meta)
+  end
+
   defp format_reported_error_event(message, stacktrace, service_context, meta) do
     %{
       "@type": "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent",

@@ -324,7 +324,7 @@ defmodule LoggerJSON.Formatters.ElasticTest do
              "message" => "oops!",
              "error.message" => error_message,
              "error.stack_trace" => stacktrace,
-             "error.type" => "EXIT",
+             "error.type" => "exit",
              "log.logger" => "Elixir.LoggerJSON.Formatters.ElasticTest",
              "log.origin" => %{
                "file.line" => _,
