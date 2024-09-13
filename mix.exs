@@ -36,6 +36,7 @@ defmodule LoggerJSON.Mixfile do
   defp deps do
     [
       {:jason, "~> 1.4"},
+      {:decimal, "~> 2.0"},
       {:plug, "~> 1.15", optional: true},
       {:ecto, "~> 3.11", optional: true},
       {:telemetry, "~> 1.0", optional: true},
