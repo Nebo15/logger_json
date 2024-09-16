@@ -37,6 +37,7 @@ defmodule LoggerJSON.Mixfile do
     [
       {:jason, "~> 1.4"},
       {:plug, "~> 1.15", optional: true},
+      {:decimal, ">= 0.0.0", optional: true},
       {:ecto, "~> 3.11", optional: true},
       {:telemetry, "~> 1.0", optional: true},
       {:stream_data, "~> 1.0", only: [:dev, :test]},
