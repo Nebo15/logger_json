@@ -64,6 +64,11 @@ defmodule LoggerJSON.Formatter.RedactorEncoder do
   def encode(list, redactors) when is_list(list), do: for(el <- list, do: encode(el, redactors))
   def encode(data, _redactors), do: inspect(data, pretty: true, width: 80)
 
+  defp encode_key_value({:mfa, {_module, _function, _arity} = mfa}, redactors) do
+    value = format_mfa(mfa)
+    encode_key_value({:mfa, value}, redactors)
+  end
+
   defp encode_key_value({key, value}, redactors) do
     key = encode_key(key)
     {key, encode(redact(key, value, redactors), redactors)}
@@ -72,6 +77,8 @@ defmodule LoggerJSON.Formatter.RedactorEncoder do
   defp encode_key(key) when is_binary(key), do: encode_binary(key)
   defp encode_key(key) when is_atom(key) or is_number(key), do: key
   defp encode_key(key), do: inspect(key)
+
+  defp format_mfa({module, function, arity}), do: "#{module}.#{function}/#{arity}"
 
   defp encode_binary(data) when is_binary(data) do
     if String.valid?(data) && String.printable?(data) do

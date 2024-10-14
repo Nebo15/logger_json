@@ -19,8 +19,7 @@ defmodule LoggerJSON.Formatters.Basic do
 
   @behaviour LoggerJSON.Formatter
 
-  @processed_metadata_keys ~w[file line mfa
-                              otel_span_id span_id
+  @processed_metadata_keys ~w[otel_span_id span_id
                               otel_trace_id trace_id
                               conn]a
 
