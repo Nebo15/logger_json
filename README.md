@@ -39,13 +39,14 @@ Then, enable the formatter in your `config.exs`:
 
 ```elixir
 config :logger, :default_handler,
-  formatter: {LoggerJSON.Formatters.Basic, []}
+  formatter: LoggerJSON.Formatters.Basic.new(metadata: [:request_id])
 ```
 
 or during runtime (eg. in your `application.ex`):
 
 ```elixir
-:logger.update_handler_config(:default, :formatter, {Basic, []})
+formatter = LoggerJSON.Formatters.Basic.new(metadata: :all)
+:logger.update_handler_config(:default, :formatter, formatter)
 ```
 
 You might also want to format the log messages when migrations are running:
@@ -65,13 +66,14 @@ For example in `config.exs`:
 
 ```elixir
 config :logger, :default_handler,
-  formatter: {LoggerJSON.Formatters.GoogleCloud, metadata: :all, project_id: "logger-101"}
+  formatter: LoggerJSON.Formatters.GoogleCloud.new(metadata: :all, project_id: "logger-101")
 ```
 
 or during runtime:
 
 ```elixir
-:logger.update_handler_config(:default, :formatter, {LoggerJSON.Formatters.Basic, %{metadata: {:all_except, [:conn]}}})
+formatter = LoggerJSON.Formatters.Basic.new(%{metadata: {:all_except, [:conn]}})
+:logger.update_handler_config(:default, :formatter, formatter)
 ```
 
 ## Docs

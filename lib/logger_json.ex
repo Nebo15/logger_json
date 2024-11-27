@@ -34,11 +34,12 @@ defmodule LoggerJSON do
   Then, enable the formatter in your `config.exs`:
 
       config :logger, :default_handler,
-        formatter: {LoggerJSON.Formatters.Basic, []}
+        formatter: LoggerJSON.Formatters.Basic.new(metadata: :all)
 
   or during runtime (eg. in your `application.ex`):
 
-      :logger.update_handler_config(:default, :formatter, {Basic, %{}})
+      formatter = LoggerJSON.Formatters.Basic.new(metadata: :all)
+      :logger.update_handler_config(:default, :formatter, formatter)
 
   ## Configuration
 
@@ -46,11 +47,12 @@ defmodule LoggerJSON do
   For example in `config.exs`:
 
       config :logger, :default_handler,
-        formatter: {LoggerJSON.Formatters.GoogleCloud, metadata: :all, project_id: "logger-101"}
+        formatter: LoggerJSON.Formatters.GoogleCloud.new(metadata: :all, project_id: "logger-101")
 
   or during runtime:
 
-      :logger.update_handler_config(:default, :formatter, {Basic, %{metadata: {:all_except, [:conn]}}})
+      formatter = LoggerJSON.Formatters.Basic.new(metadata: {:all_except, [:conn]})
+      :logger.update_handler_config(:default, :formatter, formatter)
 
   ### Shared Options
 
@@ -81,7 +83,7 @@ defmodule LoggerJSON do
   Formatters may encode the well-known metadata differently and support additional metadata keys, see the documentation
   of the formatter for more details.
   """
-  @log_levels [:error, :info, :debug, :emergency, :alert, :critical, :warning, :notice]
+  @log_levels Logger.levels()
   @log_level_strings Enum.map(@log_levels, &to_string/1)
 
   @doc """
@@ -111,6 +113,6 @@ defmodule LoggerJSON do
     do: Logger.configure(level: level)
 
   def configure_log_level!(level) do
-    raise ArgumentError, "Log level should be one of 'debug', 'info', 'warn', 'error' values, got: #{inspect(level)}"
+    raise ArgumentError, "Log level should be one of #{inspect(@log_levels)} values, got: #{inspect(level)}"
   end
 end

@@ -24,7 +24,7 @@ defmodule LoggerJSON.PlugTest do
 
   describe "telemetry_logging_handler/4 for Basic formatter" do
     setup do
-      formatter = {LoggerJSON.Formatters.Basic, metadata: :all}
+      formatter = LoggerJSON.Formatters.Basic.new(metadata: :all)
       :logger.update_handler_config(:default, :formatter, formatter)
     end
 
@@ -142,7 +142,7 @@ defmodule LoggerJSON.PlugTest do
 
   describe "telemetry_logging_handler/4 for DataDog formatter" do
     setup do
-      formatter = {LoggerJSON.Formatters.Datadog, metadata: [:network, :phoenix, :duration, :http, :"usr.id"]}
+      formatter = LoggerJSON.Formatters.Datadog.new(metadata: [:network, :phoenix, :duration, :http, :"usr.id"])
       :logger.update_handler_config(:default, :formatter, formatter)
     end
 
@@ -338,7 +338,7 @@ defmodule LoggerJSON.PlugTest do
 
   describe "telemetry_logging_handler/4 for GoogleCloud formatter" do
     setup do
-      formatter = {LoggerJSON.Formatters.GoogleCloud, metadata: {:all_except, [:conn]}}
+      formatter = LoggerJSON.Formatters.GoogleCloud.new(metadata: {:all_except, [:conn]})
       :logger.update_handler_config(:default, :formatter, formatter)
     end
 
@@ -474,7 +474,7 @@ defmodule LoggerJSON.PlugTest do
 
   describe "telemetry_logging_handler/4 for Elastic formatter" do
     setup do
-      formatter = {LoggerJSON.Formatters.Elastic, metadata: nil}
+      formatter = LoggerJSON.Formatters.Elastic.new(metadata: nil)
       :logger.update_handler_config(:default, :formatter, formatter)
     end
 

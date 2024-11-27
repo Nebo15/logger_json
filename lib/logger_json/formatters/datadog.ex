@@ -48,15 +48,24 @@ defmodule LoggerJSON.Formatters.Datadog do
 
   @processed_metadata_keys ~w[pid file line mfa conn]a
 
-  @impl true
-  def format(%{level: level, meta: meta, msg: msg}, opts) do
+  def new(opts) do
     opts = Keyword.new(opts)
     encoder_opts = Keyword.get(opts, :encoder_opts, [])
     redactors = Keyword.get(opts, :redactors, [])
     hostname = Keyword.get(opts, :hostname, :system)
-
     metadata_keys_or_selector = Keyword.get(opts, :metadata, [])
     metadata_selector = update_metadata_selector(metadata_keys_or_selector, @processed_metadata_keys)
+    {__MODULE__, %{encoder_opts: encoder_opts, metadata: metadata_selector, redactors: redactors, hostname: hostname}}
+  end
+
+  @impl true
+  def format(%{level: level, meta: meta, msg: msg}, config) do
+    %{
+      encoder_opts: encoder_opts,
+      metadata: metadata_selector,
+      redactors: redactors,
+      hostname: hostname
+    } = config
 
     message =
       format_message(msg, meta, %{

@@ -24,13 +24,22 @@ defmodule LoggerJSON.Formatters.Basic do
                               otel_trace_id trace_id
                               conn]a
 
-  @impl true
-  def format(%{level: level, meta: meta, msg: msg}, opts) do
+  def new(opts) do
     opts = Keyword.new(opts)
     encoder_opts = Keyword.get(opts, :encoder_opts, [])
     metadata_keys_or_selector = Keyword.get(opts, :metadata, [])
     metadata_selector = update_metadata_selector(metadata_keys_or_selector, @processed_metadata_keys)
     redactors = Keyword.get(opts, :redactors, [])
+    {__MODULE__, %{encoder_opts: encoder_opts, metadata: metadata_selector, redactors: redactors}}
+  end
+
+  @impl true
+  def format(%{level: level, meta: meta, msg: msg}, config) do
+    %{
+      encoder_opts: encoder_opts,
+      metadata: metadata_selector,
+      redactors: redactors
+    } = config
 
     message =
       format_message(msg, meta, %{

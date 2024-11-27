@@ -5,7 +5,7 @@ defmodule LoggerJSON.Formatters.ElasticTest do
   require Logger
 
   setup do
-    formatter = {Elastic, metadata: :all}
+    formatter = Elastic.new(metadata: :all)
     :logger.update_handler_config(:default, :formatter, formatter)
   end
 
@@ -490,7 +490,7 @@ defmodule LoggerJSON.Formatters.ElasticTest do
   end
 
   test "passing options to encoder" do
-    formatter = {Elastic, encoder_opts: [pretty: true]}
+    formatter = Elastic.new(encoder_opts: [pretty: true])
     :logger.update_handler_config(:default, :formatter, formatter)
 
     assert capture_log(fn ->
@@ -501,7 +501,7 @@ defmodule LoggerJSON.Formatters.ElasticTest do
 
   test "reads metadata from the given application env" do
     Application.put_env(:logger_json, :test_elastic_metadata_key, [:foo])
-    formatter = {Elastic, metadata: {:from_application_env, {:logger_json, :test_elastic_metadata_key}}}
+    formatter = Elastic.new(metadata: {:from_application_env, {:logger_json, :test_elastic_metadata_key}})
     :logger.update_handler_config(:default, :formatter, formatter)
 
     Logger.metadata(foo: "foo")
@@ -519,7 +519,7 @@ defmodule LoggerJSON.Formatters.ElasticTest do
 
   test "reads metadata from the given application env at given path" do
     Application.put_env(:logger_json, :test_elastic_metadata_key, metadata: [:foo])
-    formatter = {Elastic, metadata: {:from_application_env, {:logger_json, :test_elastic_metadata_key}, [:metadata]}}
+    formatter = Elastic.new(metadata: {:from_application_env, {:logger_json, :test_elastic_metadata_key}, [:metadata]})
     :logger.update_handler_config(:default, :formatter, formatter)
 
     Logger.metadata(foo: "foo")

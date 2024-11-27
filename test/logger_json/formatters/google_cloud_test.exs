@@ -5,7 +5,7 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
   require Logger
 
   setup do
-    formatter = {GoogleCloud, metadata: :all, project_id: "myproj-101"}
+    formatter = GoogleCloud.new(metadata: :all, project_id: "myproj-101")
     :logger.update_handler_config(:default, :formatter, formatter)
   end
 
@@ -117,7 +117,7 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
   end
 
   test "logs span and trace ids without project_id" do
-    formatter = {GoogleCloud, metadata: :all}
+    formatter = GoogleCloud.new(metadata: :all)
     :logger.update_handler_config(:default, :formatter, formatter)
 
     Logger.metadata(
@@ -169,7 +169,7 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
   end
 
   test "does not crash on invalid OTEL span and trace ids" do
-    formatter = {GoogleCloud, metadata: :all}
+    formatter = GoogleCloud.new(metadata: :all)
     :logger.update_handler_config(:default, :formatter, formatter)
 
     Logger.metadata(
@@ -531,7 +531,7 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
   end
 
   test "passing options to encoder" do
-    formatter = {GoogleCloud, encoder_opts: [pretty: true]}
+    formatter = GoogleCloud.new(encoder_opts: [pretty: true])
     :logger.update_handler_config(:default, :formatter, formatter)
 
     assert capture_log(fn ->
@@ -542,7 +542,7 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
 
   test "reads metadata from the given application env" do
     Application.put_env(:logger_json, :test_google_cloud_metadata_key, [:foo])
-    formatter = {GoogleCloud, metadata: {:from_application_env, {:logger_json, :test_google_cloud_metadata_key}}}
+    formatter = GoogleCloud.new(metadata: {:from_application_env, {:logger_json, :test_google_cloud_metadata_key}})
     :logger.update_handler_config(:default, :formatter, formatter)
 
     Logger.metadata(foo: "foo")
@@ -562,7 +562,7 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
     Application.put_env(:logger_json, :test_google_cloud_metadata_key, metadata: [:foo])
 
     formatter =
-      {GoogleCloud, metadata: {:from_application_env, {:logger_json, :test_google_cloud_metadata_key}, [:metadata]}}
+      GoogleCloud.new(metadata: {:from_application_env, {:logger_json, :test_google_cloud_metadata_key}, [:metadata]})
 
     :logger.update_handler_config(:default, :formatter, formatter)
 

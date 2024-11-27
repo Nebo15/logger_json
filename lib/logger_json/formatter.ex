@@ -6,5 +6,5 @@ defmodule LoggerJSON.Formatter do
           | {atom(), term()}
         ]
 
-  @callback format(event :: :logger.log_event(), opts :: opts()) :: iodata()
+  @callback format(event :: :logger.log_event(), config :: term) :: iodata()
 end
