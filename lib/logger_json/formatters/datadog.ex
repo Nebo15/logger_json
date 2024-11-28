@@ -48,6 +48,7 @@ defmodule LoggerJSON.Formatters.Datadog do
 
   @processed_metadata_keys ~w[pid file line mfa conn]a
 
+  @impl true
   def new(opts) do
     opts = Keyword.new(opts)
     encoder_opts = Keyword.get(opts, :encoder_opts, [])

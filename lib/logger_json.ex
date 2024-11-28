@@ -83,7 +83,9 @@ defmodule LoggerJSON do
   Formatters may encode the well-known metadata differently and support additional metadata keys, see the documentation
   of the formatter for more details.
   """
-  @log_levels Logger.levels()
+
+  # TODO: replace with `Logger.levels()` once LoggerJSON starts depending on Elixir 1.16+
+  @log_levels [:error, :info, :debug, :emergency, :alert, :critical, :warning, :notice]
   @log_level_strings Enum.map(@log_levels, &to_string/1)
 
   @doc """
