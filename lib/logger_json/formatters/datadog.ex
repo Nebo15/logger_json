@@ -206,9 +206,11 @@ defmodule LoggerJSON.Formatters.Datadog do
     end
 
     defp format_http_request(%{conn: %Plug.Conn{} = conn}), do: format_http_request(%{conn: conn, duration_us: nil})
+  end
 
-    defp format_http_request(_meta), do: nil
+  defp format_http_request(_meta), do: nil
 
+  if Code.ensure_loaded?(Plug.Conn) do
     if @encoder == Jason do
       require Jason.Helpers
 
