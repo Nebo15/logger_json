@@ -1,6 +1,6 @@
 defmodule LoggerJSON.Formatter.RedactorEncoder do
   @doc """
-  Takes a term and makes sure that it can be encoded by Jason.encode!/1 without errors
+  Takes a term and makes sure that it can be encoded by the encoder without errors
   and without leaking sensitive information.
 
   ## Encoding rules
@@ -16,11 +16,13 @@ defmodule LoggerJSON.Formatter.RedactorEncoder do
   `atom()`            | unchanged                                           | unchanged
   `struct()`          | converted to map                                    | values are redacted
   `keyword()`         | converted to map                                    | values are redacted
-  `%Jason.Fragment{}` | unchanged                                           | unchanged
+  `%Jason.Fragment{}` | unchanged                                           | unchanged if encoder is `Jason`
   everything else     | using `inspect/2`                                   | unchanged
   """
 
   @type redactor :: {redactor :: module(), redactor_opts :: term()}
+
+  @encoder_protocol LoggerJSON.Formatter.encoder_protocol()
 
   @spec encode(term(), redactors :: [redactor()]) :: term()
   def encode(nil, _redactors), do: nil
@@ -31,7 +33,11 @@ defmodule LoggerJSON.Formatter.RedactorEncoder do
   def encode(number, _redactors) when is_number(number), do: number
   def encode("[REDACTED]", _redactors), do: "[REDACTED]"
   def encode(binary, _redactors) when is_binary(binary), do: encode_binary(binary)
-  def encode(%Jason.Fragment{} = fragment, _redactors), do: fragment
+
+  if @encoder_protocol == Jason.Encoder do
+    def encode(%Jason.Fragment{} = fragment, _redactors), do: fragment
+  end
+
   def encode(%NaiveDateTime{} = naive_datetime, _redactors), do: naive_datetime
   def encode(%DateTime{} = datetime, _redactors), do: datetime
   def encode(%Date{} = date, _redactors), do: date

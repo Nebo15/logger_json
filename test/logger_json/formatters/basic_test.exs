@@ -4,6 +4,8 @@ defmodule LoggerJSON.Formatters.BasicTest do
   alias LoggerJSON.Formatters.Basic
   require Logger
 
+  @encoder LoggerJSON.Formatter.encoder()
+
   setup do
     formatter = {Basic, metadata: :all}
     :logger.update_handler_config(:default, :formatter, formatter)
@@ -242,14 +244,16 @@ defmodule LoggerJSON.Formatters.BasicTest do
            }
   end
 
-  test "passing options to encoder" do
-    formatter = {Basic, encoder_opts: [pretty: true]}
-    :logger.update_handler_config(:default, :formatter, formatter)
+  if @encoder == Jason do
+    test "passing options to encoder" do
+      formatter = {Basic, encoder_opts: [pretty: true]}
+      :logger.update_handler_config(:default, :formatter, formatter)
 
-    assert capture_log(fn ->
-             Logger.debug("Hello")
-           end) =~
-             ~r/\n\s{2}"message": "Hello"/
+      assert capture_log(fn ->
+               Logger.debug("Hello")
+             end) =~
+               ~r/\n\s{2}"message": "Hello"/
+    end
   end
 
   test "reads metadata from the given application env" do

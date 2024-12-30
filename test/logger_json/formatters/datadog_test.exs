@@ -4,6 +4,8 @@ defmodule LoggerJSON.Formatters.DatadogTest do
   alias LoggerJSON.Formatters.Datadog
   require Logger
 
+  @encoder LoggerJSON.Formatter.encoder()
+
   setup do
     formatter = {Datadog, metadata: :all}
     :logger.update_handler_config(:default, :formatter, formatter)
@@ -455,14 +457,16 @@ defmodule LoggerJSON.Formatters.DatadogTest do
            } = log_entry
   end
 
-  test "passing options to encoder" do
-    formatter = {Datadog, encoder_opts: [pretty: true]}
-    :logger.update_handler_config(:default, :formatter, formatter)
+  if @encoder == Jason do
+    test "passing options to encoder" do
+      formatter = {Datadog, encoder_opts: [pretty: true]}
+      :logger.update_handler_config(:default, :formatter, formatter)
 
-    assert capture_log(fn ->
-             Logger.debug("Hello")
-           end) =~
-             ~r/\n\s{2}"message": "Hello"/
+      assert capture_log(fn ->
+               Logger.debug("Hello")
+             end) =~
+               ~r/\n\s{2}"message": "Hello"/
+    end
   end
 
   test "reads metadata from the given application env" do

@@ -4,6 +4,8 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
   alias LoggerJSON.Formatters.GoogleCloud
   require Logger
 
+  @encoder LoggerJSON.Formatter.encoder()
+
   setup do
     formatter = {GoogleCloud, metadata: :all, project_id: "myproj-101"}
     :logger.update_handler_config(:default, :formatter, formatter)
@@ -14,7 +16,7 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
       assert capture_log(fn ->
                Logger.debug(message)
              end)
-             |> Jason.decode!()
+             |> @encoder.decode!()
     end
   end
 
@@ -23,14 +25,14 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
       assert capture_log(fn ->
                Logger.debug(message)
              end)
-             |> Jason.decode!()
+             |> @encoder.decode!()
     end
 
     check all message <- StreamData.keyword_of(StreamData.term()) do
       assert capture_log(fn ->
                Logger.debug(message)
              end)
-             |> Jason.decode!()
+             |> @encoder.decode!()
     end
   end
 
@@ -530,14 +532,16 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
            } = log_entry
   end
 
-  test "passing options to encoder" do
-    formatter = {GoogleCloud, encoder_opts: [pretty: true]}
-    :logger.update_handler_config(:default, :formatter, formatter)
+  if @encoder == Jason do
+    test "passing options to encoder" do
+      formatter = {GoogleCloud, encoder_opts: [pretty: true]}
+      :logger.update_handler_config(:default, :formatter, formatter)
 
-    assert capture_log(fn ->
-             Logger.debug("Hello")
-           end) =~
-             ~r/\n\s{2}"message": "Hello"/
+      assert capture_log(fn ->
+               Logger.debug("Hello")
+             end) =~
+               ~r/\n\s{2}"message": "Hello"/
+    end
   end
 
   test "reads metadata from the given application env" do

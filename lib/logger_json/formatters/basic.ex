@@ -15,19 +15,21 @@ defmodule LoggerJSON.Formatters.Basic do
       }
   """
   import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, RedactorEncoder}
-  require Jason.Helpers
+  alias LoggerJSON.Formatter
 
-  @behaviour LoggerJSON.Formatter
+  @behaviour Formatter
+
+  @encoder Formatter.encoder()
 
   @processed_metadata_keys ~w[file line mfa
                               otel_span_id span_id
                               otel_trace_id trace_id
                               conn]a
 
-  @impl true
+  @impl Formatter
   def format(%{level: level, meta: meta, msg: msg}, opts) do
     opts = Keyword.new(opts)
-    encoder_opts = Keyword.get(opts, :encoder_opts, [])
+    encoder_opts = Keyword.get_lazy(opts, :encoder_opts, &Formatter.default_encoder_opts/0)
     metadata_keys_or_selector = Keyword.get(opts, :metadata, [])
     metadata_selector = update_metadata_selector(metadata_keys_or_selector, @processed_metadata_keys)
     redactors = Keyword.get(opts, :redactors, [])
@@ -49,7 +51,7 @@ defmodule LoggerJSON.Formatters.Basic do
       |> maybe_put(:request, format_http_request(meta))
       |> maybe_put(:span, format_span(meta))
       |> maybe_put(:trace, format_trace(meta))
-      |> Jason.encode_to_iodata!(encoder_opts)
+      |> @encoder.encode_to_iodata!(encoder_opts)
 
     [line, "\n"]
   end
@@ -74,21 +76,40 @@ defmodule LoggerJSON.Formatters.Basic do
   end
 
   if Code.ensure_loaded?(Plug.Conn) do
-    defp format_http_request(%{conn: %Plug.Conn{} = conn}) do
-      Jason.Helpers.json_map(
-        connection:
-          Jason.Helpers.json_map(
+    if @encoder == Jason do
+      require Jason.Helpers
+
+      defp format_http_request(%{conn: %Plug.Conn{} = conn}) do
+        Jason.Helpers.json_map(
+          connection:
+            Jason.Helpers.json_map(
+              protocol: Plug.Conn.get_http_protocol(conn),
+              method: conn.method,
+              path: conn.request_path,
+              status: conn.status
+            ),
+          client:
+            Jason.Helpers.json_map(
+              user_agent: Formatter.Plug.get_header(conn, "user-agent"),
+              ip: Formatter.Plug.remote_ip(conn)
+            )
+        )
+      end
+    else
+      defp format_http_request(%{conn: %Plug.Conn{} = conn}) do
+        %{
+          connection: %{
             protocol: Plug.Conn.get_http_protocol(conn),
             method: conn.method,
             path: conn.request_path,
             status: conn.status
-          ),
-        client:
-          Jason.Helpers.json_map(
-            user_agent: LoggerJSON.Formatter.Plug.get_header(conn, "user-agent"),
-            ip: LoggerJSON.Formatter.Plug.remote_ip(conn)
-          )
-      )
+          },
+          client: %{
+            user_agent: Formatter.Plug.get_header(conn, "user-agent"),
+            ip: Formatter.Plug.remote_ip(conn)
+          }
+        }
+      end
     end
   end
 

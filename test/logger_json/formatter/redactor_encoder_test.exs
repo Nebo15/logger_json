@@ -7,6 +7,7 @@ defmodule LoggerJSON.Formatter.RedactorEncoderTest do
 
   defmodule PasswordStruct, do: defstruct(password: "foo")
 
+  @encoder LoggerJSON.Formatter.encoder()
   @redactors [{LoggerJSON.Redactors.RedactKeys, ["password"]}]
 
   describe "encode/2" do
@@ -54,10 +55,10 @@ defmodule LoggerJSON.Formatter.RedactorEncoderTest do
       assert encode(%PasswordStruct{password: "hello"}, @redactors) == %{password: "[REDACTED]"}
     end
 
-    # Jason.Encoder protocol can be used in many other scenarios,
+    # Jason.Encoder or JSON.Encoder protocols can be used in many other scenarios,
     # like DB/API response serliazation, so it's better not to
     # assume that it's what the users expects to see in logs.
-    test "strips structs when Jason.Encoder is derived for them" do
+    test "strips structs when encoder is derived for them" do
       assert encode(%NameStruct{name: "B"}, @redactors) == %{name: "B"}
     end
 
@@ -81,7 +82,7 @@ defmodule LoggerJSON.Formatter.RedactorEncoderTest do
       assert encode(%{1 => 2}, []) == %{1 => 2}
       assert encode(%{:a => 1}, []) == %{:a => 1}
       assert encode(%{{"a", "b"} => 1}, []) == %{"{\"a\", \"b\"}" => 1}
-      assert encode(%{%{a: 1, b: 2} => 3}, []) == %{"%{a: 1, b: 2}" => 3}
+      assert encode(%{%{a: 1, b: 2} => 3}, []) in [%{"%{a: 1, b: 2}" => 3}, %{"%{b: 2, a: 1}" => 3}]
       assert encode(%{[{:a, :b}] => 3}, []) == %{"[a: :b]" => 3}
     end
 
@@ -138,11 +139,11 @@ defmodule LoggerJSON.Formatter.RedactorEncoderTest do
       assert encode([foo: ["foo", %{password: "bar"}]], @redactors) == %{foo: ["foo", %{password: "[REDACTED]"}]}
     end
 
-    property "converts any term so that it can be encoded with Jason" do
+    property "converts any term so that it can be encoded" do
       check all value <- term() do
         value
         |> encode([])
-        |> Jason.encode!()
+        |> @encoder.encode!()
       end
     end
   end

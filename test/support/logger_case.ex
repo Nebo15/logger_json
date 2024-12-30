@@ -3,6 +3,8 @@ defmodule LoggerJSON.Case do
   use ExUnit.CaseTemplate
   import ExUnit.CaptureIO
 
+  @encoder LoggerJSON.Formatter.encoder()
+
   using _ do
     quote do
       import LoggerJSON.Case
@@ -22,7 +24,7 @@ defmodule LoggerJSON.Case do
 
   def decode_or_print_error(data) do
     try do
-      Jason.decode!(data)
+      @encoder.decode!(data)
     rescue
       _reason ->
         IO.puts(data)

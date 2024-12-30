@@ -88,20 +88,22 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
         "time" => "2024-04-11T21:34:53.503Z"
       }
   """
-  import Jason.Helpers, only: [json_map: 1]
   import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, Code, RedactorEncoder}
+  alias LoggerJSON.Formatter
 
-  @behaviour LoggerJSON.Formatter
+  @behaviour Formatter
+
+  @encoder Formatter.encoder()
 
   @processed_metadata_keys ~w[pid file line mfa
                               otel_span_id span_id
                               otel_trace_id trace_id
                               conn]a
 
-  @impl true
+  @impl Formatter
   def format(%{level: level, meta: meta, msg: msg}, opts) do
     opts = Keyword.new(opts)
-    encoder_opts = Keyword.get(opts, :encoder_opts, [])
+    encoder_opts = Keyword.get_lazy(opts, :encoder_opts, &Formatter.default_encoder_opts/0)
     redactors = Keyword.get(opts, :redactors, [])
     service_context = Keyword.get_lazy(opts, :service_context, fn -> %{service: to_string(node())} end)
     project_id = Keyword.get(opts, :project_id)
@@ -130,7 +132,7 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
       |> maybe_put(:httpRequest, format_http_request(meta))
       |> maybe_merge(encode(message, redactors))
       |> maybe_merge(encode(metadata, redactors))
-      |> Jason.encode_to_iodata!(encoder_opts)
+      |> @encoder.encode_to_iodata!(encoder_opts)
 
     [line, "\n"]
   end
@@ -241,25 +243,50 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
   defp format_crash_report_location(_meta), do: nil
 
   if Code.ensure_loaded?(Plug.Conn) do
-    defp format_http_request(%{conn: %Plug.Conn{} = conn} = assigns) do
-      request_method = conn.method |> to_string() |> String.upcase()
-      request_url = Plug.Conn.request_url(conn)
-      status = conn.status
-      user_agent = LoggerJSON.Formatter.Plug.get_header(conn, "user-agent")
-      remote_ip = LoggerJSON.Formatter.Plug.remote_ip(conn)
-      referer = LoggerJSON.Formatter.Plug.get_header(conn, "referer")
-      latency = http_request_latency(assigns)
+    if @encoder == Jason do
+      require Jason.Helpers
 
-      json_map(
-        protocol: Plug.Conn.get_http_protocol(conn),
-        requestMethod: request_method,
-        requestUrl: request_url,
-        status: status,
-        userAgent: user_agent,
-        remoteIp: remote_ip,
-        referer: referer,
-        latency: latency
-      )
+      defp format_http_request(%{conn: %Plug.Conn{} = conn} = assigns) do
+        request_method = conn.method |> to_string() |> String.upcase()
+        request_url = Plug.Conn.request_url(conn)
+        status = conn.status
+        user_agent = Formatter.Plug.get_header(conn, "user-agent")
+        remote_ip = Formatter.Plug.remote_ip(conn)
+        referer = Formatter.Plug.get_header(conn, "referer")
+        latency = http_request_latency(assigns)
+
+        Jason.Helpers.json_map(
+          protocol: Plug.Conn.get_http_protocol(conn),
+          requestMethod: request_method,
+          requestUrl: request_url,
+          status: status,
+          userAgent: user_agent,
+          remoteIp: remote_ip,
+          referer: referer,
+          latency: latency
+        )
+      end
+    else
+      defp format_http_request(%{conn: %Plug.Conn{} = conn} = assigns) do
+        request_method = conn.method |> to_string() |> String.upcase()
+        request_url = Plug.Conn.request_url(conn)
+        status = conn.status
+        user_agent = Formatter.Plug.get_header(conn, "user-agent")
+        remote_ip = Formatter.Plug.remote_ip(conn)
+        referer = Formatter.Plug.get_header(conn, "referer")
+        latency = http_request_latency(assigns)
+
+        %{
+          protocol: Plug.Conn.get_http_protocol(conn),
+          requestMethod: request_method,
+          requestUrl: request_url,
+          status: status,
+          userAgent: user_agent,
+          remoteIp: remote_ip,
+          referer: referer,
+          latency: latency
+        }
+      end
     end
   end
 
@@ -323,19 +350,41 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
   # coveralls-ignore-stop
 
   # https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogEntryOperation
-  defp format_operation(%{request_id: request_id, pid: pid}), do: json_map(id: request_id, producer: inspect(pid))
-  defp format_operation(%{pid: pid}), do: json_map(producer: inspect(pid))
+  if @encoder == Jason do
+    require Jason.Helpers
+
+    defp format_operation(%{request_id: request_id, pid: pid}),
+      do: Jason.Helpers.json_map(id: request_id, producer: inspect(pid))
+
+    defp format_operation(%{pid: pid}), do: Jason.Helpers.json_map(producer: inspect(pid))
+  else
+    defp format_operation(%{request_id: request_id, pid: pid}), do: %{id: request_id, producer: inspect(pid)}
+    defp format_operation(%{pid: pid}), do: %{producer: inspect(pid)}
+  end
+
   # Erlang logger always has `pid` in the metadata but we keep this clause "just in case"
   # coveralls-ignore-next-line
   defp format_operation(_meta), do: nil
 
   # https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogEntrySourceLocation
-  defp format_source_location(%{file: file, line: line, mfa: {m, f, a}}) do
-    json_map(
-      file: IO.chardata_to_string(file),
-      line: line,
-      function: format_function(m, f, a)
-    )
+  if @encoder == Jason do
+    require Jason.Helpers
+
+    defp format_source_location(%{file: file, line: line, mfa: {m, f, a}}) do
+      Jason.Helpers.json_map(
+        file: IO.chardata_to_string(file),
+        line: line,
+        function: format_function(m, f, a)
+      )
+    end
+  else
+    defp format_source_location(%{file: file, line: line, mfa: {m, f, a}}) do
+      %{
+        file: IO.chardata_to_string(file),
+        line: line,
+        function: format_function(m, f, a)
+      }
+    end
   end
 
   defp format_source_location(_meta),

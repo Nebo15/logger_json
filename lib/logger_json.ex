@@ -52,13 +52,25 @@ defmodule LoggerJSON do
 
       :logger.update_handler_config(:default, :formatter, {Basic, %{metadata: {:all_except, [:conn]}}})
 
+  It is possible to set during compile-time the JSON encoder:
+
+      config :logger_json, encoder: Jason
+
+  For Elixir 1.18+, `JSON` is available and can be set as the encoder:
+
+      config :logger_json, encoder: JSON
+
+  For retro-compatibility, `Jason` is the default encoder. Make sure to add it to the project
+  dependencies if the encoder will not be changed.
+
   ### Shared Options
 
   Some formatters require additional configuration options. Here are the options that are common for each formatter:
 
-    * `:encoder_opts` - options to be passed directly to the JSON encoder. This allows you to customize the behavior of the JSON
-    encoder. See the [documentation for Jason](https://hexdocs.pm/jason/Jason.html#encode/2-options) for available options. By
-    default, no options are passed to the encoder.
+    * `:encoder_opts` - options to be passed directly to the JSON encoder. This allows you to customize the behavior
+    of the JSON encoder. If the encoder is `JSON`, it defaults to `JSON.protocol_encode/2`. Otherwise, defaults to
+    empty keywords. See the [documentation for Jason](https://hexdocs.pm/jason/Jason.html#encode/2-options) for
+    available options for `Jason` encoder.
 
     * `:metadata` - a list of metadata keys to include in the log entry. By default, no metadata is included.
     If `:all`is given, all metadata is included. If `{:all_except, keys}` is given, all metadata except

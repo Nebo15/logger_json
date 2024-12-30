@@ -74,6 +74,21 @@ or during runtime:
 :logger.update_handler_config(:default, :formatter, {LoggerJSON.Formatters.Basic, %{metadata: {:all_except, [:conn]}}})
 ```
 
+It is possible to set during compile-time the JSON encoder:
+
+```elixir
+config :logger_json, encoder: Jason
+```
+
+For Elixir 1.18+, `JSON` is available and can be set as the encoder:
+
+```elixir
+config :logger_json, encoder: JSON
+```
+
+For retro-compatibility, `Jason` is the default encoder. Make sure to add it to the project
+dependencies if the encoder will not be changed.
+
 ## Docs
 
 The docs can be found at [https://hexdocs.pm/logger_json](https://hexdocs.pm/logger_json).
