@@ -292,13 +292,15 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
 
   defp format_http_request(_meta), do: nil
 
-  defp http_request_latency(%{duration_us: duration_us}) do
-    duration_s = Float.round(duration_us / 1_000_000, 9)
-    "#{duration_s}s"
-  end
+  if Code.ensure_loaded?(Plug.Conn) do
+    defp http_request_latency(%{duration_us: duration_us}) do
+      duration_s = Float.round(duration_us / 1_000_000, 9)
+      "#{duration_s}s"
+    end
 
-  defp http_request_latency(_assigns) do
-    nil
+    defp http_request_latency(_assigns) do
+      nil
+    end
   end
 
   defp format_affected_user(%{user_id: user_id}), do: "user:" <> user_id

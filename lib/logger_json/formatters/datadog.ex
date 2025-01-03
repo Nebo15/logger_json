@@ -270,6 +270,8 @@ defmodule LoggerJSON.Formatters.Datadog do
     end
   end
 
-  defp to_nanosecs(duration_us) when is_number(duration_us), do: duration_us * 1000
-  defp to_nanosecs(_), do: nil
+  if Code.ensure_loaded?(Plug.Conn) do
+    defp to_nanosecs(duration_us) when is_number(duration_us), do: duration_us * 1000
+    defp to_nanosecs(_), do: nil
+  end
 end
