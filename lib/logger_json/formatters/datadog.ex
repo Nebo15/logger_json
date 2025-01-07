@@ -212,9 +212,9 @@ defmodule LoggerJSON.Formatters.Datadog do
 
   if Code.ensure_loaded?(Plug.Conn) do
     if @encoder == Jason do
-      require Jason.Helpers
-
       defp build_http_request_data(%Plug.Conn{} = conn, request_id) do
+        require Jason.Helpers
+
         request_url = Plug.Conn.request_url(conn)
         user_agent = Formatter.Plug.get_header(conn, "user-agent")
         remote_ip = Formatter.Plug.remote_ip(conn)
