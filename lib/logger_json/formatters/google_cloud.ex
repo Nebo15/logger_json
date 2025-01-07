@@ -353,26 +353,29 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
 
   # https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogEntryOperation
   if @encoder == Jason do
-    require Jason.Helpers
+    defp operation(meta) do
+      require Jason.Helpers
 
-    defp format_operation(%{request_id: request_id, pid: pid}),
-      do: Jason.Helpers.json_map(id: request_id, producer: inspect(pid))
-
-    defp format_operation(%{pid: pid}), do: Jason.Helpers.json_map(producer: inspect(pid))
+      case meta do
+        %{request_id: request_id, pid: pid} -> Jason.Helpers.json_map(id: request_id, producer: inspect(pid))
+        %{pid: pid} -> Jason.Helpers.json_map(producer: inspect(pid))
+        _meta -> nil
+      end
+    end
   else
     defp format_operation(%{request_id: request_id, pid: pid}), do: %{id: request_id, producer: inspect(pid)}
     defp format_operation(%{pid: pid}), do: %{producer: inspect(pid)}
-  end
 
-  # Erlang logger always has `pid` in the metadata but we keep this clause "just in case"
-  # coveralls-ignore-next-line
-  defp format_operation(_meta), do: nil
+    # Erlang logger always has `pid` in the metadata but we keep this clause "just in case"
+    # coveralls-ignore-next-line
+    defp format_operation(_meta), do: nil
+  end
 
   # https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogEntrySourceLocation
   if @encoder == Jason do
-    require Jason.Helpers
-
     defp format_source_location(%{file: file, line: line, mfa: {m, f, a}}) do
+      require Jason.Helpers
+
       Jason.Helpers.json_map(
         file: IO.chardata_to_string(file),
         line: line,
