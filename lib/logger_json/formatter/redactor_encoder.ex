@@ -35,7 +35,7 @@ defmodule LoggerJSON.Formatter.RedactorEncoder do
   def encode(binary, _redactors) when is_binary(binary), do: encode_binary(binary)
 
   if @encoder_protocol == Jason.Encoder do
-    def encode(%Jason.Fragment{} = fragment, _redactors), do: fragment
+    def encode(fragment, _redactors) when is_struct(fragment, Jason.Fragment), do: fragment
   end
 
   def encode(%NaiveDateTime{} = naive_datetime, _redactors), do: naive_datetime
