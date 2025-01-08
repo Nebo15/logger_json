@@ -244,6 +244,8 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
 
   if Code.ensure_loaded?(Plug.Conn) do
     Formatter.with Jason do
+      require Jason.Helpers
+
       defp format_http_request(%{conn: %Plug.Conn{} = conn} = assigns) do
         request_method = conn.method |> to_string() |> String.upcase()
         request_url = Plug.Conn.request_url(conn)
