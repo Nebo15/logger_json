@@ -15,7 +15,7 @@ defmodule LoggerJSON.Formatters.Basic do
       }
   """
   import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, RedactorEncoder}
-  alias LoggerJSON.Formatter
+  require LoggerJSON.Formatter, as: Formatter
 
   @behaviour Formatter
 
@@ -76,8 +76,8 @@ defmodule LoggerJSON.Formatters.Basic do
   end
 
   if Code.ensure_loaded?(Plug.Conn) do
-    if @encoder == Jason and Code.ensure_loaded?(Jason) do
-      require Jason.Helpers
+    if @encoder == Jason do
+      Formatter.require_jason_helpers()
 
       defp format_http_request(%{conn: %Plug.Conn{} = conn}) do
         Jason.Helpers.json_map(

@@ -42,7 +42,7 @@ defmodule LoggerJSON.Formatters.Datadog do
       }
   """
   import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, Code, RedactorEncoder}
-  alias LoggerJSON.Formatter
+  require LoggerJSON.Formatter, as: Formatter
 
   @behaviour Formatter
 
@@ -211,8 +211,8 @@ defmodule LoggerJSON.Formatters.Datadog do
   defp format_http_request(_meta), do: nil
 
   if Code.ensure_loaded?(Plug.Conn) do
-    if @encoder == Jason and Code.ensure_loaded?(Jason) do
-      require Jason.Helpers
+    if @encoder == Jason do
+      Formatter.require_jason_helpers()
 
       defp build_http_request_data(%Plug.Conn{} = conn, request_id) do
         request_url = Plug.Conn.request_url(conn)

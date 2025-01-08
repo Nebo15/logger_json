@@ -25,4 +25,12 @@ defmodule LoggerJSON.Formatter do
   @doc false
   @spec encoder_protocol :: module()
   def encoder_protocol, do: @encoder_protocol
+
+  @doc false
+  @spec require_jason_helpers :: Macro.t()
+  defmacro require_jason_helpers do
+    quote do
+      require Jason.Helpers
+    end
+  end
 end
