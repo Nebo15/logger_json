@@ -243,9 +243,7 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
   defp format_crash_report_location(_meta), do: nil
 
   if Code.ensure_loaded?(Plug.Conn) do
-    if @encoder == Jason do
-      Formatter.require_jason_helpers()
-
+    Formatter.with Jason do
       defp format_http_request(%{conn: %Plug.Conn{} = conn} = assigns) do
         request_method = conn.method |> to_string() |> String.upcase()
         request_url = Plug.Conn.request_url(conn)
@@ -352,8 +350,8 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
   # coveralls-ignore-stop
 
   # https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogEntryOperation
-  if @encoder == Jason do
-    Formatter.require_jason_helpers()
+  Formatter.with Jason do
+    require Jason.Helpers
 
     defp format_operation(%{request_id: request_id, pid: pid}),
       do: Jason.Helpers.json_map(id: request_id, producer: inspect(pid))
@@ -369,8 +367,8 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
   defp format_operation(_meta), do: nil
 
   # https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogEntrySourceLocation
-  if @encoder == Jason do
-    Formatter.require_jason_helpers()
+  Formatter.with Jason do
+    require Jason.Helpers
 
     defp format_source_location(%{file: file, line: line, mfa: {m, f, a}}) do
       Jason.Helpers.json_map(

@@ -76,8 +76,8 @@ defmodule LoggerJSON.Formatters.Basic do
   end
 
   if Code.ensure_loaded?(Plug.Conn) do
-    if @encoder == Jason do
-      Formatter.require_jason_helpers()
+    Formatter.with Jason do
+      require Jason.Helpers
 
       defp format_http_request(%{conn: %Plug.Conn{} = conn}) do
         Jason.Helpers.json_map(

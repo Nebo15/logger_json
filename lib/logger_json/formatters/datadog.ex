@@ -211,8 +211,8 @@ defmodule LoggerJSON.Formatters.Datadog do
   defp format_http_request(_meta), do: nil
 
   if Code.ensure_loaded?(Plug.Conn) do
-    if @encoder == Jason do
-      Formatter.require_jason_helpers()
+    Formatter.with Jason do
+      require Jason.Helpers
 
       defp build_http_request_data(%Plug.Conn{} = conn, request_id) do
         request_url = Plug.Conn.request_url(conn)

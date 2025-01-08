@@ -27,10 +27,12 @@ defmodule LoggerJSON.Formatter do
   def encoder_protocol, do: @encoder_protocol
 
   @doc false
-  @spec require_jason_helpers :: Macro.t()
-  defmacro require_jason_helpers do
-    quote do
-      require Jason.Helpers
+  @spec with(module(), Macro.t()) :: Macro.t()
+  defmacro with(encoder, block) do
+    if @encoder == Macro.expand(encoder, __CALLER__) do
+      block[:do]
+    else
+      block[:else]
     end
   end
 end
