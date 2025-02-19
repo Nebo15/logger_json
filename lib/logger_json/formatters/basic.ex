@@ -31,6 +31,7 @@ defmodule LoggerJSON.Formatters.Basic do
     metadata_keys_or_selector = Keyword.get(opts, :metadata, [])
     metadata_selector = update_metadata_selector(metadata_keys_or_selector, @processed_metadata_keys)
     redactors = Keyword.get(opts, :redactors, [])
+    show_node = Keyword.get(opts, :show_node, nil)
 
     message =
       format_message(msg, meta, %{
@@ -49,6 +50,7 @@ defmodule LoggerJSON.Formatters.Basic do
       |> maybe_put(:request, format_http_request(meta))
       |> maybe_put(:span, format_span(meta))
       |> maybe_put(:trace, format_trace(meta))
+      |> maybe_put(:node, show_node && node())
       |> Jason.encode_to_iodata!(encoder_opts)
 
     [line, "\n"]
