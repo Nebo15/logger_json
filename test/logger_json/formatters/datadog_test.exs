@@ -500,4 +500,47 @@ defmodule LoggerJSON.Formatters.DatadogTest do
              "foo" => "foo"
            } = log
   end
+
+  test "logs Task/GenServer termination" do
+    test_pid = self()
+
+    logs =
+      capture_log(fn ->
+        {:ok, _} = Supervisor.start_link([{CrashingGenServer, :ok}], strategy: :one_for_one)
+
+        {:ok, _} =
+          Task.start(fn ->
+            try do
+              GenServer.call(CrashingGenServer, :boom)
+            catch
+              _ -> nil
+            after
+              send(test_pid, :done)
+            end
+          end)
+
+        # Wait for task to finish
+        receive do
+          :done -> nil
+        end
+
+        # Let logs flush
+        Process.sleep(100)
+      end)
+
+    [_, log_entry] =
+      logs
+      |> String.trim()
+      |> String.split("\n")
+      |> Enum.map(&decode_or_print_error/1)
+
+    assert %{
+             "domain" => ["otp", "elixir"],
+             "error" => %{"message" => message},
+             "error_logger" => %{"tag" => "error_msg"},
+             "syslog" => %{"severity" => "error"}
+           } = log_entry
+
+    assert message =~ ~r/Task #PID<\d+.\d+.\d+> started from #{inspect(test_pid)} terminating/
+  end
 end
