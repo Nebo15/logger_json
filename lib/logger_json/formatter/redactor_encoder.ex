@@ -58,10 +58,10 @@ defmodule LoggerJSON.Formatter.RedactorEncoder do
       encode_key_value({key, value}, redactors)
     end)
   rescue
-    _ -> for(el <- keyword, do: encode(el, redactors))
+    _ -> encode_list(keyword, redactors, [])
   end
 
-  def encode(list, redactors) when is_list(list), do: for(el <- list, do: encode(el, redactors))
+  def encode(list, redactors) when is_list(list), do: encode_list(list, redactors, [])
   def encode(data, _redactors), do: inspect(data, pretty: true, width: 80)
 
   defp encode_key_value({key, value}, redactors) do
@@ -85,5 +85,26 @@ defmodule LoggerJSON.Formatter.RedactorEncoder do
     Enum.reduce(redactors, value, fn {redactor, opts}, acc ->
       redactor.redact(to_string(key), acc, opts)
     end)
+  end
+
+  defp encode_list([], _redactors, acc), do: Enum.reverse(acc)
+
+  defp encode_list([head | tail], redactors, acc) do
+    encoded = encode(head, redactors)
+    encode_list(tail, redactors, [encoded | acc])
+  end
+
+  defp encode_list(improper_tail, redactors, [head | tail]) do
+    # Tuple will be converted to list, which will make the list proper and
+    # defeat the purpose
+    redacted =
+      case improper_tail do
+        {key, value} -> {key, encode(redact(key, value, redactors), redactors)}
+        _other -> encode(improper_tail, redactors)
+      end
+
+    tail
+    |> Enum.reduce([head | redacted], fn el, acc -> [el | acc] end)
+    |> inspect(limit: :infinity, pretty: true)
   end
 end
