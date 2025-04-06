@@ -144,7 +144,7 @@ defmodule LoggerJSON.Formatters.Elastic do
                               conn]a
 
   @impl Formatter
-  def new(opts) do
+  def new(opts \\ []) do
     opts = Keyword.new(opts)
     encoder_opts = Keyword.get_lazy(opts, :encoder_opts, &Formatter.default_encoder_opts/0)
     metadata_keys_or_selector = Keyword.get(opts, :metadata, [])

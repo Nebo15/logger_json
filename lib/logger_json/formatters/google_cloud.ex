@@ -109,7 +109,7 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
   @default_levels_reported_as_errors ~w[emergency alert critical error]a
 
   @impl Formatter
-  def new(opts) do
+  def new(opts \\ []) do
     opts = Keyword.new(opts)
     encoder_opts = Keyword.get_lazy(opts, :encoder_opts, &Formatter.default_encoder_opts/0)
     redactors = Keyword.get(opts, :redactors, [])
