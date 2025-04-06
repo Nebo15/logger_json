@@ -148,6 +148,10 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
   end
 
   test "logs span and trace ids without project_id" do
+    System.delete_env("GCLOUD_PROJECT")
+    System.delete_env("GOOGLE_PROJECT_ID")
+    System.delete_env("GOOGLE_CLOUD_PROJECT")
+
     formatter = GoogleCloud.new(metadata: :all)
     :logger.update_handler_config(:default, :formatter, formatter)
 
@@ -610,5 +614,33 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
     assert %{
              "foo" => "foo"
            } = log
+  end
+
+  test "reads project_id from environment_variables" do
+    for {env_var, project_id} <- [
+          {"GCLOUD_PROJECT", "myproj-101"},
+          {"GOOGLE_PROJECT_ID", "myproj-102"},
+          {"GOOGLE_CLOUD_PROJECT", "myproj-103"}
+        ] do
+      System.put_env(env_var, project_id)
+
+      formatter = GoogleCloud.new(metadata: :all)
+      :logger.update_handler_config(:default, :formatter, formatter)
+
+      Logger.metadata(
+        otel_span_id: ~c"bff20904aa5883a6",
+        otel_trace_flags: ~c"01",
+        otel_trace_id: ~c"294740ce41cc9f202dedb563db123532"
+      )
+
+      log_entry =
+        capture_log(fn ->
+          Logger.debug("Hello")
+        end)
+        |> decode_or_print_error()
+
+      assert log_entry["logging.googleapis.com/trace"] ==
+               "projects/#{project_id}/traces/294740ce41cc9f202dedb563db123532"
+    end
   end
 end
