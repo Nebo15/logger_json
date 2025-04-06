@@ -5,7 +5,7 @@ defmodule LoggerJSON.Formatters.BasicTest do
   require Logger
 
   setup do
-    formatter = {Basic, metadata: :all}
+    formatter = Basic.new(metadata: :all)
     :logger.update_handler_config(:default, :formatter, formatter)
   end
 
@@ -158,7 +158,7 @@ defmodule LoggerJSON.Formatters.BasicTest do
              }
            } = log
 
-    formatter = {Basic, metadata: {:all_except, [:struct]}}
+    formatter = Basic.new(metadata: {:all_except, [:struct]})
     :logger.update_handler_config(:default, :formatter, formatter)
 
     log =
@@ -181,7 +181,7 @@ defmodule LoggerJSON.Formatters.BasicTest do
              }
            } = log
 
-    formatter = {Basic, metadata: [:node]}
+    formatter = Basic.new(metadata: [:node])
     :logger.update_handler_config(:default, :formatter, formatter)
 
     log =
@@ -243,7 +243,7 @@ defmodule LoggerJSON.Formatters.BasicTest do
   end
 
   test "passing options to encoder" do
-    formatter = {Basic, encoder_opts: [pretty: true]}
+    formatter = Basic.new(encoder_opts: [pretty: true])
     :logger.update_handler_config(:default, :formatter, formatter)
 
     assert capture_log(fn ->
@@ -254,7 +254,7 @@ defmodule LoggerJSON.Formatters.BasicTest do
 
   test "reads metadata from the given application env" do
     Application.put_env(:logger_json, :test_basic_metadata_key, [:foo])
-    formatter = {Basic, metadata: {:from_application_env, {:logger_json, :test_basic_metadata_key}}}
+    formatter = Basic.new(metadata: {:from_application_env, {:logger_json, :test_basic_metadata_key}})
     :logger.update_handler_config(:default, :formatter, formatter)
 
     Logger.metadata(foo: "foo")
@@ -274,7 +274,7 @@ defmodule LoggerJSON.Formatters.BasicTest do
 
   test "reads metadata from the given application env at given path" do
     Application.put_env(:logger_json, :test_basic_metadata_key, metadata: [:foo])
-    formatter = {Basic, metadata: {:from_application_env, {:logger_json, :test_basic_metadata_key}, [:metadata]}}
+    formatter = Basic.new(metadata: {:from_application_env, {:logger_json, :test_basic_metadata_key}, [:metadata]})
     :logger.update_handler_config(:default, :formatter, formatter)
 
     Logger.metadata(foo: "foo")

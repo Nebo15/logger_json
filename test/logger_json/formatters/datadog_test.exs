@@ -5,7 +5,7 @@ defmodule LoggerJSON.Formatters.DatadogTest do
   require Logger
 
   setup do
-    formatter = {Datadog, metadata: :all}
+    formatter = Datadog.new(metadata: :all)
     :logger.update_handler_config(:default, :formatter, formatter)
   end
 
@@ -91,7 +91,7 @@ defmodule LoggerJSON.Formatters.DatadogTest do
     assert log["syslog"]["hostname"] == :inet.gethostname() |> elem(1) |> IO.chardata_to_string()
 
     # static value
-    formatter = {Datadog, hostname: "foo.bar1"}
+    formatter = Datadog.new(hostname: "foo.bar1")
     :logger.update_handler_config(:default, :formatter, formatter)
 
     log =
@@ -103,7 +103,7 @@ defmodule LoggerJSON.Formatters.DatadogTest do
     assert log["syslog"]["hostname"] == "foo.bar1"
 
     # unset value
-    formatter = {Datadog, hostname: :unset}
+    formatter = Datadog.new(hostname: :unset)
     :logger.update_handler_config(:default, :formatter, formatter)
 
     log =
@@ -456,7 +456,7 @@ defmodule LoggerJSON.Formatters.DatadogTest do
   end
 
   test "passing options to encoder" do
-    formatter = {Datadog, encoder_opts: [pretty: true]}
+    formatter = Datadog.new(encoder_opts: [pretty: true])
     :logger.update_handler_config(:default, :formatter, formatter)
 
     assert capture_log(fn ->
@@ -467,7 +467,7 @@ defmodule LoggerJSON.Formatters.DatadogTest do
 
   test "reads metadata from the given application env" do
     Application.put_env(:logger_json, :test_datadog_metadata_key, [:foo])
-    formatter = {Datadog, metadata: {:from_application_env, {:logger_json, :test_datadog_metadata_key}}}
+    formatter = Datadog.new(metadata: {:from_application_env, {:logger_json, :test_datadog_metadata_key}})
     :logger.update_handler_config(:default, :formatter, formatter)
 
     Logger.metadata(foo: "foo")
@@ -485,7 +485,7 @@ defmodule LoggerJSON.Formatters.DatadogTest do
 
   test "reads metadata from the given application env at given path" do
     Application.put_env(:logger_json, :test_datadog_metadata_key, metadata: [:foo])
-    formatter = {Datadog, metadata: {:from_application_env, {:logger_json, :test_datadog_metadata_key}, [:metadata]}}
+    formatter = Datadog.new(metadata: {:from_application_env, {:logger_json, :test_datadog_metadata_key}, [:metadata]})
     :logger.update_handler_config(:default, :formatter, formatter)
 
     Logger.metadata(foo: "foo")

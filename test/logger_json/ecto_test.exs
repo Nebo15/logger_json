@@ -4,7 +4,7 @@ defmodule LoggerJSON.EctoTest do
   require Logger
 
   setup do
-    formatter = {LoggerJSON.Formatters.Basic, metadata: :all}
+    formatter = LoggerJSON.Formatters.Basic.new(metadata: :all)
     :logger.update_handler_config(:default, :formatter, formatter)
   end
 

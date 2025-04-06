@@ -22,7 +22,8 @@ defmodule LoggerJSONTest do
     end
 
     test "raises on invalid log level" do
-      message = "Log level should be one of 'debug', 'info', 'warn', 'error' values, got: :invalid"
+      message =
+        "Log level should be one of [:error, :info, :debug, :emergency, :alert, :critical, :warning, :notice] values, got: :invalid"
 
       assert_raise ArgumentError, message, fn ->
         LoggerJSON.configure_log_level!(:invalid)

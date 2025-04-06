@@ -99,7 +99,7 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
                               conn]a
 
   @impl true
-  def format(%{level: level, meta: meta, msg: msg}, opts) do
+  def new(opts) do
     opts = Keyword.new(opts)
     encoder_opts = Keyword.get(opts, :encoder_opts, [])
     redactors = Keyword.get(opts, :redactors, [])
@@ -107,6 +107,26 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
     project_id = Keyword.get(opts, :project_id)
     metadata_keys_or_selector = Keyword.get(opts, :metadata, [])
     metadata_selector = update_metadata_selector(metadata_keys_or_selector, @processed_metadata_keys)
+
+    {__MODULE__,
+     %{
+       encoder_opts: encoder_opts,
+       redactors: redactors,
+       service_context: service_context,
+       project_id: project_id,
+       metadata: metadata_selector
+     }}
+  end
+
+  @impl true
+  def format(%{level: level, meta: meta, msg: msg}, config) do
+    %{
+      encoder_opts: encoder_opts,
+      redactors: redactors,
+      service_context: service_context,
+      project_id: project_id,
+      metadata: metadata_selector
+    } = config
 
     message =
       format_message(msg, meta, %{

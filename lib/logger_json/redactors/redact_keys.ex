@@ -5,9 +5,12 @@ defmodule LoggerJSON.Redactors.RedactKeys do
   It takes list of keys to redact as an argument, eg.:
   ```elixir
   config :logger, :default_handler,
-    formatter: {LoggerJSON.Formatters.Basic, redactors: [
-      {LoggerJSON.Redactors.RedactKeys, ["password"]}
-    ]}
+    formatter:
+      LoggerJSON.Formatters.Basic.new(
+        redactors: [
+          {LoggerJSON.Redactors.RedactKeys, ["password"]}
+        ]
+      )
   ```
 
   Keep in mind that the key will be converted to binary before sending it to the redactor.
