@@ -3,8 +3,9 @@ if Code.ensure_loaded?(Ecto) and Code.ensure_loaded?(:telemetry) do
     @moduledoc """
     A telemetry handler that logs Ecto query metrics in JSON format.
 
-    This module is not recommended to be used in production, as it can be
-    costly to log every single database query.
+    Please keep in mind that logging all database operations will have a performance impact
+    on your application, it's not recommended to use this module in high-throughput production
+    environments.
     """
     require Logger
 
