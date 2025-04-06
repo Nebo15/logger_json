@@ -99,7 +99,6 @@ defmodule LoggerJSON.Formatter.MetadataTest do
         crash_reason: "crash_reason",
         pid: "pid",
         gl: "gl",
-        mfa: "mfa",
         report_cb: "report_cb",
         time: "time"
       }

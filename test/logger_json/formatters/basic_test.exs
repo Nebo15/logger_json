@@ -114,6 +114,20 @@ defmodule LoggerJSON.Formatters.BasicTest do
     assert log["trace"] == "294740ce41cc9f202dedb563db123532"
   end
 
+  test "logs file, line and mfa as metadata" do
+    metadata =
+      capture_log(fn ->
+        Logger.debug("Hello")
+      end)
+      |> decode_or_print_error()
+      |> Map.get("metadata")
+
+    assert metadata |> Map.get("file") |> to_string() =~ "logger_json/formatters/basic_test.exs"
+    assert metadata |> Map.get("line") |> is_integer()
+
+    assert metadata["mfa"] === "Elixir.LoggerJSON.Formatters.BasicTest.test logs file, line and mfa as metadata/1"
+  end
+
   test "logs metadata" do
     Logger.metadata(
       date: Date.utc_today(),
