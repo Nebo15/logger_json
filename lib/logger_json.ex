@@ -24,7 +24,7 @@ defmodule LoggerJSON do
       def deps do
         [
           # ...
-          {:logger_json, "~> 6.1"}
+          {:logger_json, "~> 7.0"}
           # ...
         ]
       end
@@ -43,7 +43,9 @@ defmodule LoggerJSON do
 
   ## Configuration
 
-  Configuration can be set using 2nd element of the tuple of the `:formatter` option in `Logger` configuration.
+  Configuration can be set using `new/1` helper of the formatter module,
+  or by setting the 2nd element of the `:formatter` option tuple in `Logger` configuration.
+
   For example in `config.exs`:
 
       config :logger, :default_handler,
@@ -54,16 +56,11 @@ defmodule LoggerJSON do
       formatter = LoggerJSON.Formatters.Basic.new(metadata: {:all_except, [:conn]})
       :logger.update_handler_config(:default, :formatter, formatter)
 
-  It is possible to set during compile-time the JSON encoder:
-
-      config :logger_json, encoder: Jason
-
-  For Elixir 1.18+, `JSON` is available and can be set as the encoder:
+  By default, `LoggerJSON` is using `Jason` as the JSON encoder. If you use Elixir 1.18 or later, you can
+  use the built-in `JSON` module as the encoder. To do this, you need to set the `:encoder` option in your
+  `config.exs` file. This setting is only available at compile-time:
 
       config :logger_json, encoder: JSON
-
-  For retro-compatibility, `Jason` is the default encoder. Make sure to add it to the project
-  dependencies if the encoder will not be changed.
 
   ### Shared Options
 
@@ -77,7 +74,8 @@ defmodule LoggerJSON do
     * `:metadata` - a list of metadata keys to include in the log entry. By default, no metadata is included.
     If `:all`is given, all metadata is included. If `{:all_except, keys}` is given, all metadata except
     the specified keys is included. If `{:from_application_env, {app, module}, path}` is given, the metadata is fetched from
-    the application environment (eg. `{:from_application_env, {:logger, :default_formatter}, [:metadata]}`) on each logged message.
+    the application environment (eg. `{:from_application_env, {:logger, :default_formatter}, [:metadata]}`) during the
+    configuration initialization.
 
     * `:redactors` - a list of tuples, where first element is the module that implements the `LoggerJSON.Redactor` behaviour,
     and the second element is the options to pass to the redactor module. By default, no redactors are used.

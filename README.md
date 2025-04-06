@@ -27,7 +27,7 @@ Add `logger_json` to your list of dependencies in `mix.exs`:
 def deps do
   [
     # ...
-    {:logger_json, "~> 6.1"}
+    {:logger_json, "~> 7.0"}
     # ...
   ]
 end
@@ -76,20 +76,11 @@ formatter = LoggerJSON.Formatters.Basic.new(%{metadata: {:all_except, [:conn]}})
 :logger.update_handler_config(:default, :formatter, formatter)
 ```
 
-It is possible to set during compile-time the JSON encoder:
+By default, `LoggerJSON` is using `Jason` as the JSON encoder. If you use Elixir 1.18 or later, you can
+use the built-in `JSON` module as the encoder. To do this, you need to set the `:encoder` option in your
+`config.exs` file. This setting is only available at compile-time:
 
-```elixir
-config :logger_json, encoder: Jason
-```
-
-For Elixir 1.18+, `JSON` is available and can be set as the encoder:
-
-```elixir
-config :logger_json, encoder: JSON
-```
-
-For retro-compatibility, `Jason` is the default encoder. Make sure to add it to the project
-dependencies if the encoder will not be changed.
+    config :logger_json, encoder: JSON
 
 ## Docs
 
