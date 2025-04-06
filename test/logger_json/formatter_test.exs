@@ -24,36 +24,4 @@ defmodule LoggerJSON.FormatterTest do
       assert LoggerJSON.Formatter.encoder_protocol() == @encoder_protocol
     end
   end
-
-  describe "with/2" do
-    test "runs do block if it matches encoder" do
-      result =
-        LoggerJSON.Formatter.with @encoder do
-          quote do
-            :ok
-          end
-        else
-          quote do
-            :error
-          end
-        end
-
-      assert result == :ok
-    end
-
-    test "runs else block if it does not match encoder" do
-      result =
-        LoggerJSON.Formatter.with Something do
-          quote do
-            :error
-          end
-        else
-          quote do
-            :ok
-          end
-        end
-
-      assert result == :ok
-    end
-  end
 end
