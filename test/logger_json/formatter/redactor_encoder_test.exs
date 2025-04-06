@@ -77,6 +77,10 @@ defmodule LoggerJSON.Formatter.RedactorEncoderTest do
       assert encode([password: "foo"], @redactors) == %{password: "[REDACTED]"}
     end
 
+    test "redacts values in improper list tail" do
+      assert encode([nil | %{password: "foo"}], @redactors) == "[nil | %{password: \"[REDACTED]\"}]"
+    end
+
     test "converts non-string map keys" do
       assert encode(%{1 => 2}, []) == %{1 => 2}
       assert encode(%{:a => 1}, []) == %{:a => 1}
@@ -95,6 +99,18 @@ defmodule LoggerJSON.Formatter.RedactorEncoderTest do
 
     test "inspects pids" do
       assert encode(self(), []) == inspect(self())
+    end
+
+    test "inspects improper lists" do
+      assert encode([1, [2, 3], 4 | 5], @redactors) == "[1, [2, 3], 4 | 5]"
+    end
+
+    test "inspects improper lists that start as keyword lists" do
+      assert encode([{:foo, 1}, 2 | 3], @redactors) == "[[:foo, 1], 2 | 3]"
+    end
+
+    test "inspects improper keyword lists" do
+      assert encode([{:foo, 1} | {:bar, 2}], @redactors) == "[[:foo, 1] | {:bar, 2}]"
     end
 
     test "doesn't choke on things that look like keyword lists but aren't" do
