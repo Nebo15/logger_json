@@ -12,7 +12,10 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
   The formatter can be configured with the following options:
 
   * `:project_id` (optional) - the Google Cloud project ID. This is required for correctly logging OpenTelemetry trace and
-  span IDs so that they can be linked to the correct trace in Google Cloud Trace.
+  span IDs so that they can be linked to the correct trace in Google Cloud Trace. If it's not provided, the formatter will
+  try to read it from the environment variables `GOOGLE_CLOUD_PROJECT`, `GOOGLE_PROJECT_ID` or `GCLOUD_PROJECT`. Please keep
+  in mind that environment will be read whenever you call the `new/1` function, so you should configure the formatter at runtime
+  (in the `config/runtime.exs` or in your `application.ex`) if you rely on this feature.
 
   * `:service_context` (optional) - a map with the following keys:
     * `:service` - the name of the service that is logging the message. Default: `node()`.
@@ -106,7 +109,7 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
     encoder_opts = Keyword.get_lazy(opts, :encoder_opts, &Formatter.default_encoder_opts/0)
     redactors = Keyword.get(opts, :redactors, [])
     service_context = Keyword.get_lazy(opts, :service_context, fn -> %{service: to_string(node())} end)
-    project_id = Keyword.get(opts, :project_id)
+    project_id = Keyword.get_lazy(opts, :project_id, &get_default_project_id/0)
     metadata_keys_or_selector = Keyword.get(opts, :metadata, [])
     metadata_selector = update_metadata_selector(metadata_keys_or_selector, @processed_metadata_keys)
 
@@ -118,6 +121,12 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
        project_id: project_id,
        metadata: metadata_selector
      }}
+  end
+
+  defp get_default_project_id do
+    System.get_env("GOOGLE_CLOUD_PROJECT") ||
+      System.get_env("GOOGLE_PROJECT_ID") ||
+      System.get_env("GCLOUD_PROJECT")
   end
 
   @impl Formatter
