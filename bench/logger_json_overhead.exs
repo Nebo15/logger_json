@@ -81,6 +81,7 @@ redactors = []
 
 Benchee.run(
   %{
+    "just JSON" => fn input -> JSON.encode_to_iodata!(input) end,
     "just Jason" => fn input -> Jason.encode_to_iodata!(input) end,
     "logger_json encode" => fn input ->
       %{message: LoggerJSON.Formatter.RedactorEncoder.encode(input, redactors)}
