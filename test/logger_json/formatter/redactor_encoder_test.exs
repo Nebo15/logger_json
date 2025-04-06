@@ -8,7 +8,7 @@ defmodule LoggerJSON.Formatter.RedactorEncoderTest do
   defmodule PasswordStruct, do: defstruct(password: "foo")
 
   @encoder LoggerJSON.Formatter.encoder()
-  @redactors [{LoggerJSON.Redactors.RedactKeys, ["password"]}]
+  @redactors [LoggerJSON.Redactors.RedactKeys.new(["password"])]
 
   describe "encode/2" do
     test "allows nils" do

@@ -8,7 +8,14 @@ defmodule LoggerJSON.Formatter do
 
   @type encoder_opts :: JSON.encoder() | [Jason.encode_opt()] | term()
 
-  @callback new(opts) :: {module, :logger.formatter_config()}
+  @doc """
+  Creates a new configuration for the formatter.
+  """
+  @callback new(opts) :: {module, term()}
+
+  @doc """
+  Formats a log event.
+  """
   @callback format(event :: :logger.log_event(), opts :: opts()) :: iodata()
 
   @encoder Application.compile_env(:logger_json, :encoder, Jason)

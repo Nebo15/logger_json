@@ -7,9 +7,17 @@ defmodule LoggerJSON.Redactor do
   """
 
   @doc """
+  Creates a new redactor.
+  """
+  @callback new(opts :: term()) :: {module(), term()}
+
+  @doc """
   Takes a key and a value and returns a redacted value.
 
   This callback will be applied on key-value pairs, like elements of structs, maps or keyword lists.
   """
   @callback redact(key :: String.t(), value :: term(), opts :: term()) :: term()
+
+  # TODO: Make it required in a future version
+  @optional_callbacks new: 1
 end
