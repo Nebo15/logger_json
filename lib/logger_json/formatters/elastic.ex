@@ -130,28 +130,30 @@ defmodule LoggerJSON.Formatters.Elastic do
 
   """
   import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, RedactorEncoder}
-  require Jason.Helpers
+  alias LoggerJSON.Formatter
 
-  @behaviour LoggerJSON.Formatter
+  @behaviour Formatter
 
   @ecs_version "8.11.0"
+
+  @encoder Formatter.encoder()
 
   @processed_metadata_keys ~w[file line mfa domain error_logger
                               otel_span_id span_id
                               otel_trace_id trace_id
                               conn]a
 
-  @impl true
+  @impl Formatter
   def new(opts) do
     opts = Keyword.new(opts)
-    encoder_opts = Keyword.get(opts, :encoder_opts, [])
+    encoder_opts = Keyword.get_lazy(opts, :encoder_opts, &Formatter.default_encoder_opts/0)
     metadata_keys_or_selector = Keyword.get(opts, :metadata, [])
     metadata_selector = update_metadata_selector(metadata_keys_or_selector, @processed_metadata_keys)
     redactors = Keyword.get(opts, :redactors, [])
     {__MODULE__, %{encoder_opts: encoder_opts, metadata: metadata_selector, redactors: redactors}}
   end
 
-  @impl LoggerJSON.Formatter
+  @impl Formatter
   def format(%{level: level, meta: meta, msg: msg}, config) do
     %{
       encoder_opts: encoder_opts,
@@ -178,7 +180,7 @@ defmodule LoggerJSON.Formatters.Elastic do
       |> maybe_merge(format_http_request(meta))
       |> maybe_put(:"span.id", format_span_id(meta))
       |> maybe_put(:"trace.id", format_trace_id(meta))
-      |> Jason.encode_to_iodata!(encoder_opts)
+      |> @encoder.encode_to_iodata!(encoder_opts)
 
     [line, "\n"]
   end
@@ -291,13 +293,13 @@ defmodule LoggerJSON.Formatters.Elastic do
     # - event.duration (note: ns, not μs): https://www.elastic.co/guide/en/ecs/current/ecs-event.html#field-event-duration
     defp format_http_request(%{conn: %Plug.Conn{} = conn, duration_us: duration_us}) do
       %{
-        "client.ip": LoggerJSON.Formatter.Plug.remote_ip(conn),
+        "client.ip": Formatter.Plug.remote_ip(conn),
         "http.version": Plug.Conn.get_http_protocol(conn),
         "http.request.method": conn.method,
-        "http.request.referrer": LoggerJSON.Formatter.Plug.get_header(conn, "referer"),
+        "http.request.referrer": Formatter.Plug.get_header(conn, "referer"),
         "http.response.status_code": conn.status,
         "url.path": conn.request_path,
-        "user_agent.original": LoggerJSON.Formatter.Plug.get_header(conn, "user-agent")
+        "user_agent.original": Formatter.Plug.get_header(conn, "user-agent")
       }
       |> maybe_put(:"event.duration", to_nanosecs(duration_us))
     end
@@ -321,6 +323,8 @@ defmodule LoggerJSON.Formatters.Elastic do
 
   defp safe_chardata_to_string(other), do: other
 
-  defp to_nanosecs(duration_us) when is_number(duration_us), do: duration_us * 1000
-  defp to_nanosecs(_), do: nil
+  if Code.ensure_loaded?(Plug.Conn) do
+    defp to_nanosecs(duration_us) when is_number(duration_us), do: duration_us * 1000
+    defp to_nanosecs(_), do: nil
+  end
 end

@@ -6,6 +6,7 @@ defmodule NameStruct do
   are not compiled with the application so not protocol consolidation would happen.
   """
 
-  @derive Jason.Encoder
+  @derive LoggerJSON.Formatter.encoder_protocol()
+
   defstruct [:name]
 end
