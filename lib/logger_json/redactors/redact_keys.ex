@@ -8,7 +8,7 @@ defmodule LoggerJSON.Redactors.RedactKeys do
     formatter:
       LoggerJSON.Formatters.Basic.new(
         redactors: [
-          {LoggerJSON.Redactors.RedactKeys, ["password"]}
+          LoggerJSON.Redactors.RedactKeys.new(["password"])
         ]
       )
   ```
@@ -18,6 +18,12 @@ defmodule LoggerJSON.Redactors.RedactKeys do
 
   @behaviour LoggerJSON.Redactor
 
+  @impl LoggerJSON.Redactor
+  def new(keys) do
+    {__MODULE__, keys}
+  end
+
+  @impl LoggerJSON.Redactor
   def redact(key, value, keys) do
     if key in keys do
       "[REDACTED]"
