@@ -4,6 +4,8 @@ defmodule LoggerJSON.Formatters.ElasticTest do
   alias LoggerJSON.Formatters.Elastic
   require Logger
 
+  @encoder LoggerJSON.Formatter.encoder()
+
   setup do
     formatter = Elastic.new(metadata: :all)
     :logger.update_handler_config(:default, :formatter, formatter)
@@ -489,14 +491,16 @@ defmodule LoggerJSON.Formatters.ElasticTest do
     assert message =~ ~r/Task #PID<\d+.\d+.\d+> started from #{inspect(test_pid)} terminating/
   end
 
-  test "passing options to encoder" do
-    formatter = Elastic.new(encoder_opts: [pretty: true])
-    :logger.update_handler_config(:default, :formatter, formatter)
+  if @encoder == Jason do
+    test "passing options to encoder" do
+      formatter = Elastic.new(encoder_opts: [pretty: true])
+      :logger.update_handler_config(:default, :formatter, formatter)
 
-    assert capture_log(fn ->
-             Logger.debug("Hello")
-           end) =~
-             ~r/\n\s{2}"message": "Hello"/
+      assert capture_log(fn ->
+               Logger.debug("Hello")
+             end) =~
+               ~r/\n\s{2}"message": "Hello"/
+    end
   end
 
   test "reads metadata from the given application env" do

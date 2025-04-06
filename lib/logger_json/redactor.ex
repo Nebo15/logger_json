@@ -2,8 +2,8 @@ defmodule LoggerJSON.Redactor do
   @moduledoc """
   This module provides a behaviour which allows to redact sensitive information from logs.
 
-  *Note*: redactor will not be applied on `Jason.Fragment` structs. For more information
-  about encoding and redacting see `LoggerJSON.Formatter.RedactorEncoder.encode/2`.
+  *Note*: redactor will not be applied on `Jason.Fragment` structs if the encoder is `Jason`.
+  For more information about encoding and redacting see `LoggerJSON.Formatter.RedactorEncoder.encode/2`.
   """
 
   @doc """

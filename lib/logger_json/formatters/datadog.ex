@@ -42,16 +42,18 @@ defmodule LoggerJSON.Formatters.Datadog do
       }
   """
   import LoggerJSON.Formatter.{MapBuilder, DateTime, Message, Metadata, Code, RedactorEncoder}
-  require Jason.Helpers
+  require LoggerJSON.Formatter, as: Formatter
 
-  @behaviour LoggerJSON.Formatter
+  @behaviour Formatter
+
+  @encoder Formatter.encoder()
 
   @processed_metadata_keys ~w[pid file line mfa conn]a
 
-  @impl true
+  @impl Formatter
   def new(opts) do
     opts = Keyword.new(opts)
-    encoder_opts = Keyword.get(opts, :encoder_opts, [])
+    encoder_opts = Keyword.get_lazy(opts, :encoder_opts, &Formatter.default_encoder_opts/0)
     redactors = Keyword.get(opts, :redactors, [])
     hostname = Keyword.get(opts, :hostname, :system)
     metadata_keys_or_selector = Keyword.get(opts, :metadata, [])
@@ -59,7 +61,7 @@ defmodule LoggerJSON.Formatters.Datadog do
     {__MODULE__, %{encoder_opts: encoder_opts, metadata: metadata_selector, redactors: redactors, hostname: hostname}}
   end
 
-  @impl true
+  @impl Formatter
   def format(%{level: level, meta: meta, msg: msg}, config) do
     %{
       encoder_opts: encoder_opts,
@@ -88,7 +90,7 @@ defmodule LoggerJSON.Formatters.Datadog do
       |> maybe_merge(format_http_request(meta))
       |> maybe_merge(encode(metadata, redactors))
       |> maybe_merge(encode(message, redactors))
-      |> Jason.encode_to_iodata!(encoder_opts)
+      |> @encoder.encode_to_iodata!(encoder_opts)
 
     [line, "\n"]
   end
@@ -208,31 +210,8 @@ defmodule LoggerJSON.Formatters.Datadog do
 
   if Code.ensure_loaded?(Plug.Conn) do
     defp format_http_request(%{conn: %Plug.Conn{} = conn, duration_us: duration_us} = meta) do
-      request_url = Plug.Conn.request_url(conn)
-      user_agent = LoggerJSON.Formatter.Plug.get_header(conn, "user-agent")
-      remote_ip = LoggerJSON.Formatter.Plug.remote_ip(conn)
-      referer = LoggerJSON.Formatter.Plug.get_header(conn, "referer")
-
-      %{
-        http:
-          Jason.Helpers.json_map(
-            url: request_url,
-            status_code: conn.status,
-            method: conn.method,
-            referer: referer,
-            request_id: meta[:request_id],
-            useragent: user_agent,
-            url_details:
-              Jason.Helpers.json_map(
-                host: conn.host,
-                port: conn.port,
-                path: conn.request_path,
-                queryString: conn.query_string,
-                scheme: conn.scheme
-              )
-          ),
-        network: Jason.Helpers.json_map(client: Jason.Helpers.json_map(ip: remote_ip))
-      }
+      conn
+      |> build_http_request_data(meta[:request_id])
       |> maybe_put(:duration, to_nanosecs(duration_us))
     end
 
@@ -241,6 +220,36 @@ defmodule LoggerJSON.Formatters.Datadog do
 
   defp format_http_request(_meta), do: nil
 
-  defp to_nanosecs(duration_us) when is_number(duration_us), do: duration_us * 1000
-  defp to_nanosecs(_), do: nil
+  if Code.ensure_loaded?(Plug.Conn) do
+    defp build_http_request_data(%Plug.Conn{} = conn, request_id) do
+      request_url = Plug.Conn.request_url(conn)
+      user_agent = Formatter.Plug.get_header(conn, "user-agent")
+      remote_ip = Formatter.Plug.remote_ip(conn)
+      referer = Formatter.Plug.get_header(conn, "referer")
+
+      %{
+        http: %{
+          url: request_url,
+          status_code: conn.status,
+          method: conn.method,
+          referer: referer,
+          request_id: request_id,
+          useragent: user_agent,
+          url_details: %{
+            host: conn.host,
+            port: conn.port,
+            path: conn.request_path,
+            queryString: conn.query_string,
+            scheme: conn.scheme
+          }
+        },
+        network: %{client: %{ip: remote_ip}}
+      }
+    end
+  end
+
+  if Code.ensure_loaded?(Plug.Conn) do
+    defp to_nanosecs(duration_us) when is_number(duration_us), do: duration_us * 1000
+    defp to_nanosecs(_), do: nil
+  end
 end

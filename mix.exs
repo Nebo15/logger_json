@@ -35,7 +35,7 @@ defmodule LoggerJSON.Mixfile do
 
   defp deps do
     [
-      {:jason, "~> 1.4"},
+      {:jason, "~> 1.4", optional: true},
       {:plug, "~> 1.15", optional: true},
       {:decimal, ">= 0.0.0", optional: true},
       {:ecto, "~> 3.11", optional: true},
