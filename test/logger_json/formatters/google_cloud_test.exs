@@ -188,6 +188,10 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
   end
 
   test "does not crash on invalid span and trace ids" do
+    System.delete_env("GCLOUD_PROJECT")
+    System.delete_env("GOOGLE_PROJECT_ID")
+    System.delete_env("GOOGLE_CLOUD_PROJECT")
+
     Logger.metadata(
       span_id: :foo,
       trace_id: 123
@@ -204,6 +208,10 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
   end
 
   test "does not crash on invalid OTEL span and trace ids" do
+    System.delete_env("GCLOUD_PROJECT")
+    System.delete_env("GOOGLE_PROJECT_ID")
+    System.delete_env("GOOGLE_CLOUD_PROJECT")
+
     formatter = GoogleCloud.new(metadata: :all)
     :logger.update_handler_config(:default, :formatter, formatter)
 
