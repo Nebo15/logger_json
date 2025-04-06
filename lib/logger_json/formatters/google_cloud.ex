@@ -21,6 +21,9 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
     * `:service` - the name of the service that is logging the message. Default: `node()`.
     * `:version` - the version of the service that is logging the message.
 
+  * `:reported_levels` (optional) - a list of log levels that should be reported as errors to Google Cloud Error Reporting.
+  Default: `[:emergency, :alert, :critical, :error]`.
+
   For list of shared options see "Shared options" in `LoggerJSON`.
 
   ## Metadata
@@ -103,6 +106,8 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
                               otel_trace_id trace_id
                               conn]a
 
+  @default_levels_reported_as_errors ~w[emergency alert critical error]a
+
   @impl Formatter
   def new(opts) do
     opts = Keyword.new(opts)
@@ -112,6 +117,7 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
     project_id = Keyword.get_lazy(opts, :project_id, &get_default_project_id/0)
     metadata_keys_or_selector = Keyword.get(opts, :metadata, [])
     metadata_selector = update_metadata_selector(metadata_keys_or_selector, @processed_metadata_keys)
+    reported_levels = Keyword.get(opts, :reported_levels, @default_levels_reported_as_errors)
 
     {__MODULE__,
      %{
@@ -119,7 +125,8 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
        redactors: redactors,
        service_context: service_context,
        project_id: project_id,
-       metadata: metadata_selector
+       metadata: metadata_selector,
+       reported_levels: reported_levels
      }}
   end
 
@@ -136,7 +143,8 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
       redactors: redactors,
       service_context: service_context,
       project_id: project_id,
-      metadata: metadata_selector
+      metadata: metadata_selector,
+      reported_levels: reported_levels
     } = config
 
     message =
@@ -159,11 +167,20 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
       |> maybe_put(:"logging.googleapis.com/spanId", format_span(meta, project_id))
       |> maybe_put(:"logging.googleapis.com/trace", format_trace(meta, project_id))
       |> maybe_put(:httpRequest, format_http_request(meta))
+      |> maybe_report_to_google_cloud_error_reporter(level, reported_levels)
       |> maybe_merge(encode(message, redactors))
       |> maybe_merge(encode(metadata, redactors))
       |> @encoder.encode_to_iodata!(encoder_opts)
 
     [line, "\n"]
+  end
+
+  defp maybe_report_to_google_cloud_error_reporter(map, level, reported_levels) do
+    if level in reported_levels do
+      Map.put(map, :"@type", "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent")
+    else
+      map
+    end
   end
 
   defp log_level(:emergency), do: "EMERGENCY"

@@ -37,7 +37,7 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
   end
 
   test "logs an LogEntry of a given level" do
-    for level <- [:error, :info, :debug, :emergency, :alert, :critical, :warning, :notice] do
+    for level <- [:info, :debug, :warning, :notice] do
       log_entry =
         capture_log(level, fn ->
           Logger.log(level, "Hello")
@@ -48,6 +48,35 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
       level_string = String.upcase(to_string(level))
 
       assert %{
+               "logging.googleapis.com/operation" => %{"producer" => ^pid},
+               "logging.googleapis.com/sourceLocation" => %{
+                 "file" => _,
+                 "function" => _,
+                 "line" => _
+               },
+               "domain" => ["elixir"],
+               "message" => "Hello",
+               "severity" => ^level_string,
+               "time" => _
+             } = log_entry
+
+      refute Map.has_key?(log_entry, "@type")
+    end
+  end
+
+  test "reports errors to Google Cloud Error Reporter" do
+    for level <- [:error, :emergency, :alert, :critical] do
+      log_entry =
+        capture_log(level, fn ->
+          Logger.log(level, "Hello")
+        end)
+        |> decode_or_print_error()
+
+      pid = inspect(self())
+      level_string = String.upcase(to_string(level))
+
+      assert %{
+               "@type" => "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent",
                "logging.googleapis.com/operation" => %{"producer" => ^pid},
                "logging.googleapis.com/sourceLocation" => %{
                  "file" => _,
