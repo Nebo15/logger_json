@@ -111,7 +111,7 @@ defmodule LoggerJSON.Formatters.Datadog do
   def format_crash_reason(binary, _other, _meta) do
     %{
       error: %{
-        message: binary
+        message: IO.chardata_to_string(binary)
       }
     }
   end
