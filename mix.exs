@@ -40,6 +40,7 @@ defmodule LoggerJSON.Mixfile do
       {:decimal, ">= 0.0.0", optional: true},
       {:ecto, "~> 3.11", optional: true},
       {:telemetry, "~> 1.0", optional: true},
+      {:benchee, "~> 1.3", only: [:dev, :test]},
       {:stream_data, "~> 1.0", only: [:dev, :test]},
       {:castore, "~> 1.0", only: [:dev, :test]},
       {:excoveralls, ">= 0.15.0", only: [:dev, :test]},

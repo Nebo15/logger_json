@@ -87,11 +87,15 @@ defmodule LoggerJSON.Formatter.RedactorEncoder do
   defp format_mfa({module, function, arity}), do: "#{module}.#{function}/#{arity}"
 
   defp encode_binary(data) when is_binary(data) do
-    if String.valid?(data) && String.printable?(data) do
+    if String.printable?(data) do
       data
     else
       inspect(data)
     end
+  end
+
+  defp redact(_key, value, []) do
+    value
   end
 
   defp redact(key, value, redactors) do
