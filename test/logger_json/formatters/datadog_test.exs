@@ -284,7 +284,9 @@ defmodule LoggerJSON.Formatters.DatadogTest do
       |> decode_or_print_error()
 
     assert %{
+             "message" => message,
              "error" => %{
+               "kind" => "RuntimeError",
                "message" => message,
                "stack" => stacktrace
              },
@@ -354,7 +356,7 @@ defmodule LoggerJSON.Formatters.DatadogTest do
       end)
       |> decode_or_print_error()
 
-    assert log["error"] == %{"message" => "Hello"}
+    assert log["error"] == %{"message" => "Hello", "kind" => "exit"}
 
     assert log["network"] == %{"client" => %{"ip" => "127.0.0.1"}}
 

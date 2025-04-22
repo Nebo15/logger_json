@@ -116,23 +116,41 @@ defmodule LoggerJSON.Formatters.Datadog do
   end
 
   @doc false
-  def format_crash_reason(binary, {%{} = _exception, stacktrace}, _meta) do
+  def format_crash_reason(binary, {%struct{} = _exception, stacktrace}, _meta) do
+    kind =
+      struct
+      |> Module.split()
+      |> List.last()
+
+    message = IO.chardata_to_string(binary)
+
     %{
+      message: message,
       error: %{
-        message: IO.chardata_to_string(binary),
+        kind: kind,
+        message: message,
         stack: Exception.format_stacktrace(stacktrace)
       }
     }
   end
 
   # https://docs.datadoghq.com/standard-attributes/?search=logger+error&product=log+management
-  def format_crash_reason(binary, _other, _meta) do
+  def format_crash_reason(binary, other, _meta) do
+    message = IO.chardata_to_string(binary)
+
     %{
+      message: message,
       error: %{
-        message: IO.chardata_to_string(binary)
+        kind: format_crash_reason_kind(other),
+        message: message
       }
     }
   end
+
+  defp format_crash_reason_kind({{:EXIT, _pid}, _reason}), do: "exit"
+  defp format_crash_reason_kind({:exit, _reason}), do: "exit"
+  defp format_crash_reason_kind({:throw, _reason}), do: "throw"
+  defp format_crash_reason_kind(_), do: "other"
 
   defp syslog(level, meta, :system) do
     {:ok, hostname} = :inet.gethostname()
