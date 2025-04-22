@@ -35,18 +35,26 @@ end
 
 and install it running `mix deps.get`.
 
-Then, enable the formatter in your `config.exs`:
+Then, enable the formatter in your `runtime.exs`:
 
 ```elixir
 config :logger, :default_handler,
   formatter: LoggerJSON.Formatters.Basic.new(metadata: [:request_id])
 ```
 
-or during runtime (eg. in your `application.ex`):
+or inside your application code (eg. in your `application.ex`):
 
 ```elixir
 formatter = LoggerJSON.Formatters.Basic.new(metadata: :all)
 :logger.update_handler_config(:default, :formatter, formatter)
+```
+
+or inside your `config.exs` (notice that `new/1` is not available here
+and tuple format must be used):
+
+```elixir
+config :logger, :default_handler,
+  formatter: {LoggerJSON.Formatters.Basic, metadata: [:request_id]}
 ```
 
 You might also want to format the log messages when migrations are running:
@@ -55,6 +63,12 @@ You might also want to format the log messages when migrations are running:
 config :domain, MyApp.Repo,
   # ...
   start_apps_before_migration: [:logger_json]
+```
+
+And you might want to make logging level configurable using an `LOG_LEVEL` environment variable (in `application.ex`):
+
+```elixir
+LoggerJSON.configure_log_level_from_env!()
 ```
 
 Additionally, you may also be try [redirecting otp reports to Logger](https://hexdocs.pm/logger/Logger.html#module-configuration) (see "Configuration" section).

@@ -585,6 +585,16 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
     end
   end
 
+  test "accepts opts as a tuple" do
+    :logger.update_handler_config(:default, :formatter, {GoogleCloud, metadata: :all, project_id: "myproj-101"})
+
+    assert capture_log(fn ->
+             Logger.debug("hello")
+           end)
+           |> decode_or_print_error()
+           |> Map.has_key?("message")
+  end
+
   test "reads metadata from the given application env" do
     Application.put_env(:logger_json, :test_google_cloud_metadata_key, [:foo])
     formatter = GoogleCloud.new(metadata: {:from_application_env, {:logger_json, :test_google_cloud_metadata_key}})

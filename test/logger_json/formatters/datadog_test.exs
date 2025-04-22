@@ -469,6 +469,16 @@ defmodule LoggerJSON.Formatters.DatadogTest do
     end
   end
 
+  test "accepts opts as a tuple" do
+    :logger.update_handler_config(:default, :formatter, {Datadog, metadata: :all})
+
+    assert capture_log(fn ->
+             Logger.debug("hello")
+           end)
+           |> decode_or_print_error()
+           |> Map.has_key?("message")
+  end
+
   test "reads metadata from the given application env" do
     Application.put_env(:logger_json, :test_datadog_metadata_key, [:foo])
     formatter = Datadog.new(metadata: {:from_application_env, {:logger_json, :test_datadog_metadata_key}})

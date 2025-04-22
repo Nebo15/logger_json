@@ -31,15 +31,21 @@ defmodule LoggerJSON do
 
   and install it running `mix deps.get`.
 
-  Then, enable the formatter in your `config.exs`:
+  Then, enable the formatter in your `runtime.exs`:
 
       config :logger, :default_handler,
-        formatter: LoggerJSON.Formatters.Basic.new(metadata: :all)
+        formatter: LoggerJSON.Formatters.Basic.new(metadata: [:request_id])
 
-  or during runtime (eg. in your `application.ex`):
+  or inside your application code (eg. in your `application.ex`):
 
       formatter = LoggerJSON.Formatters.Basic.new(metadata: :all)
       :logger.update_handler_config(:default, :formatter, formatter)
+
+  or inside your `config.exs` (notice that `new/1` is not available here
+  and tuple format must be used):
+
+      config :logger, :default_handler,
+        formatter: {LoggerJSON.Formatters.Basic, metadata: [:request_id]}
 
   ## Configuration
 

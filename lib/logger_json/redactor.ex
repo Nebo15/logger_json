@@ -7,7 +7,25 @@ defmodule LoggerJSON.Redactor do
   """
 
   @doc """
-  Creates a new redactor.
+  Initializes a new redactor configuration.
+
+  ## Compile‑time vs. Runtime Configuration
+
+  This function can’t be used in `config.exs` because that file is evaluated
+  before your application modules are compiled and loaded, so `new/1` isn’t defined yet.
+  You can only call it in `config/runtime.exs` or from your application code.
+
+  If you must set up the redactor in `config.exs`, use the tuple format:
+  the first element is the module implementing `LoggerJSON.Redactor`,
+  and the second is the options passed to `new/1`. For example:
+
+    config :logger, :default_handler,
+      formatter: {LoggerJSON.Formatters.Basic, redactors: [
+        {MyRedactor, [option1: :value1]}
+      ]}
+
+  Note that tuple‑based configs are resolved for each log entry,
+  which can increase logging overhead.
   """
   @callback new(opts :: term()) :: {module(), term()}
 

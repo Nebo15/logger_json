@@ -110,6 +110,12 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
 
   @impl Formatter
   def new(opts \\ []) do
+    {__MODULE__, config(opts)}
+  end
+
+  defp config(%{} = map), do: map
+
+  defp config(opts) do
     opts = Keyword.new(opts)
     encoder_opts = Keyword.get_lazy(opts, :encoder_opts, &Formatter.default_encoder_opts/0)
     redactors = Keyword.get(opts, :redactors, [])
@@ -119,15 +125,14 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
     metadata_selector = update_metadata_selector(metadata_keys_or_selector, @processed_metadata_keys)
     reported_levels = Keyword.get(opts, :reported_levels, @default_levels_reported_as_errors)
 
-    {__MODULE__,
-     %{
-       encoder_opts: encoder_opts,
-       redactors: redactors,
-       service_context: service_context,
-       project_id: project_id,
-       metadata: metadata_selector,
-       reported_levels: reported_levels
-     }}
+    %{
+      encoder_opts: encoder_opts,
+      redactors: redactors,
+      service_context: service_context,
+      project_id: project_id,
+      metadata: metadata_selector,
+      reported_levels: reported_levels
+    }
   end
 
   defp get_default_project_id do
@@ -137,7 +142,7 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
   end
 
   @impl Formatter
-  def format(%{level: level, meta: meta, msg: msg}, config) do
+  def format(%{level: level, meta: meta, msg: msg}, config_or_opts) do
     %{
       encoder_opts: encoder_opts,
       redactors: redactors,
@@ -145,7 +150,7 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
       project_id: project_id,
       metadata: metadata_selector,
       reported_levels: reported_levels
-    } = config
+    } = config(config_or_opts)
 
     message =
       format_message(msg, meta, %{

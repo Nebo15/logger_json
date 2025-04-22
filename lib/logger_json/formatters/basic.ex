@@ -27,21 +27,27 @@ defmodule LoggerJSON.Formatters.Basic do
 
   @impl Formatter
   def new(opts \\ []) do
+    {__MODULE__, config(opts)}
+  end
+
+  defp config(%{} = map), do: map
+
+  defp config(opts) do
     opts = Keyword.new(opts)
     encoder_opts = Keyword.get_lazy(opts, :encoder_opts, &Formatter.default_encoder_opts/0)
     metadata_keys_or_selector = Keyword.get(opts, :metadata, [])
     metadata_selector = update_metadata_selector(metadata_keys_or_selector, @processed_metadata_keys)
     redactors = Keyword.get(opts, :redactors, [])
-    {__MODULE__, %{encoder_opts: encoder_opts, metadata: metadata_selector, redactors: redactors}}
+    %{encoder_opts: encoder_opts, metadata: metadata_selector, redactors: redactors}
   end
 
   @impl Formatter
-  def format(%{level: level, meta: meta, msg: msg}, config) do
+  def format(%{level: level, meta: meta, msg: msg}, config_or_opts) do
     %{
       encoder_opts: encoder_opts,
       metadata: metadata_selector,
       redactors: redactors
-    } = config
+    } = config(config_or_opts)
 
     message =
       format_message(msg, meta, %{
