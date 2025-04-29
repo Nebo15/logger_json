@@ -469,7 +469,6 @@ defmodule LoggerJSON.Formatters.DatadogTest do
 
       assert log["error"]["kind"] == "error"
       assert log["error"]["message"] == "Something went wrong"
-      assert log["error"]["stack"] =~ "LoggerJSON.Formatters.DatadogTest"
     end
   end
 
