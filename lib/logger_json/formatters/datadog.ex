@@ -249,14 +249,13 @@ defmodule LoggerJSON.Formatters.Datadog do
        when is_binary(message) and level in [:error, :critical, :alert, :emergency] do
     existing_error = msg[:error] || %{}
 
-    %{
-      error:
-        Map.merge(existing_error, %{
-          kind: get_error_kind(msg),
-          message: message,
-          stack: get_error_stack(msg)
-        })
-    }
+    error =
+      existing_error
+      |> Map.put(:kind, get_error_kind(msg))
+      |> Map.put(:message, message)
+      |> maybe_put(:stack, get_error_stack(msg))
+
+    %{error: error}
   end
 
   defp format_error(_msg, _level), do: nil
@@ -265,12 +264,7 @@ defmodule LoggerJSON.Formatters.Datadog do
   defp get_error_kind(_), do: "error"
 
   defp get_error_stack(%{error: %{stack: stack}}) when is_binary(stack), do: stack
-
-  defp get_error_stack(_msg) do
-    with {:current_stacktrace, stacktrace} <- Process.info(self(), :current_stacktrace) do
-      Exception.format_stacktrace(stacktrace)
-    end
-  end
+  defp get_error_stack(_msg), do: nil
 
   if Code.ensure_loaded?(Plug.Conn) do
     defp build_http_request_data(%Plug.Conn{} = conn, request_id) do
