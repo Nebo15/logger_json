@@ -459,6 +459,20 @@ defmodule LoggerJSON.Formatters.DatadogTest do
            } = log_entry
   end
 
+  test "logs error.{kind, message, stack} for error+ logs" do
+    for level <- [:error, :critical, :alert, :emergency] do
+      log =
+        capture_log(fn ->
+          Logger.log(level, "Something went wrong")
+        end)
+        |> decode_or_print_error()
+
+      assert log["error"]["kind"] == "error"
+      assert log["error"]["message"] == "Something went wrong"
+      assert log["error"]["stack"] =~ "LoggerJSON.Formatters.DatadogTest"
+    end
+  end
+
   if @encoder == Jason do
     test "passing options to encoder" do
       formatter = Datadog.new(encoder_opts: [pretty: true])
