@@ -94,6 +94,7 @@ defmodule LoggerJSON.Formatters.Datadog do
       %{syslog: syslog(level, meta, hostname)}
       |> maybe_put(:logger, format_logger(meta))
       |> maybe_merge(format_http_request(meta))
+      |> maybe_merge(format_error(message, level))
       |> maybe_merge(encode(metadata, redactors))
       |> maybe_merge(encode(message, redactors))
       |> @encoder.encode_to_iodata!(encoder_opts)
@@ -243,6 +244,33 @@ defmodule LoggerJSON.Formatters.Datadog do
   end
 
   defp format_http_request(_meta), do: nil
+
+  defp format_error(%{message: message} = msg, level)
+       when is_binary(message) and level in [:error, :critical, :alert, :emergency] do
+    existing_error = msg[:error] || %{}
+
+    %{
+      error:
+        Map.merge(existing_error, %{
+          kind: get_error_kind(msg),
+          message: message,
+          stack: get_error_stack(msg)
+        })
+    }
+  end
+
+  defp format_error(_msg, _level), do: nil
+
+  defp get_error_kind(%{error: %{kind: kind}}) when is_binary(kind), do: kind
+  defp get_error_kind(_), do: "error"
+
+  defp get_error_stack(%{error: %{stack: stack}}) when is_binary(stack), do: stack
+
+  defp get_error_stack(_msg) do
+    with {:current_stacktrace, stacktrace} <- Process.info(self(), :current_stacktrace) do
+      Exception.format_stacktrace(stacktrace)
+    end
+  end
 
   if Code.ensure_loaded?(Plug.Conn) do
     defp build_http_request_data(%Plug.Conn{} = conn, request_id) do
