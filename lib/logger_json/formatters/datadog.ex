@@ -259,10 +259,10 @@ defmodule LoggerJSON.Formatters.Datadog do
 
   defp format_http_request(_meta), do: nil
 
-  defp format_error(%{message: message} = msg, metadata, level, reported_levels) when is_binary(message) do
-    existing_error = msg[:error]
+  defp format_error(%{error: _error}, _metadata, _level, _reported_levels), do: nil
 
-    if level in reported_levels and is_nil(existing_error) do
+  defp format_error(%{message: message}, metadata, level, reported_levels) when is_binary(message) do
+    if level in reported_levels do
       error =
         metadata[:error]
         |> Kernel.||(%{})
