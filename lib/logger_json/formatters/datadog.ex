@@ -270,8 +270,6 @@ defmodule LoggerJSON.Formatters.Datadog do
         |> maybe_put(:stack, get_error_stack(msg))
 
       %{error: error}
-    else
-      nil
     end
   end
 
