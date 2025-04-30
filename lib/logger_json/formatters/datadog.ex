@@ -17,6 +17,9 @@ defmodule LoggerJSON.Formatters.Datadog do
     (like Kubernetes), you can set `hostname` to `:unset` to exclude it entirely. You'll then be relying on
     [`dd-agent`](https://docs.datadoghq.com/agent/) to determine the hostname.
 
+  * `:reported_levels` (optional) - a list of log levels that should be reported as errors to Datadog.
+    Default: `[:emergency, :alert, :critical, :error]`.
+
   For list of shared options see "Shared options" in `LoggerJSON`.
 
   ## Metadata
@@ -50,6 +53,8 @@ defmodule LoggerJSON.Formatters.Datadog do
 
   @processed_metadata_keys ~w[pid file line mfa conn]a
 
+  @default_levels_reported_as_errors ~w[emergency alert critical error]a
+
   @impl Formatter
   def new(opts \\ []) do
     {__MODULE__, config(opts)}
@@ -64,7 +69,15 @@ defmodule LoggerJSON.Formatters.Datadog do
     hostname = Keyword.get(opts, :hostname, :system)
     metadata_keys_or_selector = Keyword.get(opts, :metadata, [])
     metadata_selector = update_metadata_selector(metadata_keys_or_selector, @processed_metadata_keys)
-    %{encoder_opts: encoder_opts, metadata: metadata_selector, redactors: redactors, hostname: hostname}
+    reported_levels = Keyword.get(opts, :reported_levels, @default_levels_reported_as_errors)
+
+    %{
+      encoder_opts: encoder_opts,
+      metadata: metadata_selector,
+      redactors: redactors,
+      hostname: hostname,
+      reported_levels: reported_levels
+    }
   end
 
   @impl Formatter
@@ -73,7 +86,8 @@ defmodule LoggerJSON.Formatters.Datadog do
       encoder_opts: encoder_opts,
       metadata: metadata_selector,
       redactors: redactors,
-      hostname: hostname
+      hostname: hostname,
+      reported_levels: reported_levels
     } = config(config_or_opts)
 
     message =
@@ -94,7 +108,7 @@ defmodule LoggerJSON.Formatters.Datadog do
       %{syslog: syslog(level, meta, hostname)}
       |> maybe_put(:logger, format_logger(meta))
       |> maybe_merge(format_http_request(meta))
-      |> maybe_merge(format_error(message, level))
+      |> maybe_merge(format_error(message, level, reported_levels))
       |> maybe_merge(encode(metadata, redactors))
       |> maybe_merge(encode(message, redactors))
       |> @encoder.encode_to_iodata!(encoder_opts)
@@ -245,20 +259,23 @@ defmodule LoggerJSON.Formatters.Datadog do
 
   defp format_http_request(_meta), do: nil
 
-  defp format_error(%{message: message} = msg, level)
-       when is_binary(message) and level in [:error, :critical, :alert, :emergency] do
-    existing_error = msg[:error] || %{}
+  defp format_error(%{message: message} = msg, level, reported_levels) when is_binary(message) do
+    if level in reported_levels do
+      existing_error = msg[:error] || %{}
 
-    error =
-      existing_error
-      |> Map.put(:kind, get_error_kind(msg))
-      |> Map.put(:message, message)
-      |> maybe_put(:stack, get_error_stack(msg))
+      error =
+        existing_error
+        |> Map.put(:kind, get_error_kind(msg))
+        |> Map.put(:message, message)
+        |> maybe_put(:stack, get_error_stack(msg))
 
-    %{error: error}
+      %{error: error}
+    else
+      nil
+    end
   end
 
-  defp format_error(_msg, _level), do: nil
+  defp format_error(_msg, _level, _reported_levels), do: nil
 
   defp get_error_kind(%{error: %{kind: kind}}) when is_binary(kind), do: kind
   defp get_error_kind(_), do: "error"
