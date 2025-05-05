@@ -56,12 +56,17 @@ defmodule LoggerJSON.Formatters.Basic do
         crash: &format_crash_reason(&1, &2, meta)
       })
 
+    metadata =
+      meta
+      |> take_metadata(metadata_selector)
+      |> maybe_update(:file, &IO.chardata_to_string/1)
+
     line =
       %{
         time: utc_time(meta),
         severity: Atom.to_string(level),
         message: encode(message, redactors),
-        metadata: encode(take_metadata(meta, metadata_selector), redactors)
+        metadata: encode(metadata, redactors)
       }
       |> maybe_put(:request, format_http_request(meta))
       |> maybe_put(:span, format_span(meta))

@@ -124,7 +124,7 @@ defmodule LoggerJSON.Formatters.BasicTest do
       |> decode_or_print_error()
       |> Map.get("metadata")
 
-    assert metadata |> Map.get("file") |> to_string() =~ "logger_json/formatters/basic_test.exs"
+    assert metadata |> Map.get("file") =~ "logger_json/formatters/basic_test.exs"
     assert metadata |> Map.get("line") |> is_integer()
 
     assert metadata["mfa"] === "Elixir.LoggerJSON.Formatters.BasicTest.test logs file, line and mfa as metadata/1"
