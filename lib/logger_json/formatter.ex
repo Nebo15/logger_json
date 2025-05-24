@@ -23,8 +23,8 @@ defmodule LoggerJSON.Formatter do
   the first element is the module implementing `LoggerJSON.Formatter`,
   and the second is the options passed to `new/1`. For example:
 
-    config :logger, :default_handler,
-      formatter: {LoggerJSON.Formatters.Basic, metadata: [:request_id]}
+      config :logger, :default_handler,
+        formatter: {LoggerJSON.Formatters.Basic, metadata: [:request_id]}
 
   Note that tuple‑based configs are resolved for each log entry,
   which can increase logging overhead.
