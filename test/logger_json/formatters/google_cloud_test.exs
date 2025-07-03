@@ -338,7 +338,7 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
              """
   end
 
-  test "logs exception user context" do
+  test "logs exception user context with binary values" do
     Logger.metadata(crash_reason: {{:EXIT, self()}, :foo})
 
     # The keys are applied in the order of their precedence
@@ -357,6 +357,30 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
       [entity, _id] = key |> Atom.to_string() |> String.split("_")
 
       assert log_entry["context"]["user"] == "#{entity}:foo_#{key}"
+
+      metadata
+    end)
+  end
+
+  test "logs exception user context with integer values" do
+    Logger.metadata(crash_reason: {{:EXIT, self()}, :foo})
+
+    # The keys are applied in the order of their precedence
+    [:user_id, :identity_id, :actor_id, :account_id]
+    |> Enum.reverse()
+    |> Enum.reduce([], fn key, metadata ->
+      metadata = Keyword.put(metadata, key, 123)
+      Logger.metadata(metadata)
+
+      log_entry =
+        capture_log(fn ->
+          Logger.debug("Hello")
+        end)
+        |> decode_or_print_error()
+
+      [entity, _id] = key |> Atom.to_string() |> String.split("_")
+
+      assert log_entry["context"]["user"] == "#{entity}:123"
 
       metadata
     end)

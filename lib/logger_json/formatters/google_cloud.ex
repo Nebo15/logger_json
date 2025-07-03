@@ -329,10 +329,10 @@ defmodule LoggerJSON.Formatters.GoogleCloud do
     end
   end
 
-  defp format_affected_user(%{user_id: user_id}), do: "user:" <> user_id
-  defp format_affected_user(%{identity_id: identity_id}), do: "identity:" <> identity_id
-  defp format_affected_user(%{actor_id: actor_id}), do: "actor:" <> actor_id
-  defp format_affected_user(%{account_id: account_id}), do: "account:" <> account_id
+  defp format_affected_user(%{user_id: user_id}), do: Enum.join(["user:", user_id])
+  defp format_affected_user(%{identity_id: identity_id}), do: Enum.join(["identity:", identity_id])
+  defp format_affected_user(%{actor_id: actor_id}), do: Enum.join(["actor:", actor_id])
+  defp format_affected_user(%{account_id: account_id}), do: Enum.join(["account:", account_id])
   defp format_affected_user(_meta), do: nil
 
   defp format_stacktrace(stacktrace) do
