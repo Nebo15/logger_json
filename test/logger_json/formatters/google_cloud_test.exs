@@ -362,7 +362,7 @@ defmodule LoggerJSON.Formatters.GoogleCloudTest do
     end)
   end
 
-  test "logs exception user context with integer values" do
+  test "logs exception user context with non-binary values" do
     Logger.metadata(crash_reason: {{:EXIT, self()}, :foo})
 
     # The keys are applied in the order of their precedence
