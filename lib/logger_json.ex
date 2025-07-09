@@ -52,7 +52,7 @@ defmodule LoggerJSON do
   Configuration can be set using `new/1` helper of the formatter module,
   or by setting the 2nd element of the `:formatter` option tuple in `Logger` configuration.
 
-  For example in `config.exs`:
+  For example in `runtime.exs`:
 
       config :logger, :default_handler,
         formatter: LoggerJSON.Formatters.GoogleCloud.new(metadata: :all, project_id: "logger-101")
