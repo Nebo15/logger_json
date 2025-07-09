@@ -76,7 +76,7 @@ Additionally, you may also be try [redirecting otp reports to Logger](https://he
 ## Configuration
 
 Configuration can be set using 2nd element of the tuple of the `:formatter` option in `Logger` configuration.
-For example in `config.exs`:
+For example in `runtime.exs`:
 
 ```elixir
 config :logger, :default_handler,
