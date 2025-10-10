@@ -114,5 +114,14 @@ defmodule LoggerJSON.Formatter.MetadataTest do
 
       assert take_metadata(meta, [:mfa]) == %{mfa: "mfa"}
     end
+
+    test "supports special metadata keys :module and :function" do
+      meta = %{
+        mfa: {Foo.Bar, :foo, 7}
+      }
+
+      assert take_metadata(meta, [:module]) == %{module: "Foo.Bar"}
+      assert take_metadata(meta, [:function]) == %{function: "foo/7"}
+    end
   end
 end

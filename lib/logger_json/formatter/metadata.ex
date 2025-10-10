@@ -66,6 +66,27 @@ defmodule LoggerJSON.Formatter.Metadata do
   end
 
   def take_metadata(meta, keys) when is_list(keys) do
-    Map.take(meta, keys)
+    Enum.reduce(keys, %{}, &compute_meta(&1, &2, meta))
+  end
+
+  defp compute_meta(:module, acc, meta) do
+    case meta do
+      %{mfa: {mod, _, _}} -> Map.put(acc, :module, inspect(mod))
+      _ -> acc
+    end
+  end
+
+  defp compute_meta(:function, acc, meta) do
+    case meta do
+      %{mfa: {_, fun, arity}} -> Map.put(acc, :function, "#{fun}/#{arity}")
+      _ -> acc
+    end
+  end
+
+  defp compute_meta(key, acc, meta) do
+    case meta do
+      %{^key => value} -> Map.put(acc, key, value)
+      _ -> acc
+    end
   end
 end
