@@ -489,6 +489,20 @@ defmodule LoggerJSON.Formatters.DatadogTest do
     end
   end
 
+  test "logs non-map error field from logger metadata as error.error" do
+    for level <- [:error, :critical, :alert, :emergency] do
+      log =
+        capture_log(level, fn ->
+          Logger.log(level, "Something went wrong", error: "Error field")
+        end)
+        |> decode_or_print_error()
+
+      assert log["error"]["kind"] == "error"
+      assert log["error"]["message"] == "Something went wrong"
+      assert log["error"]["error"] == "Error field"
+    end
+  end
+
   if @encoder == Jason do
     test "passing options to encoder" do
       formatter = Datadog.new(encoder_opts: [pretty: true])
