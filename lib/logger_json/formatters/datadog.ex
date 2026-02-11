@@ -263,9 +263,15 @@ defmodule LoggerJSON.Formatters.Datadog do
 
   defp format_error(%{message: message}, metadata, level, reported_levels) when is_binary(message) do
     if level in reported_levels do
+      metadata_error =
+        case metadata[:error] do
+          nil -> %{}
+          value when is_map(value) -> value
+          other -> %{error: other}
+        end
+
       error =
-        metadata[:error]
-        |> Kernel.||(%{})
+        metadata_error
         |> Map.put(:kind, get_error_kind(metadata))
         |> Map.put(:message, message)
         |> maybe_put(:stack, get_error_stack(metadata))
