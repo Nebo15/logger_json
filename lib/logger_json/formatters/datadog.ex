@@ -70,13 +70,15 @@ defmodule LoggerJSON.Formatters.Datadog do
     metadata_keys_or_selector = Keyword.get(opts, :metadata, [])
     metadata_selector = update_metadata_selector(metadata_keys_or_selector, @processed_metadata_keys)
     reported_levels = Keyword.get(opts, :reported_levels, @default_levels_reported_as_errors)
+    env = Keyword.get(opts, :env)
 
     %{
       encoder_opts: encoder_opts,
       metadata: metadata_selector,
       redactors: redactors,
       hostname: hostname,
-      reported_levels: reported_levels
+      reported_levels: reported_levels,
+      env: env
     }
   end
 
@@ -87,7 +89,8 @@ defmodule LoggerJSON.Formatters.Datadog do
       metadata: metadata_selector,
       redactors: redactors,
       hostname: hostname,
-      reported_levels: reported_levels
+      reported_levels: reported_levels,
+      env: env
     } = config(config_or_opts)
 
     message =
@@ -105,7 +108,7 @@ defmodule LoggerJSON.Formatters.Datadog do
       |> maybe_update(:otel_trace_id, &safe_chardata_to_string/1)
 
     line =
-      %{syslog: syslog(level, meta, hostname)}
+      %{syslog: syslog(level, meta, hostname, env)}
       |> maybe_put(:logger, format_logger(meta))
       |> maybe_merge(format_http_request(meta))
       |> maybe_merge(format_error(message, metadata, level, reported_levels))
@@ -167,30 +170,23 @@ defmodule LoggerJSON.Formatters.Datadog do
   defp format_crash_reason_kind({:throw, _reason}), do: "throw"
   defp format_crash_reason_kind(_), do: "other"
 
-  defp syslog(level, meta, :system) do
+  defp syslog(level, meta, hostname, env) do
+    %{
+      severity: Atom.to_string(level),
+      timestamp: utc_time(meta)
+    }
+    |> maybe_put(:hostname, syslog_hostname(hostname))
+    |> maybe_put(:env, env)
+  end
+
+  defp syslog_hostname(:system) do
     {:ok, hostname} = :inet.gethostname()
-
-    %{
-      hostname: to_string(hostname),
-      severity: Atom.to_string(level),
-      timestamp: utc_time(meta)
-    }
+    to_string(hostname)
   end
 
-  defp syslog(level, meta, :unset) do
-    %{
-      severity: Atom.to_string(level),
-      timestamp: utc_time(meta)
-    }
-  end
+  defp syslog_hostname(:unset), do: nil
 
-  defp syslog(level, meta, hostname) do
-    %{
-      hostname: hostname,
-      severity: Atom.to_string(level),
-      timestamp: utc_time(meta)
-    }
-  end
+  defp syslog_hostname(hostname), do: hostname
 
   defp format_logger(%{file: file, line: line, mfa: {m, f, a}} = meta) do
     %{
