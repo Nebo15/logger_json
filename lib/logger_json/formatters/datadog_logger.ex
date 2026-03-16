@@ -48,7 +48,10 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
 
   @impl LoggerJSON.Formatter
   def format_event(level, msg, ts, md, md_keys, formatter_state) do
+    # Metadata is merged first so that reserved keys (message, logger, syslog)
+    # in the second map always take precedence.
     Map.merge(
+      format_metadata(md, md_keys),
       %{
         logger:
           json_map(
@@ -59,8 +62,7 @@ defmodule LoggerJSON.Formatters.DatadogLogger do
           ),
         message: IO.chardata_to_string(msg),
         syslog: syslog(level, ts, formatter_state.hostname)
-      },
-      format_metadata(md, md_keys)
+      }
     )
   end
 

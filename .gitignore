@@ -49,3 +49,5 @@ rel/*/
 # Don't commit file uploads
 uploads/
 !uploads/.gitkeep
+
+.expert
