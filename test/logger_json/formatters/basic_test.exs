@@ -127,7 +127,8 @@ defmodule LoggerJSON.Formatters.BasicTest do
     assert metadata |> Map.get("file") =~ "logger_json/formatters/basic_test.exs"
     assert metadata |> Map.get("line") |> is_integer()
 
-    assert metadata["mfa"] === "Elixir.LoggerJSON.Formatters.BasicTest.test logs file, line and mfa as metadata/1"
+    assert metadata["mfa"] ===
+             Exception.format_mfa(__MODULE__, :"test logs file, line and mfa as metadata", 1)
   end
 
   test "logs metadata" do
@@ -298,6 +299,54 @@ defmodule LoggerJSON.Formatters.BasicTest do
                "foo" => "foo"
              }
            } = log
+  end
+
+  test "derives :module, :function, and :initial_call from :mfa when explicitly requested" do
+    formatter = Basic.new(metadata: [:module, :function, :initial_call])
+    :logger.update_handler_config(:default, :formatter, formatter)
+
+    log =
+      capture_log(fn ->
+        Logger.debug("Hello")
+      end)
+      |> decode_or_print_error()
+
+    assert %{"metadata" => %{"module" => module, "function" => function}} = log
+    assert module =~ "LoggerJSON.Formatters.BasicTest"
+    assert function =~ ~r/^test derives .+\/1$/
+  end
+
+  test "derives virtual keys for metadata: :all" do
+    formatter = Basic.new(metadata: :all)
+    :logger.update_handler_config(:default, :formatter, formatter)
+
+    log =
+      capture_log(fn ->
+        Logger.debug("Hello")
+      end)
+      |> decode_or_print_error()
+
+    metadata = log["metadata"]
+    assert metadata["mfa"] =~ "LoggerJSON.Formatters.BasicTest"
+    assert metadata["module"] =~ "LoggerJSON.Formatters.BasicTest"
+    assert metadata["function"] =~ ~r/^test derives .+\/1$/
+  end
+
+  test "derives virtual keys for metadata: {:all_except, [...]}" do
+    formatter = Basic.new(metadata: {:all_except, [:file, :line]})
+    :logger.update_handler_config(:default, :formatter, formatter)
+
+    log =
+      capture_log(fn ->
+        Logger.debug("Hello")
+      end)
+      |> decode_or_print_error()
+
+    metadata = log["metadata"]
+    assert metadata["module"] =~ "LoggerJSON.Formatters.BasicTest"
+    assert metadata["function"] =~ ~r/^test derives .+\/1$/
+    refute Map.has_key?(metadata, "file")
+    refute Map.has_key?(metadata, "line")
   end
 
   test "reads metadata from the given application env at given path" do

@@ -84,7 +84,7 @@ defmodule LoggerJSON.Formatter.RedactorEncoder do
   defp encode_key(key) when is_atom(key) or is_number(key), do: key
   defp encode_key(key), do: inspect(key)
 
-  defp format_mfa({module, function, arity}), do: "#{module}.#{function}/#{arity}"
+  defp format_mfa({module, function, arity}), do: Exception.format_mfa(module, function, arity)
 
   defp encode_binary(data) when is_binary(data) do
     if String.printable?(data) do

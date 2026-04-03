@@ -114,5 +114,13 @@ defmodule LoggerJSON.Formatter.MetadataTest do
 
       assert take_metadata(meta, [:mfa]) == %{mfa: "mfa"}
     end
+
+    test "does not compute virtual keys from :mfa" do
+      meta = %{mfa: {Foo.Bar, :foo, 7}}
+
+      assert take_metadata(meta, [:module]) == %{}
+      assert take_metadata(meta, [:function]) == %{}
+      assert take_metadata(meta, [:mfa]) == %{mfa: {Foo.Bar, :foo, 7}}
+    end
   end
 end

@@ -59,6 +59,7 @@ defmodule LoggerJSON.Formatters.Basic do
     metadata =
       meta
       |> take_metadata(metadata_selector)
+      |> maybe_put_virtual_keys(meta, metadata_selector)
       |> maybe_update(:file, &IO.chardata_to_string/1)
 
     line =
@@ -113,6 +114,34 @@ defmodule LoggerJSON.Formatters.Basic do
   end
 
   defp format_http_request(_meta), do: nil
+
+  # Computes virtual metadata keys from :mfa when explicitly requested via a key
+  # list but not already present in metadata. This mirrors the special keys
+  # supported by Elixir's built-in Logger.Formatter (see `compute_meta/2`):
+  # https://hexdocs.pm/logger/Logger.html#module-metadata
+  @virtual_metadata_keys [:module, :function, :initial_call]
+
+  defp maybe_put_virtual_keys(metadata, meta, keys) when is_list(keys) do
+    Enum.reduce(keys, metadata, &maybe_compute_meta(&1, &2, meta))
+  end
+
+  defp maybe_put_virtual_keys(metadata, meta, _selector) do
+    Enum.reduce(@virtual_metadata_keys, metadata, &maybe_compute_meta(&1, &2, meta))
+  end
+
+  defp maybe_compute_meta(:module, acc, %{mfa: {mod, _, _}}) do
+    Map.put_new(acc, :module, mod)
+  end
+
+  defp maybe_compute_meta(:function, acc, %{mfa: {_, fun, arity}}) do
+    Map.put_new(acc, :function, "#{fun}/#{arity}")
+  end
+
+  defp maybe_compute_meta(:initial_call, acc, %{initial_call: {mod, fun, arity}}) do
+    Map.put_new(acc, :initial_call, Exception.format_mfa(mod, fun, arity))
+  end
+
+  defp maybe_compute_meta(_key, acc, _meta), do: acc
 
   defp format_span(%{otel_span_id: otel_span_id}), do: IO.chardata_to_string(otel_span_id)
   defp format_span(%{span_id: span_id}), do: span_id
