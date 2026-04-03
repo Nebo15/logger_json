@@ -34,6 +34,16 @@ defmodule LoggerJSON.Formatter.Message do
     structured_fmt.(data)
   end
 
+  # breaking change introduced in Elixir 1.19
+  def format_message({format, args}, %{crash_reason: crash_reason}, %{crash: crash_fmt}) do
+    message =
+      format
+      |> Logger.Utils.scan_inspect(args, :infinity)
+      |> :io_lib.build_text()
+
+    crash_fmt.(message, crash_reason)
+  end
+
   def format_message({format, args}, _meta, %{binary: binary_fmt}) do
     format
     |> Logger.Utils.scan_inspect(args, :infinity)
