@@ -117,6 +117,29 @@ defmodule LoggerJSON.Formatters.DatadogTest do
     refute Map.has_key?(log["syslog"], "hostname")
   end
 
+  test "logs env" do
+    # do not log it by default
+    log =
+      capture_log(fn ->
+        Logger.debug("Hello")
+      end)
+      |> decode_or_print_error()
+
+    refute Map.has_key?(log["syslog"], "env")
+
+    # static value
+    formatter = Datadog.new(env: "production")
+    :logger.update_handler_config(:default, :formatter, formatter)
+
+    log =
+      capture_log(fn ->
+        Logger.debug("Hello")
+      end)
+      |> decode_or_print_error()
+
+    assert log["syslog"]["env"] == "production"
+  end
+
   test "logs OpenTelemetry span and trace ids" do
     Logger.metadata(
       otel_span_id: ~c"bff20904aa5883a6",
