@@ -301,8 +301,8 @@ defmodule LoggerJSON.Formatters.BasicTest do
            } = log
   end
 
-  test "derives :module, :function, and :initial_call from :mfa when explicitly requested" do
-    formatter = Basic.new(metadata: [:module, :function, :initial_call])
+  test "derives :module and :function from :mfa when explicitly requested" do
+    formatter = Basic.new(metadata: [:module, :function])
     :logger.update_handler_config(:default, :formatter, formatter)
 
     log =
@@ -314,6 +314,21 @@ defmodule LoggerJSON.Formatters.BasicTest do
     assert %{"metadata" => %{"module" => module, "function" => function}} = log
     assert module =~ "LoggerJSON.Formatters.BasicTest"
     assert function =~ ~r/^test derives .+\/1$/
+  end
+
+  test "derives :initial_call from metadata when explicitly requested" do
+    formatter = Basic.new(metadata: [:initial_call])
+    :logger.update_handler_config(:default, :formatter, formatter)
+
+    Logger.metadata(initial_call: {MyApp.Worker, :init, 1})
+
+    log =
+      capture_log(fn ->
+        Logger.debug("Hello")
+      end)
+      |> decode_or_print_error()
+
+    assert log["metadata"]["initial_call"] == Exception.format_mfa(MyApp.Worker, :init, 1)
   end
 
   test "derives virtual keys for metadata: :all" do

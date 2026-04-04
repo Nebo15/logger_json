@@ -138,7 +138,7 @@ defmodule LoggerJSON.Formatters.Basic do
   end
 
   defp maybe_compute_meta(:initial_call, acc, %{initial_call: {mod, fun, arity}}) do
-    Map.put_new(acc, :initial_call, Exception.format_mfa(mod, fun, arity))
+    Map.put(acc, :initial_call, Exception.format_mfa(mod, fun, arity))
   end
 
   defp maybe_compute_meta(_key, acc, _meta), do: acc
