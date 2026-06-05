@@ -1,7 +1,6 @@
 defmodule LoggerJSON.PlugTest do
   use LoggerJSON.Case, async: false
   import LoggerJSON.Plug
-  require Logger
 
   describe "attach/3" do
     test "attaches a telemetry handler" do
