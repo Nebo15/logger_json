@@ -227,7 +227,7 @@ defmodule LoggerJSON.Formatters.Datadog do
   defp convert_otel_field(value) when is_binary(value) or is_list(value) do
     value = to_string(value)
     len = byte_size(value) - 16
-    <<_front::binary-size(len), value::binary>> = value
+    <<_front::binary-size(^len), value::binary>> = value
     convert_otel_field(value)
   rescue
     _ -> ""
