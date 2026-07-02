@@ -66,7 +66,7 @@ defmodule LoggerJSON.Formatters.Datadog do
     opts = Keyword.new(opts)
     encoder_opts = Keyword.get_lazy(opts, :encoder_opts, &Formatter.default_encoder_opts/0)
     redactors = Keyword.get(opts, :redactors, [])
-    hostname = Keyword.get(opts, :hostname, :system)
+    hostname = opts |> Keyword.get(:hostname, :system) |> syslog_hostname()
     metadata_keys_or_selector = Keyword.get(opts, :metadata, [])
     metadata_selector = update_metadata_selector(metadata_keys_or_selector, @processed_metadata_keys)
     reported_levels = Keyword.get(opts, :reported_levels, @default_levels_reported_as_errors)
@@ -175,7 +175,7 @@ defmodule LoggerJSON.Formatters.Datadog do
       severity: Atom.to_string(level),
       timestamp: utc_time(meta)
     }
-    |> maybe_put(:hostname, syslog_hostname(hostname))
+    |> maybe_put(:hostname, hostname)
     |> maybe_put(:env, env)
   end
 
