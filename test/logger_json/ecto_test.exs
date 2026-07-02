@@ -1,7 +1,6 @@
 defmodule LoggerJSON.EctoTest do
   use LoggerJSON.Case, async: false
   import LoggerJSON.Ecto
-  require Logger
 
   setup do
     formatter = LoggerJSON.Formatters.Basic.new(metadata: :all)

@@ -1,8 +1,6 @@
 defmodule LoggerJSON.FormatterTest do
   use LoggerJSON.Case, async: true
 
-  require LoggerJSON.Formatter
-
   @encoder Application.compile_env!(:logger_json, :encoder)
   @encoder_protocol Module.concat(@encoder, "Encoder")
   @default_encoder_opts if(@encoder == JSON, do: &JSON.protocol_encode/2, else: [])
