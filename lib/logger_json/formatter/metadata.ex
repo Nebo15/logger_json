@@ -50,15 +50,11 @@ defmodule LoggerJSON.Formatter.Metadata do
     the ones already processed by the formatter.
   """
   def take_metadata(meta, {:all_except, keys}) do
-    meta
-    |> Map.drop(keys ++ @ignored_metadata_keys)
-    |> Enum.into(%{})
+    Map.drop(meta, keys ++ @ignored_metadata_keys)
   end
 
   def take_metadata(meta, :all) do
-    meta
-    |> Map.drop(@ignored_metadata_keys)
-    |> Enum.into(%{})
+    Map.drop(meta, @ignored_metadata_keys)
   end
 
   def take_metadata(_meta, []) do
