@@ -111,7 +111,7 @@ defmodule LoggerJSON.Formatters.Datadog do
       %{syslog: syslog(level, meta, hostname, env)}
       |> maybe_put(:logger, format_logger(meta))
       |> maybe_merge(format_http_request(meta))
-      |> maybe_merge(format_error(message, metadata, level, reported_levels))
+      |> maybe_merge(format_error(message, metadata, level, reported_levels, redactors))
       |> maybe_merge(encode(metadata, redactors))
       |> maybe_merge(encode(message, redactors))
       |> @encoder.encode_to_iodata!(encoder_opts)
@@ -255,15 +255,15 @@ defmodule LoggerJSON.Formatters.Datadog do
 
   defp format_http_request(_meta), do: nil
 
-  defp format_error(%{error: _error}, _metadata, _level, _reported_levels), do: nil
+  defp format_error(%{error: _error}, _metadata, _level, _reported_levels, _redactors), do: nil
 
-  defp format_error(%{message: message}, metadata, level, reported_levels) when is_binary(message) do
+  defp format_error(%{message: message}, metadata, level, reported_levels, redactors) when is_binary(message) do
     if level in reported_levels do
       metadata_error =
         case metadata[:error] do
           nil -> %{}
-          value when is_map(value) -> value
-          other -> %{error: other}
+          value when is_map(value) -> encode(value, redactors)
+          other -> %{error: encode(other, redactors)}
         end
 
       error =
@@ -276,7 +276,7 @@ defmodule LoggerJSON.Formatters.Datadog do
     end
   end
 
-  defp format_error(_msg, _metadata, _level, _reported_levels), do: nil
+  defp format_error(_msg, _metadata, _level, _reported_levels, _redactors), do: nil
 
   defp get_error_kind(%{error: %{kind: kind}}) when is_binary(kind), do: kind
   defp get_error_kind(_metadata), do: "error"

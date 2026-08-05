@@ -526,6 +526,35 @@ defmodule LoggerJSON.Formatters.DatadogTest do
     end
   end
 
+  test "encodes error field from logger metadata that is not JSON-encodable" do
+    for level <- [:error, :critical, :alert, :emergency] do
+      log =
+        capture_log(level, fn ->
+          Logger.log(level, "Something went wrong", error: {:error, {:timeout, {GenServer, :call, [:server, :msg]}}})
+        end)
+        |> decode_or_print_error()
+
+      assert log["error"]["kind"] == "error"
+      assert log["error"]["message"] == "Something went wrong"
+      assert log["error"]["error"] == ["error", ["timeout", ["Elixir.GenServer", "call", ["server", "msg"]]]]
+    end
+  end
+
+  test "encodes map error field from logger metadata with values that are not JSON-encodable" do
+    for level <- [:error, :critical, :alert, :emergency] do
+      log =
+        capture_log(level, fn ->
+          Logger.log(level, "Something went wrong", error: %{module: "PaymentGateway", reason: {:error, :timeout}})
+        end)
+        |> decode_or_print_error()
+
+      assert log["error"]["kind"] == "error"
+      assert log["error"]["message"] == "Something went wrong"
+      assert log["error"]["module"] == "PaymentGateway"
+      assert log["error"]["reason"] == ["error", "timeout"]
+    end
+  end
+
   if @encoder == Jason do
     test "passing options to encoder" do
       formatter = Datadog.new(encoder_opts: [pretty: true])
